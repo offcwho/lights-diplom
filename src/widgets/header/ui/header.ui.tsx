@@ -75,7 +75,7 @@ export const MobileNavigationUi = () => {
 
     console.log('pathname', pathname);
 
-    const showTotalsAttached = pathname === "/cart" && total > 0;
+    const showTotalsAttached = pathname === "/carts" && total > 0;
     return (
         // Превращаем в изящный парящий док с мягкой тенью вместо скучной полоски на весь экран
         <nav className="md:hidden fixed bottom-3 inset-x-4 z-50" id="mobilenav">
