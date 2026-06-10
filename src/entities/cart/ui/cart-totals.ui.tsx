@@ -4,45 +4,80 @@ import { AnimatePresence, motion, useMotionValue, animate } from "framer-motion"
 import { ArrowRight, X } from "lucide-react"
 import { useCart } from "../module/cart.context";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const CartTotalsUi = ({ className, style }: { className?: string; style?: React.CSSProperties }) => {
     const { items, coupon, setCoupon, subtotal, total } = useCart();
     const { headerHeight, mobileNavHeight } = useHeaderHeight();
     const [isOpen, setIsOpen] = useState(false);
 
-    // --- свайп вниз: двигаем ВЕСЬ блок ---
     const y = useMotionValue(0);
-    const touchStart = useRef<{ y: number; t: number } | null>(null);
+    const rootRef = useRef<HTMLDivElement>(null);
+    const isOpenRef = useRef(isOpen);
+    isOpenRef.current = isOpen;
 
-    const onTouchStart = (e: React.TouchEvent) => {
-        touchStart.current = { y: e.touches[0].clientY, t: Date.now() };
-        y.stop();
-    };
+    // --- свайп по ЛЮБОЙ точке блока ---
+    useEffect(() => {
+        const el = rootRef.current;
+        if (!el) return;
 
-    const onTouchMove = (e: React.TouchEvent) => {
-        e.stopPropagation();
-        if (!touchStart.current) return;
-        const delta = e.touches[0].clientY - touchStart.current.y;
-        y.set(delta > 0 ? delta * 0.55 : 0); // только вниз, с сопротивлением
-    };
+        let startY = 0;
+        let startT = 0;
+        let dragging = false;
 
-    const onTouchEnd = (e: React.TouchEvent) => {
-        if (!touchStart.current) return;
-        const deltaY = e.changedTouches[0].clientY - touchStart.current.y;
-        const deltaT = Date.now() - touchStart.current.t;
-        const velocity = deltaY / Math.max(deltaT, 1);
-        touchStart.current = null;
+        const onTouchStart = (e: TouchEvent) => {
+            startY = e.touches[0].clientY;
+            startT = Date.now();
+            dragging = false;
+            y.stop();
+        };
 
-        if (deltaY > 50 || (deltaY > 15 && velocity > 0.4)) {
-            setIsOpen(false);
-            // плавно возвращаем блок на место, пока аккордеон схлопывается
-            animate(y, 0, { type: 'spring', stiffness: 300, damping: 30 });
-        } else {
-            animate(y, 0, { type: 'spring', stiffness: 400, damping: 28 });
-        }
-    };
-    // -------------------------------------
+        const onTouchMove = (e: TouchEvent) => {
+            // свайпаем только в раскрытом состоянии и только на мобилке
+            if (!isOpenRef.current || window.innerWidth >= 1024) return;
+
+            const delta = e.touches[0].clientY - startY;
+
+            // тянем панель ТОЛЬКО если её внутренний скролл в самом верху и жест идёт вниз
+            if (el.scrollTop <= 0 && delta > 0) {
+                dragging = true;
+                e.preventDefault(); // глушим нативный скролл — поэтому passive: false
+                y.set(delta * 0.55);
+            } else if (!dragging) {
+                // обычный скролл контента — обновляем точку отсчёта,
+                // чтобы при возврате к scrollTop=0 панель не прыгала
+                startY = e.touches[0].clientY;
+                startT = Date.now();
+            }
+        };
+
+        const onTouchEnd = (e: TouchEvent) => {
+            if (!dragging) return;
+            dragging = false;
+
+            const deltaY = e.changedTouches[0].clientY - startY;
+            const deltaT = Date.now() - startT;
+            const velocity = deltaY / Math.max(deltaT, 1);
+
+            if (deltaY > 50 || (deltaY > 15 && velocity > 0.4)) {
+                setIsOpen(false);
+                animate(y, 0, { type: 'spring', stiffness: 300, damping: 30 });
+            } else {
+                animate(y, 0, { type: 'spring', stiffness: 400, damping: 28 });
+            }
+        };
+
+        el.addEventListener('touchstart', onTouchStart, { passive: true });
+        el.addEventListener('touchmove', onTouchMove, { passive: false }); // 👈 нужен preventDefault
+        el.addEventListener('touchend', onTouchEnd, { passive: true });
+
+        return () => {
+            el.removeEventListener('touchstart', onTouchStart);
+            el.removeEventListener('touchmove', onTouchMove);
+            el.removeEventListener('touchend', onTouchEnd);
+        };
+    }, [y]);
+    // -----------------------------------
 
     if (items.length === 0) return null;
 
@@ -103,23 +138,23 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
     );
 
     return (
-        // 👇 корень теперь motion.div — свайп двигает ВЕСЬ блок
         <motion.div
+            ref={rootRef}
             className={`lg:col-span-5 bg-white border border-black/5 rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] space-y-6 sticky xs:bottom-0 lg:top-16 ${className}`}
             style={{
                 ...style,
                 maxHeight: `calc(100dvh - ${headerHeight + mobileNavHeight + 24}px)`,
                 overflowY: 'auto',
                 overscrollBehavior: 'contain',
-                y, // 👈 смещение всей плашки
+                y,
             }}
         >
-            {/* ДЕСКТОП — полные тоталы всегда видны */}
+            {/* ДЕСКТОП */}
             <div className="hidden lg:block space-y-6">
                 {totalsContent}
             </div>
 
-            {/* МОБИЛКА — аккордеон + свайп всего блока */}
+            {/* МОБИЛКА */}
             <div className="lg:hidden overflow-hidden">
                 <AnimatePresence mode="wait" initial={false}>
                     {isOpen ? (
@@ -131,14 +166,8 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
                             transition={{ duration: 0.3, ease: 'easeInOut' }}
                             className="space-y-6"
                         >
-                            {/* РУЧКА */}
-                            <div
-                                onTouchStart={onTouchStart}
-                                onTouchMove={onTouchMove}
-                                onTouchEnd={onTouchEnd}
-                                className="flex justify-center py-4 -mt-4 -mx-6 select-none"
-                                style={{ touchAction: 'none' }}
-                            >
+                            {/* ручка остаётся как визуальная подсказка */}
+                            <div className="flex justify-center py-4 -mt-4 -mx-6 select-none">
                                 <motion.div
                                     className="w-10 h-1 rounded-full bg-zinc-300"
                                     animate={{ y: [0, 3, 0] }}
