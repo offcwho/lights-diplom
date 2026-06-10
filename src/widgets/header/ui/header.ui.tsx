@@ -79,10 +79,10 @@ export const MobileNavigationUi = () => {
         <nav className="md:hidden fixed bottom-3 inset-x-4 z-50" id="mobilenav">
             <AnimatePresence>
                 {pathname === "/cart" && (
-                    <CartTotals className="lg:hidden xs:block bottom-0 rounded-b-none border-b border-b-black/5" />
+                    <CartTotals className="lg:hidden xs:block bottom-0 rounded-b-none border-b border-b-black/5 bg-white/30! backdrop-blur-xl!" />
                 )}
             </AnimatePresence>
-            <div className={`grid grid-cols-4 backdrop-blur-xl bg-white/80 border border-black/5 p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.06)] ${pathname === "/cart" ? 'rounded-b-3xl' : 'rounded-3xl'} ${pathname === "/cart" ? 'border-t-none' : ''}`}>
+            <div className={`grid grid-cols-4 backdrop-blur-xl bg-white/50 border border-black/5 p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.06)] ${pathname === "/cart" ? 'rounded-b-3xl' : 'rounded-3xl'} ${pathname === "/cart" ? 'border-t-none' : ''}`}>
                 {links.map((item) => {
                     const isActive = pathname === item.link;
                     const Icon = item.icon;
@@ -115,7 +115,7 @@ export const MobileNavigationUi = () => {
                                         animate={{
                                             y: isActive ? -1 : 0, // Тонкий архитектурный подъем вверх
                                             scale: isActive ? 1.05 : 1,
-                                            color: isActive ? "#ffffff" : "#71717a",
+                                            color: isActive ? "#ffffff" : "#111111",
                                         }}
                                         transition={{ type: "spring", stiffness: 400, damping: 28 }}
                                     >
@@ -136,7 +136,7 @@ export const MobileNavigationUi = () => {
                                             height: isActive ? "auto" : 0,
                                             marginTop: isActive ? 4 : 0,
                                             scale: isActive ? 1 : 0.9,
-                                            color: isActive ? "#ffffff" : "#71717a",
+                                            color: isActive ? "#ffffff" : "#111111",
                                         }}
                                         transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                         className="block overflow-hidden text-[9px] font-bold uppercase tracking-wider font-sans"

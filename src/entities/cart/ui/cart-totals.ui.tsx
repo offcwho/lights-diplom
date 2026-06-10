@@ -144,7 +144,7 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 60, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-            className={`lg:col-span-5 bg-white border border-black/5 rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] space-y-6 lg:sticky lg:top-16 ${className}`}
+            className={`lg:col-span-5 border border-black/5 rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] space-y-6 lg:sticky lg:top-16 ${className}`}
             style={{
                 ...style,
                 overflowY: 'auto',
