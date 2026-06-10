@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 
 type HeightContextValue = {
     headerHeight: number;
-    mobileNavHeight: number;
+    mobileNavHeight: number; // весь блок навигации: док + панель (для паддинга контента)
+    dockHeight: number;      // только док с иконками (для maxHeight панели)
 };
 
 const HeaderHeightContext = createContext<HeightContextValue | undefined>(undefined);
@@ -13,38 +14,53 @@ const HeaderHeightContext = createContext<HeightContextValue | undefined>(undefi
 export const HeaderHeightProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [headerHeight, setHeaderHeight] = useState(0);
     const [mobileNavHeight, setMobileNavHeight] = useState(0);
+    const [dockHeight, setDockHeight] = useState(0);
     const pathname = usePathname();
 
     useEffect(() => {
         let cancelled = false;
 
-        const measure = () => {
+        const update = () => {
             if (cancelled) return;
             const header = document.getElementById('header');
             const nav = document.getElementById('mobilenav');
-            // ставим высоту только если элемент реально есть и не оторван
-            if (header) setHeaderHeight(header.offsetHeight);
-            if (nav) setMobileNavHeight(nav.offsetHeight);
+            const dock = document.getElementById('mobiledock');
+
+            if (header) {
+                const h = Math.round(header.offsetHeight);
+                setHeaderHeight(prev => Math.abs(prev - h) > 1 ? h : prev);
+            }
+            if (nav) {
+                const n = Math.round(nav.offsetHeight);
+                setMobileNavHeight(prev => Math.abs(prev - n) > 1 ? n : prev);
+            }
+            if (dock) {
+                const d = Math.round(dock.offsetHeight);
+                setDockHeight(prev => Math.abs(prev - d) > 1 ? d : prev);
+            }
         };
 
-        measure();
-        document.fonts?.ready.then(() => { if (!cancelled) measure(); });
+        update();
+        document.fonts?.ready.then(() => { if (!cancelled) update(); });
 
-        const observers: ResizeObserver[] = [];
-        [document.getElementById('header'), document.getElementById('mobilenav')].forEach(el => {
-            if (!el) return;
-            const ro = new ResizeObserver(measure);
-            ro.observe(el);
-            observers.push(ro);
+        // 👇 вот объявление, которого не хватало
+        const observer = new ResizeObserver(update);
+
+        [
+            document.getElementById('header'),
+            document.getElementById('mobilenav'),
+            document.getElementById('mobiledock'),
+        ].forEach(el => {
+            if (el) observer.observe(el);
         });
 
         return () => {
-            cancelled = true; // 👈 глушит асинхронный .then после ухода со страницы
-            observers.forEach(o => o.disconnect());
+            cancelled = true;
+            observer.disconnect(); // отключает наблюдение со всех элементов разом
         };
     }, [pathname]);
 
-    const value: HeightContextValue = { headerHeight, mobileNavHeight };
+    const value = { headerHeight, mobileNavHeight, dockHeight };
 
     return (
         <HeaderHeightContext.Provider value={value}>

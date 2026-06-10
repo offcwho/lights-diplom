@@ -20,7 +20,7 @@ export default function Layout({
                 className="h-full overflow-y-auto flex flex-col justify-between gap-12"
                 style={{
                     paddingTop: headerHeight,
-                    ['--bottom-pad' as string]: calculatePadding,
+                    ['--bottom-pad' as string]: mobileNavHeight + 24 + 'px',
                 }}
                 id="main-content"
             >

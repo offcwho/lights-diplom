@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 export const CartTotalsUi = ({ className, style }: { className?: string; style?: React.CSSProperties }) => {
     const { items, coupon, setCoupon, subtotal, total } = useCart();
     const [isOpen, setIsOpen] = useState(false);
+    const { headerHeight, dockHeight } = useHeaderHeight();
 
     const y = useMotionValue(0);
     const rootRef = useRef<HTMLDivElement>(null);
@@ -143,10 +144,10 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 60, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-            className={`lg:col-span-5 border border-black/5 rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] space-y-6 lg:sticky lg:top-16 ${className}`}
+            className={`cart-sheet lg:col-span-5 border border-black/5 rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] space-y-6 lg:sticky lg:top-16 ${className}`}
             style={{
                 ...style,
-                overflowY: 'auto',
+                ['--sheet-offset' as string]: `${headerHeight + dockHeight + 36}px`,
                 overscrollBehavior: 'contain',
                 y,
             }}

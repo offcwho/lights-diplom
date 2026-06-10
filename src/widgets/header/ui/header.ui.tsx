@@ -85,7 +85,7 @@ export const MobileNavigationUi = () => {
                 )}
             </AnimatePresence>
             <motion.div
-                id="mobilenav"
+                id="mobiledock"
                 initial={false}
                 animate={{
                     borderTopLeftRadius: showTotalsAttached ? 0 : 24,
