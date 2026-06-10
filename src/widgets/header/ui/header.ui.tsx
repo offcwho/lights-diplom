@@ -75,12 +75,12 @@ export const MobileNavigationUi = () => {
 
     console.log('pathname', pathname);
 
-    const showTotalsAttached = pathname === "/carts" && total > 0;
+    const showTotalsAttached = pathname === "/cart" && total > 0;
     return (
         // Превращаем в изящный парящий док с мягкой тенью вместо скучной полоски на весь экран
         <nav className="md:hidden fixed bottom-3 inset-x-4 z-50" id="mobilenav">
             <AnimatePresence>
-                {pathname === "/cart" && (
+                {pathname === "/carts" && (
                     <CartTotals className="lg:hidden xs:block bottom-0 rounded-b-none border-b border-b-black/5 bg-white/30! backdrop-blur-xl!" />
                 )}
             </AnimatePresence>
