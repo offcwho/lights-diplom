@@ -1,6 +1,6 @@
 'use client'
 
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence, motion, PanInfo } from "framer-motion"
 import { ArrowRight, X } from "lucide-react"
 import { useCart } from "../module/cart.context";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
@@ -12,6 +12,13 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
     const [isOpen, setIsOpen] = useState(false);
 
     if (items.length === 0) return null;
+
+    // закрываем, если утянули вниз дальше 100px ИЛИ свайпнули быстро
+    const handleDragEnd = (_: unknown, info: PanInfo) => {
+        if (info.offset.y > 100 || info.velocity.y > 500) {
+            setIsOpen(false);
+        }
+    };
 
     const totalsContent = (
         <>
@@ -74,17 +81,16 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
             className={`lg:col-span-5 bg-white border border-black/5 rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] space-y-6 sticky xs:bottom-0 lg:top-16 ${className}`}
             style={{
                 ...style,
-                // потолок: плашка не может стать выше свободного места между хедером и меню
                 maxHeight: `calc(100dvh - ${headerHeight + mobileNavHeight + 24}px)`,
                 overflowY: 'auto',
             }}
         >
             {/* ДЕСКТОП — полные тоталы всегда видны */}
-            <div className="hidden lg:block space-y-6 ">
+            <div className="hidden lg:block space-y-6">
                 {totalsContent}
             </div>
 
-            {/* МОБИЛКА — аккордеон, раскрывается вверх (низ зафиксирован) */}
+            {/* МОБИЛКА — аккордеон + свайп вниз для закрытия */}
             <div className="lg:hidden overflow-hidden">
                 <AnimatePresence mode="wait" initial={false}>
                     {isOpen ? (
@@ -94,8 +100,17 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.3, ease: 'easeInOut' }}
+                            // 👇 свайп вниз
+                            drag="y"
+                            dragConstraints={{ top: 0, bottom: 0 }}
+                            dragElastic={{ top: 0, bottom: 0.6 }}
+                            onDragEnd={handleDragEnd}
                             className="space-y-6"
                         >
+                            {/* ручка-индикатор свайпа */}
+                            <div className="flex justify-center -mt-2 mb-2 touch-none">
+                                <div className="w-10 h-1 rounded-full bg-zinc-200" />
+                            </div>
                             {totalsContent}
                         </motion.div>
                     ) : (
