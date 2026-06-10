@@ -3,12 +3,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
-const HeaderHeightContext = createContext<HeightContextValue | undefined>(undefined);
-
 type HeightContextValue = {
     headerHeight: number;
     mobileNavHeight: number;
 };
+
+const HeaderHeightContext = createContext<HeightContextValue | undefined>(undefined);
 
 export const HeaderHeightProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [headerHeight, setHeaderHeight] = useState(0);
@@ -16,41 +16,35 @@ export const HeaderHeightProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const pathname = usePathname();
 
     useEffect(() => {
-        const header = document.getElementById('header');
-        if (!header) return;
+        let cancelled = false;
 
-        const update = () => setHeaderHeight(header.offsetHeight);
+        const measure = () => {
+            if (cancelled) return;
+            const header = document.getElementById('header');
+            const nav = document.getElementById('mobilenav');
+            // ставим высоту только если элемент реально есть и не оторван
+            if (header) setHeaderHeight(header.offsetHeight);
+            if (nav) setMobileNavHeight(nav.offsetHeight);
+        };
 
-        update();
+        measure();
+        document.fonts?.ready.then(() => { if (!cancelled) measure(); });
 
-        document.fonts?.ready.then(update);
+        const observers: ResizeObserver[] = [];
+        [document.getElementById('header'), document.getElementById('mobilenav')].forEach(el => {
+            if (!el) return;
+            const ro = new ResizeObserver(measure);
+            ro.observe(el);
+            observers.push(ro);
+        });
 
-        const observer = new ResizeObserver(update);
-        observer.observe(header);
-
-        return () => observer.disconnect();
+        return () => {
+            cancelled = true; // 👈 глушит асинхронный .then после ухода со страницы
+            observers.forEach(o => o.disconnect());
+        };
     }, [pathname]);
 
-    useEffect(() => {
-        const mobileNav = document.getElementById('mobilenav');
-        if (!mobileNav) return;
-
-        const update = () => setMobileNavHeight(mobileNav.offsetHeight);
-
-        update();
-
-        document.fonts?.ready.then(update);
-
-        const observer = new ResizeObserver(update);
-        observer.observe(mobileNav);
-
-        return () => observer.disconnect();
-    }, [pathname]);
-
-    const value = {
-        headerHeight,
-        mobileNavHeight
-    };
+    const value: HeightContextValue = { headerHeight, mobileNavHeight };
 
     return (
         <HeaderHeightContext.Provider value={value}>

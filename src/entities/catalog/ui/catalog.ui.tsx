@@ -17,7 +17,7 @@ export const CatalogUi = () => {
             <button
                 onClick={() => { setIsOpenFilters(() => !isOpenFilters) }}
                 className={`fixed z-99 top-0 bottom-0 left-0 py-3 px-3 h-fit bg-white rounded-r-2xl items-center  justify-center lg:hidden xs:flex`}
-                style={{ top: headerHeight + 100 + 'px' }}
+                style={{ top: headerHeight + 'px' + '100px' }}
             >
                 <Sliders />
             </button>
@@ -28,7 +28,7 @@ export const CatalogUi = () => {
                         {isOpenFilters && (
                             <CatalogFilters
                                 className={`lg:col-span-4 space-y-8 lg:block ${isOpenFilters ? 'xs:fixed!' : 'xs:hidden'} xs:absolute xs:top-0 xs:left-0 w-full z-100 h-full top`}
-                                style={{ marginTop: headerHeight + 100 + 'px' }}
+                                style={{ marginTop: headerHeight + 'px' + '100px' }}
                                 onClose={() => setIsOpenFilters(false)}
                             />
                         )}
