@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
+import { CartTotals } from "@/entities/cart";
 
 export const HeaderUi = () => {
     const page = 'profile';
@@ -70,75 +71,83 @@ export const MobileNavigationUi = () => {
         { name: "Profile", link: "/profile", icon: User },
     ];
 
+    console.log('pathname', pathname);
+
+
     return (
         // Превращаем в изящный парящий док с мягкой тенью вместо скучной полоски на весь экран
-        <nav className="md:hidden fixed bottom-3 inset-x-4 z-50 grid grid-cols-4 bg-white/80 border border-black/5 backdrop-blur-xl rounded-3xl p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.06)]" id="mobilenav">
-            {links.map((item) => {
-                const isActive = pathname === item.link;
-                const Icon = item.icon;
+        <nav className="md:hidden fixed bottom-3 inset-x-4 z-50" id="mobilenav">
+            {pathname === "/cart" && (
+                <CartTotals className="lg:hidden xs:block bottom-0 rounded-b-none border-b border-b-black/5" />
+            )}
+            <div className={`grid grid-cols-4 backdrop-blur-xl bg-white/80 border border-black/5 p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.06)] ${pathname === "/cart" ? 'rounded-b-3xl' : 'rounded-3xl'} ${pathname === "/cart" ? 'border-t-none' : ''}`}>
+                {links.map((item) => {
+                    const isActive = pathname === item.link;
+                    const Icon = item.icon;
 
-                return (
-                    <Link key={item.link} href={item.link} className="relative select-none outline-none">
-                        <motion.div
-                            whileTap={{ scale: 0.93 }} // Эффект упругого продавливания кнопки пальцем
-                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                            className="relative flex flex-col items-center justify-center py-2.5 h-full rounded-[18px] cursor-pointer"
-                        >
-                            {/* Скользящая капсула: теперь она занимает 100% пространства ячейки (минус inset). 
+                    return (
+                        <Link key={item.link} href={item.link} className="relative select-none outline-none">
+                            <motion.div
+                                whileTap={{ scale: 0.93 }} // Эффект упругого продавливания кнопки пальцем
+                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                className="relative flex flex-col items-center justify-center py-2.5 h-full rounded-[18px] cursor-pointer"
+                            >
+                                {/* Скользящая капсула: теперь она занимает 100% пространства ячейки (минус inset). 
                                 Это гарантирует идеальную центровку на любых экранах без хардкода пикселей.
                             */}
-                            {isActive && (
-                                <motion.span
-                                    layoutId="active-nav-pill"
-                                    className="absolute inset-0 bg-black rounded-[18px] z-0"
-                                    transition={{
-                                        type: "spring",
-                                        stiffness: 380,
-                                        damping: 30, // Тягучая, дорогая инерция без лишнего дребезга
-                                    }}
-                                />
-                            )}
-
-                            {/* Контейнер для контента: гарантирует, что элементы не будут прыгать во время анимации */}
-                            <div className="relative z-10 flex flex-col items-center justify-center space-y-0.5">
-                                <motion.div
-                                    animate={{
-                                        y: isActive ? -1 : 0, // Тонкий архитектурный подъем вверх
-                                        scale: isActive ? 1.05 : 1,
-                                        color: isActive ? "#ffffff" : "#71717a",
-                                    }}
-                                    transition={{ type: "spring", stiffness: 400, damping: 28 }}
-                                >
-                                    <Icon
-                                        size={18}
-                                        strokeWidth={isActive ? 2.2 : 2}
-                                        fill={isActive && item.name === "Favourites" ? "currentColor" : "none"}
+                                {isActive && (
+                                    <motion.span
+                                        layoutId="active-nav-pill"
+                                        className="absolute inset-0 bg-black rounded-[18px] z-0"
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 380,
+                                            damping: 30, // Тягучая, дорогая инерция без лишнего дребезга
+                                        }}
                                     />
-                                </motion.div>
+                                )}
 
-                                {/* Вместо жесткого AnimatePresence, ломающего сетку, мы используем контролируемый сдвиг.
+                                {/* Контейнер для контента: гарантирует, что элементы не будут прыгать во время анимации */}
+                                <div className="relative z-10 flex flex-col items-center justify-center space-y-0.5">
+                                    <motion.div
+                                        animate={{
+                                            y: isActive ? -1 : 0, // Тонкий архитектурный подъем вверх
+                                            scale: isActive ? 1.05 : 1,
+                                            color: isActive ? "#ffffff" : "#71717a",
+                                        }}
+                                        transition={{ type: "spring", stiffness: 400, damping: 28 }}
+                                    >
+                                        <Icon
+                                            size={18}
+                                            strokeWidth={isActive ? 2.2 : 2}
+                                            fill={isActive && item.name === "Favourites" ? "currentColor" : "none"}
+                                        />
+                                    </motion.div>
+
+                                    {/* Вместо жесткого AnimatePresence, ломающего сетку, мы используем контролируемый сдвиг.
                                     Текст всегда занимает свое место, но плавно проявляется и приподнимается.
                                 */}
-                                <motion.span
-                                    initial={false}
-                                    animate={{
-                                        opacity: isActive ? 1 : 0,
-                                        height: isActive ? "auto" : 0,
-                                        marginTop: isActive ? 4 : 0,
-                                        scale: isActive ? 1 : 0.9,
-                                        color: isActive ? "#ffffff" : "#71717a",
-                                    }}
-                                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                                    className="block overflow-hidden text-[9px] font-bold uppercase tracking-wider font-sans"
-                                    style={{ pointerEvents: "none" }}
-                                >
-                                    {item.name}
-                                </motion.span>
-                            </div>
-                        </motion.div>
-                    </Link>
-                );
-            })}
+                                    <motion.span
+                                        initial={false}
+                                        animate={{
+                                            opacity: isActive ? 1 : 0,
+                                            height: isActive ? "auto" : 0,
+                                            marginTop: isActive ? 4 : 0,
+                                            scale: isActive ? 1 : 0.9,
+                                            color: isActive ? "#ffffff" : "#71717a",
+                                        }}
+                                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                        className="block overflow-hidden text-[9px] font-bold uppercase tracking-wider font-sans"
+                                        style={{ pointerEvents: "none" }}
+                                    >
+                                        {item.name}
+                                    </motion.span>
+                                </div>
+                            </motion.div>
+                        </Link>
+                    );
+                })}
+            </div>
         </nav>
     );
 };

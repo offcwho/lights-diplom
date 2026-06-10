@@ -16,13 +16,11 @@ export const CartUi = () => {
         if (section) {
             section.style.paddingBottom = '0';
         }
-        if (mainContent) {
-            mainContent.style.paddingBottom = '0';
-        }
+       
     }, [mobileNavHeight]);
 
     return (
-        <Container className="space-y-5! h-screen">
+        <Container className="space-y-5!">
             <div className="bg-[#F4F3F0] text-zinc-900 px-4 md:px-12 lg:py-20 xs:py-10 font-sans selection:bg-black selection:text-white rounded-2xl">
                 <div className="max-w-7xl mx-auto space-y-12">
                     <CartHeader />
@@ -32,9 +30,6 @@ export const CartUi = () => {
                     </div>
                 </div>
             </div>
-            <CartTotals className="lg:hidden xs:block bottom-0"
-                style={{ paddingBottom: mobileNavHeight + 10 + 'px', bottom: '12px' }}
-            />
         </Container>
     )
 }

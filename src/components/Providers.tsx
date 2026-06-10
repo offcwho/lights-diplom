@@ -1,9 +1,12 @@
+import { CartProvider } from "@/entities/cart/module/cart.context";
 import { HeaderHeightProvider } from "@/hooks/useHeaderHeight";
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
     return (
         <HeaderHeightProvider>
-            {children}
+            <CartProvider>
+                {children}
+            </CartProvider>
         </HeaderHeightProvider>
     )
 };

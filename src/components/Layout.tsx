@@ -13,12 +13,14 @@ export default function Layout({
 }>) {
     const { mobileNavHeight, headerHeight } = useHeaderHeight();
 
+    const calculatePadding = mobileNavHeight + 20 + 'px'
+
     return (
         <body className="relative h-screen overflow-hidden">
             <Header />
             <div
                 className="h-full overflow-y-auto"
-                style={{ paddingTop: headerHeight, paddingBottom: mobileNavHeight }}
+                style={{ paddingTop: headerHeight, paddingBottom: calculatePadding }}
                 id="main-content"
             >
                 <main>{children}</main>

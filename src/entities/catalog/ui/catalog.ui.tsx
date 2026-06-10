@@ -21,7 +21,7 @@ export const CatalogUi = () => {
             >
                 <Sliders />
             </button>
-            <Container className="py-12 space-y-12">
+            <Container className="py-12 space-y-12 pb-0!">
                 <CatalogHeading className="mb-8" />
                 <div className="grid xs:grid-cols-1 lg:grid-cols-14 gap-8 items-start">
                     <AnimatePresence>
