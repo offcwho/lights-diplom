@@ -84,7 +84,7 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
         <>
             <div className="flex justify-between items-center">
                 <h2 className="text-[11px] font-mono font-bold uppercase tracking-[0.25em] text-zinc-400">
-                    Cart Totals
+                    Сумма корзины
                 </h2>
                 <button onClick={() => setIsOpen(false)} className="lg:hidden">
                     <X size={16} />
@@ -93,17 +93,17 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
 
             <div className="space-y-4 border-b border-black/5 pb-6 text-xs font-medium">
                 <div className="flex justify-between">
-                    <span className="text-zinc-500 uppercase tracking-wider">Subtotal</span>
+                    <span className="text-zinc-500 uppercase tracking-wider">Итого</span>
                     <span className="font-mono font-bold">${subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-baseline">
-                    <span className="text-zinc-500 uppercase tracking-wider">Shipping</span>
+                    <span className="text-zinc-500 uppercase tracking-wider">Доставка</span>
                     <span className="font-mono text-[10px] text-zinc-400 font-bold uppercase tracking-widest bg-zinc-100 px-2 py-0.5 rounded-md">Free</span>
                 </div>
             </div>
 
             <div className="flex justify-between items-baseline">
-                <span className="text-xs font-bold uppercase tracking-wider">Total</span>
+                <span className="text-xs font-bold uppercase tracking-wider">Общая цена</span>
                 <motion.span
                     key={total}
                     initial={{ scale: 0.96, opacity: 0.8 }}
@@ -117,19 +117,19 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
             <div className="pt-6 flex flex-col sm:flex-row items-stretch gap-2 max-w-sm">
                 <input
                     type="text"
-                    placeholder="Enter coupon code"
+                    placeholder="Введите промокод"
                     value={coupon}
                     onChange={(e) => setCoupon(e.target.value)}
                     className="bg-transparent border border-black/10 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider outline-none focus:border-black/30 transition-colors placeholder:text-zinc-400 flex-1"
                 />
                 <button className="bg-white hover:bg-zinc-900 hover:text-white text-black border border-black/10 rounded-xl px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-widest transition-all">
-                    Apply
+                    Применить
                 </button>
             </div>
 
             <div className="pt-2">
                 <button className="w-full bg-black text-white py-4 px-6 rounded-2xl text-xs font-bold tracking-widest hover:bg-zinc-900 active:scale-[0.99] transition-all flex items-center justify-between group">
-                    <span className="uppercase">Proceed to Checkout</span>
+                    <span className="uppercase">Перейти к оплате</span>
                     <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </button>
             </div>
@@ -143,7 +143,7 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 60, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-            className={`cart-sheet lg:col-span-5 border border-black/5 rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] space-y-6 lg:sticky lg:top-16 ${className}`}
+            className={`cart-sheet lg:col-span-5 border border-black/5 rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] xs:space-y-6 sm:space-y-0 lg:sticky lg:top-16 ${className}`}
             style={{
                 ...style,
                 ['--sheet-offset' as string]: `${headerHeight + dockHeight + 36}px`,

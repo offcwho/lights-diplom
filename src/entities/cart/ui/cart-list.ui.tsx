@@ -20,7 +20,7 @@ export const CartListUi = () => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, x: -60, scale: 0.95 }}
                             transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                            className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-6 border-b border-black/5 gap-6 bg-white/40 backdrop-blur-sm px-4 rounded-2xl"
+                            className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-6 border-b border-black/5 gap-6 bg-white/30 backdrop-blur-sm px-4 rounded-2xl"
                         >
                             {/* Инфо и превью */}
                             <div className="flex items-center space-x-6 flex-1">
@@ -43,10 +43,10 @@ export const CartListUi = () => {
                             {/* Интерактивный блок управления */}
                             <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-8 md:gap-12">
                                 {/* Счетчик количества (Стиль как на скрине, но чище) */}
-                                <div className="flex items-center border border-black/10 rounded-xl bg-white p-1">
+                                <div className="flex items-center border border-black/10 rounded-xl p-1">
                                     <button
                                         onClick={() => updateQuantity(item.id, -1)}
-                                        className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-black transition-colors rounded-lg hover:bg-zinc-100"
+                                        className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:bg-black transition-colors rounded-lg hover:text-zinc-100"
                                     >
                                         <Minus size={12} />
                                     </button>
@@ -55,7 +55,7 @@ export const CartListUi = () => {
                                     </span>
                                     <button
                                         onClick={() => updateQuantity(item.id, 1)}
-                                        className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-black transition-colors rounded-lg hover:bg-zinc-100"
+                                        className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-zinc-100 transition-colors rounded-lg hover:bg-black"
                                     >
                                         <Plus size={12} />
                                     </button>

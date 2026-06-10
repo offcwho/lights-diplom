@@ -13,7 +13,7 @@ export const CatalogListUi = ({ className }: { className?: string }) => {
 
     return (
         <div className={`${className} text-[#111111] font-sans antialiased selection:bg-black selection:text-white`}>
-            <PageStagger className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 relative">
+            <PageStagger className="grid xs:grid-cols-2 sm:grid-cols-2 xl:grid-cols-3 lg:gap-6 md:gap-5 sm:gap-4 xs:gap-2 relative">
                 {filteredProducts.map((product) => {
                     const isHovered = hoveredId === product.id;
 

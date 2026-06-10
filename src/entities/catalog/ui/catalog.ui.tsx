@@ -3,11 +3,10 @@
 import { Container } from "@/components/Container"
 import { CatalogProvider } from "../module/catalog.context"
 import { CatalogFilters, CatalogHeading, CatalogList, CatalogSearch, CatalogTopbar } from ".."
-import { Sliders } from "lucide-react"
-import { useEffect, useState } from "react"
 import { useHeaderHeight } from "@/hooks/useHeaderHeight"
 import { AnimatePresence } from "framer-motion"
 import { PageItem, PageStagger } from "@/components/Animations"
+import { useState } from "react"
 
 export const CatalogUi = () => {
     const { headerHeight } = useHeaderHeight();
@@ -16,8 +15,10 @@ export const CatalogUi = () => {
     return (
         <CatalogProvider>
             <Container className="py-12 space-y-0 pb-0!">
-                <CatalogHeading className="mb-8" />
-                <CatalogTopbar className="mb-6 md:relative xs:sticky top-3 z-99" onOpen={() => setIsOpenFilters(!isOpenFilters)} />
+                {/*  <CatalogHeading className="mb-8" /> */}
+                <CatalogTopbar
+                    className="mb-6 md:relative xs:sticky top-3 z-99" onOpen={() => setIsOpenFilters(!isOpenFilters)}
+                />
                 <AnimatePresence>
                     {isOpenFilters && (
                         <CatalogFilters

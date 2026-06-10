@@ -3,7 +3,6 @@
 import { Heart, LayoutGrid, ShoppingBag, ShoppingCart, User } from "lucide-react"
 import { Navigation } from ".."
 import Link from "next/link"
-import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { CartTotals } from "@/entities/cart";
@@ -19,7 +18,10 @@ export const HeaderUi = () => {
         }
     ]
     return (
-        <header className="fixed top-0 inset-x-0 z-9999 backdrop-blur-xl max-w-7xl w-full mx-auto px-6 py-6 flex items-center justify-between border-b border-black/5 rounded-b-4xl" id="header" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}>
+        <header
+            className={`fixed top-0 inset-x-0 z-9999 backdrop-blur-xl max-w-7xl w-full mx-auto px-6 py-6 flex items-center justify-between border-b border-black/5 rounded-b-4xl`}
+            id="header"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}>
             <Link
                 href={'/'}
                 className="text-2xl font-black tracking-tighter cursor-pointer select-none xs:text-center xs:w-full md:w-auto"

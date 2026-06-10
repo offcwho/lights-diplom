@@ -35,9 +35,9 @@ export const CatalogToolbarUi = ({
     return (
         <div className={`flex items-center gap-2 sm:gap-3 ${className ?? ''}`}>
             {/* ЕДИНАЯ КАПСУЛА: поиск | счётчик | сортировка */}
-            <div className="flex-1 min-w-0 flex items-center bg-white border border-black/10 rounded-2xl
+            <div className={`flex-1 min-w-0 flex items-center bg-white border border-black/10 rounded-2xl
                             shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-colors
-                            focus-within:border-black/30">
+                            focus-within:border-black/30 `}>
                 {/* Поиск */}
                 <CatalogSearch />
 
@@ -63,7 +63,7 @@ export const CatalogToolbarUi = ({
                 whileTap={{ scale: 0.93 }}
                 transition={springSmooth}
                 onClick={onOpen}
-                className="lg:hidden relative shrink-0 bg-[#111111] text-white p-3.5 rounded-2xl shadow-sm"
+                className={`lg:hidden relative shrink-0 bg-[#111111] text-white p-3.5 rounded-2xl shadow-sm`}
                 aria-label="Открыть фильтры"
             >
                 <Sliders size={16} />
