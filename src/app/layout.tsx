@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { SN_Pro } from "next/font/google";
 import "./globals.css";
 import Layout from "@/components/Layout";
+import { Providers } from "@/components/Providers";
 
 const SNPro = SN_Pro({
   variable: "--font-sn-pro",
@@ -25,9 +26,11 @@ export default function RootLayout({
       lang="ru"
       className={`${SNPro.variable} h-full antialiased`}
     >
-      <Layout>
-        {children}
-      </Layout>
+      <Providers>
+        <Layout>
+          {children}
+        </Layout>
+      </Providers>
     </html>
   );
 }

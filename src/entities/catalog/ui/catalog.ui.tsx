@@ -14,14 +14,15 @@ export const CatalogUi = () => {
 
     return (
         <CatalogProvider>
+            <button
+                onClick={() => { setIsOpenFilters(() => !isOpenFilters) }}
+                className={`fixed z-99 top-0 bottom-0 left-0 py-3 px-3 h-fit bg-white rounded-r-2xl items-center  justify-center lg:hidden xs:flex`}
+                style={{ top: headerHeight + 100 + 'px' }}
+            >
+                <Sliders />
+            </button>
             <Container className="py-12 space-y-12">
-                <CatalogHeading className="lg:mb-8 xs:mb-0" />
-                <button
-                    onClick={() => { setIsOpenFilters(() => !isOpenFilters) }}
-                    className={`sticky z-99 md:w-100 xs:w-30 top-0 bottom-0 mx-auto py-3 bg-white rounded-b-2xl items-center  justify-center lg:hidden xs:flex mb-8`}
-                >
-                    <Sliders />
-                </button>
+                <CatalogHeading className="mb-8" />
                 <div className="grid xs:grid-cols-1 lg:grid-cols-14 gap-8 items-start">
                     <AnimatePresence>
                         {isOpenFilters && (
