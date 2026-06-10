@@ -1,24 +1,50 @@
 'use client'
 
-import { AnimatePresence, motion, PanInfo } from "framer-motion"
+import { AnimatePresence, motion, useMotionValue, animate } from "framer-motion"
 import { ArrowRight, X } from "lucide-react"
 import { useCart } from "../module/cart.context";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export const CartTotalsUi = ({ className, style }: { className?: string; style?: React.CSSProperties }) => {
     const { items, coupon, setCoupon, subtotal, total } = useCart();
     const { headerHeight, mobileNavHeight } = useHeaderHeight();
     const [isOpen, setIsOpen] = useState(false);
 
-    if (items.length === 0) return null;
+    // --- свайп вниз: двигаем ВЕСЬ блок ---
+    const y = useMotionValue(0);
+    const touchStart = useRef<{ y: number; t: number } | null>(null);
 
-    // закрываем, если утянули вниз дальше 100px ИЛИ свайпнули быстро
-    const handleDragEnd = (_: unknown, info: PanInfo) => {
-        if (info.offset.y > 60 || info.velocity.y > 300) {
+    const onTouchStart = (e: React.TouchEvent) => {
+        touchStart.current = { y: e.touches[0].clientY, t: Date.now() };
+        y.stop();
+    };
+
+    const onTouchMove = (e: React.TouchEvent) => {
+        e.stopPropagation();
+        if (!touchStart.current) return;
+        const delta = e.touches[0].clientY - touchStart.current.y;
+        y.set(delta > 0 ? delta * 0.55 : 0); // только вниз, с сопротивлением
+    };
+
+    const onTouchEnd = (e: React.TouchEvent) => {
+        if (!touchStart.current) return;
+        const deltaY = e.changedTouches[0].clientY - touchStart.current.y;
+        const deltaT = Date.now() - touchStart.current.t;
+        const velocity = deltaY / Math.max(deltaT, 1);
+        touchStart.current = null;
+
+        if (deltaY > 50 || (deltaY > 15 && velocity > 0.4)) {
             setIsOpen(false);
+            // плавно возвращаем блок на место, пока аккордеон схлопывается
+            animate(y, 0, { type: 'spring', stiffness: 300, damping: 30 });
+        } else {
+            animate(y, 0, { type: 'spring', stiffness: 400, damping: 28 });
         }
     };
+    // -------------------------------------
+
+    if (items.length === 0) return null;
 
     const totalsContent = (
         <>
@@ -77,12 +103,15 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
     );
 
     return (
-        <div
+        // 👇 корень теперь motion.div — свайп двигает ВЕСЬ блок
+        <motion.div
             className={`lg:col-span-5 bg-white border border-black/5 rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] space-y-6 sticky xs:bottom-0 lg:top-16 ${className}`}
             style={{
                 ...style,
                 maxHeight: `calc(100dvh - ${headerHeight + mobileNavHeight + 24}px)`,
                 overflowY: 'auto',
+                overscrollBehavior: 'contain',
+                y, // 👈 смещение всей плашки
             }}
         >
             {/* ДЕСКТОП — полные тоталы всегда видны */}
@@ -90,7 +119,7 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
                 {totalsContent}
             </div>
 
-            {/* МОБИЛКА — аккордеон + свайп вниз для закрытия */}
+            {/* МОБИЛКА — аккордеон + свайп всего блока */}
             <div className="lg:hidden overflow-hidden">
                 <AnimatePresence mode="wait" initial={false}>
                     {isOpen ? (
@@ -102,17 +131,20 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
                             transition={{ duration: 0.3, ease: 'easeInOut' }}
                             className="space-y-6"
                         >
-                            {/* РУЧКА — только она ловит свайп */}
-                            <motion.div
-                                drag="y"
-                                dragConstraints={{ top: 0, bottom: 0 }}
-                                dragElastic={{ top: 0, bottom: 0.6 }}
-                                onDragEnd={handleDragEnd}
-                                className="flex justify-center py-3 -mt-4 -mx-6 cursor-grab active:cursor-grabbing"
-                                style={{ touchAction: 'none' }} // 👈 ключевое: браузер не заберёт жест под скролл
+                            {/* РУЧКА */}
+                            <div
+                                onTouchStart={onTouchStart}
+                                onTouchMove={onTouchMove}
+                                onTouchEnd={onTouchEnd}
+                                className="flex justify-center py-4 -mt-4 -mx-6 select-none"
+                                style={{ touchAction: 'none' }}
                             >
-                                <div className="w-10 h-1 rounded-full bg-zinc-300" />
-                            </motion.div>
+                                <motion.div
+                                    className="w-10 h-1 rounded-full bg-zinc-300"
+                                    animate={{ y: [0, 3, 0] }}
+                                    transition={{ repeat: 2, duration: 0.9, delay: 0.5, ease: 'easeInOut' }}
+                                />
+                            </div>
 
                             {totalsContent}
                         </motion.div>
@@ -136,6 +168,6 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
                     )}
                 </AnimatePresence>
             </div>
-        </div>
+        </motion.div>
     )
 }
