@@ -15,7 +15,8 @@ export const HeaderUi = () => {
 
     const cart = [
         {
-            'qwe': 'qwe'
+            'qwe': 'qwe',
+            quantity: 2
         }
     ]
     return (
