@@ -15,7 +15,7 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
 
     // закрываем, если утянули вниз дальше 100px ИЛИ свайпнули быстро
     const handleDragEnd = (_: unknown, info: PanInfo) => {
-        if (info.offset.y > 100 || info.velocity.y > 500) {
+        if (info.offset.y > 60 || info.velocity.y > 300) {
             setIsOpen(false);
         }
     };
@@ -100,17 +100,20 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.3, ease: 'easeInOut' }}
-                            // 👇 свайп вниз
-                            drag="y"
-                            dragConstraints={{ top: 0, bottom: 0 }}
-                            dragElastic={{ top: 0, bottom: 0.6 }}
-                            onDragEnd={handleDragEnd}
                             className="space-y-6"
                         >
-                            {/* ручка-индикатор свайпа */}
-                            <div className="flex justify-center -mt-2 mb-2 touch-none">
-                                <div className="w-10 h-1 rounded-full bg-zinc-200" />
-                            </div>
+                            {/* РУЧКА — только она ловит свайп */}
+                            <motion.div
+                                drag="y"
+                                dragConstraints={{ top: 0, bottom: 0 }}
+                                dragElastic={{ top: 0, bottom: 0.6 }}
+                                onDragEnd={handleDragEnd}
+                                className="flex justify-center py-3 -mt-4 -mx-6 cursor-grab active:cursor-grabbing"
+                                style={{ touchAction: 'none' }} // 👈 ключевое: браузер не заберёт жест под скролл
+                            >
+                                <div className="w-10 h-1 rounded-full bg-zinc-300" />
+                            </motion.div>
+
                             {totalsContent}
                         </motion.div>
                     ) : (
