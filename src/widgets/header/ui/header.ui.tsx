@@ -5,6 +5,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { CartTotals } from "@/entities/cart";
+import { useCart } from "@/entities/cart/module/cart.context";
 
 export const HeaderUi = () => {
     const page = 'profile';
@@ -63,6 +64,7 @@ export const HeaderUi = () => {
 
 export const MobileNavigationUi = () => {
     const pathname = usePathname();
+    const { total } = useCart();
 
     const links = [
         { name: "Catalog", link: "/catalog", icon: LayoutGrid },
@@ -73,7 +75,7 @@ export const MobileNavigationUi = () => {
 
     console.log('pathname', pathname);
 
-
+    const showTotalsAttached = pathname === "/cart" && total > 0;
     return (
         // Превращаем в изящный парящий док с мягкой тенью вместо скучной полоски на весь экран
         <nav className="md:hidden fixed bottom-3 inset-x-4 z-50" id="mobilenav">
@@ -82,7 +84,19 @@ export const MobileNavigationUi = () => {
                     <CartTotals className="lg:hidden xs:block bottom-0 rounded-b-none border-b border-b-black/5 bg-white/30! backdrop-blur-xl!" />
                 )}
             </AnimatePresence>
-            <div className={`grid grid-cols-4 backdrop-blur-xl bg-white/50 border border-black/5 p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.06)] ${pathname === "/cart" ? 'rounded-b-3xl' : 'rounded-3xl'} ${pathname === "/cart" ? 'border-t-none' : ''}`}>
+            <motion.div
+                id="mobilenav"
+                initial={false}
+                animate={{
+                    borderTopLeftRadius: showTotalsAttached ? 0 : 24,
+                    borderTopRightRadius: showTotalsAttached ? 0 : 24,
+                    borderBottomLeftRadius: 24,
+                    borderBottomRightRadius: 24,
+                }}
+                transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+                className={`grid grid-cols-4 backdrop-blur-xl bg-white/80 border border-black/5 p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.06)] ${showTotalsAttached ? 'border-t-0' : ''}`}
+
+            >
                 {links.map((item) => {
                     const isActive = pathname === item.link;
                     const Icon = item.icon;
@@ -149,7 +163,7 @@ export const MobileNavigationUi = () => {
                         </Link>
                     );
                 })}
-            </div>
+            </motion.div>
         </nav>
     );
 };

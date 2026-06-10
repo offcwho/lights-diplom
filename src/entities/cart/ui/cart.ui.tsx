@@ -1,14 +1,12 @@
 'use client'
 
 import { Container } from "@/components/Container"
-import { CartProvider, useCart } from "../module/cart.context"
 import { CartHeader, CartList, CartTotals } from ".."
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
 import { useEffect } from "react";
 
 export const CartUi = () => {
     const { mobileNavHeight } = useHeaderHeight();
-    const { total } = useCart();
 
     useEffect(() => {
         const mainContent = document.getElementById('main-content');

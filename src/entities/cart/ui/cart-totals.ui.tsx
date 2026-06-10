@@ -8,7 +8,6 @@ import { useEffect, useRef, useState } from "react";
 
 export const CartTotalsUi = ({ className, style }: { className?: string; style?: React.CSSProperties }) => {
     const { items, coupon, setCoupon, subtotal, total } = useCart();
-    const { headerHeight, mobileNavHeight } = useHeaderHeight();
     const [isOpen, setIsOpen] = useState(false);
 
     const y = useMotionValue(0);
