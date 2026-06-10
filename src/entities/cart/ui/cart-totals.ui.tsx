@@ -17,66 +17,65 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
     isOpenRef.current = isOpen;
 
     // --- свайп по ЛЮБОЙ точке блока ---
-    useEffect(() => {
-        const el = rootRef.current;
-        if (!el) return;
+   useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
 
-        let startY = 0;
-        let startT = 0;
-        let dragging = false;
+    let startY = 0;
+    let startT = 0;
+    let mode: 'drag' | 'scroll' | undefined; // 👈 роль жеста, решается один раз
 
-        const onTouchStart = (e: TouchEvent) => {
-            startY = e.touches[0].clientY;
-            startT = Date.now();
-            dragging = false;
-            y.stop();
-        };
+    const onTouchStart = (e: TouchEvent) => {
+        startY = e.touches[0].clientY;
+        startT = Date.now();
+        mode = undefined;
+        y.stop();
+    };
 
-        const onTouchMove = (e: TouchEvent) => {
-            // свайпаем только в раскрытом состоянии и только на мобилке
-            if (!isOpenRef.current || window.innerWidth >= 1024) return;
+    const onTouchMove = (e: TouchEvent) => {
+        if (!isOpenRef.current || window.innerWidth >= 1024) return;
 
-            const delta = e.touches[0].clientY - startY;
+        const delta = e.touches[0].clientY - startY;
 
-            // тянем панель ТОЛЬКО если её внутренний скролл в самом верху и жест идёт вниз
-            if (el.scrollTop <= 0 && delta > 0) {
-                dragging = true;
-                e.preventDefault(); // глушим нативный скролл — поэтому passive: false
-                y.set(delta * 0.55);
-            } else if (!dragging) {
-                // обычный скролл контента — обновляем точку отсчёта,
-                // чтобы при возврате к scrollTop=0 панель не прыгала
-                startY = e.touches[0].clientY;
-                startT = Date.now();
-            }
-        };
+        // решаем роль жеста ОДИН раз, после небольшого порога
+        if (mode === undefined && Math.abs(delta) > 8) {
+            // драг — только если жест вниз И скролл в самом верху (с допуском на резинку Safari)
+            mode = (delta > 0 && el.scrollTop <= 1) ? 'drag' : 'scroll';
+        }
 
-        const onTouchEnd = (e: TouchEvent) => {
-            if (!dragging) return;
-            dragging = false;
+        if (mode === 'drag') {
+            e.preventDefault();
+            y.set(Math.max(delta, 0) * 0.55);
+        }
+        // mode === 'scroll' → вообще не вмешиваемся, нативный скролл
+    };
 
-            const deltaY = e.changedTouches[0].clientY - startY;
-            const deltaT = Date.now() - startT;
-            const velocity = deltaY / Math.max(deltaT, 1);
+    const onTouchEnd = (e: TouchEvent) => {
+        if (mode !== 'drag') { mode = undefined; return; }
+        mode = undefined;
 
-            if (deltaY > 50 || (deltaY > 15 && velocity > 0.4)) {
-                setIsOpen(false);
-                animate(y, 0, { type: 'spring', stiffness: 300, damping: 30 });
-            } else {
-                animate(y, 0, { type: 'spring', stiffness: 400, damping: 28 });
-            }
-        };
+        const deltaY = e.changedTouches[0].clientY - startY;
+        const deltaT = Date.now() - startT;
+        const velocity = deltaY / Math.max(deltaT, 1);
 
-        el.addEventListener('touchstart', onTouchStart, { passive: true });
-        el.addEventListener('touchmove', onTouchMove, { passive: false }); // 👈 нужен preventDefault
-        el.addEventListener('touchend', onTouchEnd, { passive: true });
+        if (deltaY > 50 || (deltaY > 15 && velocity > 0.4)) {
+            setIsOpen(false);
+            animate(y, 0, { type: 'spring', stiffness: 300, damping: 30 });
+        } else {
+            animate(y, 0, { type: 'spring', stiffness: 400, damping: 28 });
+        }
+    };
 
-        return () => {
-            el.removeEventListener('touchstart', onTouchStart);
-            el.removeEventListener('touchmove', onTouchMove);
-            el.removeEventListener('touchend', onTouchEnd);
-        };
-    }, [y]);
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+        el.removeEventListener('touchstart', onTouchStart);
+        el.removeEventListener('touchmove', onTouchMove);
+        el.removeEventListener('touchend', onTouchEnd);
+    };
+}, [y]);
     // -----------------------------------
 
     if (items.length === 0) return null;
