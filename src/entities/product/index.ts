@@ -1,0 +1,1 @@
+export { ProductUi as Product } from "./ui/product.ui";

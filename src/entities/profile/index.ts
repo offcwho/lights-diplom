@@ -1,0 +1,1 @@
+export { ProfileUi as Profile } from "./ui/profile.ui";

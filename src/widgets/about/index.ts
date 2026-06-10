@@ -1,0 +1,1 @@
+export { AboutUi as About } from "./ui/about.ui";

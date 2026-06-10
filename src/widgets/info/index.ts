@@ -1,0 +1,1 @@
+export { InfoUi as Info } from "./ui/info.ui";
