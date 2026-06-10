@@ -77,6 +77,7 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const resetFilters = () => {
+        setSearchQuery("");
         setSelectedCategory("all");
         setSelectedColors([]);
         setMaxPrice(1500);
@@ -91,6 +92,15 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
     const filteredProducts = useMemo(() => {
         let result = [...PRODUCTS_DATA];
 
+        const query = searchQuery.trim().toLowerCase();
+        if (query) {
+            result = result.filter(p =>
+                p.name.toLowerCase().includes(query) ||
+                p.desc.toLowerCase().includes(query) ||
+                p.material.toLowerCase().includes(query)
+            );
+        }
+
         if (selectedCategory !== "all") {
             result = result.filter(p => p.category === selectedCategory);
         }
@@ -103,7 +113,7 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
         if (sortBy === "price-desc") result.sort((a, b) => b.price - a.price);
 
         return result;
-    }, [selectedCategory, selectedColors, maxPrice, sortBy]);
+    }, [searchQuery, selectedCategory, selectedColors, maxPrice, sortBy]);
 
     const value: CatalogContextValue = {
         searchQuery, setSearchQuery,

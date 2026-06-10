@@ -8,6 +8,8 @@ export { CatalogSelectComponent as CatalogSelect } from "./components/catalog-se
 export { CatalogFiltersUi as CatalogFilters } from "./ui/catalog-filters.ui";
 export { CatalogListUi as CatalogList } from "./ui/catalog-list.ui";
 export { CatalogHeadingUi as CatalogHeading } from "./ui/catalog-heading.ui";
+export { CatalogSearchUi as CatalogSearch } from "./ui/catalog-search.ui";
+export {CatalogToolbarUi as CatalogTopbar} from "./ui/catalog-toolbar.ui";
 
 //Page
 export { CatalogUi as Catalog } from "./ui/catalog.ui";

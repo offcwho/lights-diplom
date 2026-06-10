@@ -5,6 +5,7 @@ import { INITIAL_ITEMS } from "./cart.data";
 
 type CartContextValue = {
     items: typeof INITIAL_ITEMS;
+    setItems: (v: typeof INITIAL_ITEMS) => void;
     coupon: string;
     setCoupon: (v: string) => void;
     updateQuantity: (id: string, delta: number) => void;
@@ -39,6 +40,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
     const value: CartContextValue = {
         items,
+        setItems,
         coupon,
         setCoupon,
         updateQuantity,

@@ -2,7 +2,7 @@
 
 import { Container } from "@/components/Container"
 import { CatalogProvider } from "../module/catalog.context"
-import { CatalogFilters, CatalogHeading, CatalogList } from ".."
+import { CatalogFilters, CatalogHeading, CatalogList, CatalogSearch, CatalogTopbar } from ".."
 import { Sliders } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useHeaderHeight } from "@/hooks/useHeaderHeight"
@@ -10,32 +10,25 @@ import { AnimatePresence } from "framer-motion"
 import { PageItem, PageStagger } from "@/components/Animations"
 
 export const CatalogUi = () => {
-    const headerHeight = useHeaderHeight();
+    const { headerHeight } = useHeaderHeight();
     const [isOpenFilters, setIsOpenFilters] = useState(false);
 
     return (
         <CatalogProvider>
-            <button
-                onClick={() => { setIsOpenFilters(() => !isOpenFilters) }}
-                className={`fixed z-99 top-0 bottom-0 left-0 py-3 px-3 h-fit bg-white rounded-r-2xl items-center  justify-center lg:hidden xs:flex`}
-                style={{ top: headerHeight + 'px' + '100px' }}
-            >
-                <Sliders />
-            </button>
-            <Container className="py-12 space-y-12 pb-0!">
+            <Container className="py-12 space-y-0 pb-0!">
                 <CatalogHeading className="mb-8" />
-
+                <CatalogTopbar className="mb-6 md:relative xs:sticky top-3 z-99" onOpen={() => setIsOpenFilters(!isOpenFilters)} />
                 <AnimatePresence>
                     {isOpenFilters && (
                         <CatalogFilters
-                            className={`lg:col-span-4 space-y-8 lg:block ${isOpenFilters ? 'xs:fixed!' : 'xs:hidden'} xs:absolute xs:top-0 xs:left-0 w-full z-100 h-full top`}
-                            style={{ marginTop: headerHeight + 'px' + '100px' }}
+                            className={`lg:col-span-4 space-y-8 lg:block ${isOpenFilters ? 'xs:fixed!' : 'xs:hidden'} xs:absolute xs:top-0 xs:left-0 w-full z-100 h-screen top`}
+                            style={{ paddingTop: headerHeight + 24 + 'px' }}
                             onClose={() => setIsOpenFilters(false)}
                         />
                     )}
                 </AnimatePresence>
                 <PageStagger className="grid xs:grid-cols-1 lg:grid-cols-14 gap-8 items-start">
-                    <PageItem className={`lg:col-span-4 space-y-8 lg:block xs:hidden`}>
+                    <PageItem className={`lg:col-span-4 space-y-8 lg:block xs:hidden sticky top-2`}>
                         <CatalogFilters />
                     </PageItem>
                     <PageItem className="lg:col-span-10">

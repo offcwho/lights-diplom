@@ -1,3 +1,5 @@
+'use client'
+
 import { Heart, LayoutGrid, ShoppingBag, ShoppingCart, User } from "lucide-react"
 import { Navigation } from ".."
 import Link from "next/link"
@@ -8,17 +10,12 @@ import { CartTotals } from "@/entities/cart";
 import { useCart } from "@/entities/cart/module/cart.context";
 
 export const HeaderUi = () => {
+    const { items } = useCart();
+
     const page = 'profile';
     const favorites = [
         {
             'qwe': 'qwe'
-        }
-    ]
-
-    const cart = [
-        {
-            'qwe': 'qwe',
-            quantity: 2
         }
     ]
     return (
@@ -48,8 +45,8 @@ export const HeaderUi = () => {
                 >
                     <ShoppingBag size={20} />
                     {
-                        cart.length > 0 && <span className="absolute -top-0.5 -right-0.5 bg-black text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                            {cart.reduce((acc, i) => acc + i.quantity, 0)}
+                        items.length > 0 && <span className="absolute -top-0.5 -right-0.5 bg-black text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                            {items.reduce((acc, i) => acc + i.quantity, 0)}
                         </span>
                     }
                 </Link>
@@ -72,8 +69,6 @@ export const MobileNavigationUi = () => {
         { name: "Cart", link: "/cart", icon: ShoppingCart },
         { name: "Profile", link: "/profile", icon: User },
     ];
-
-    console.log('pathname', pathname);
 
     const showTotalsAttached = pathname === "/cart" && total > 0;
     return (

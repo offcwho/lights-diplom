@@ -8,11 +8,11 @@ import Link from "next/link";
 import { PageItem, PageStagger } from "@/components/Animations";
 
 export const CatalogListUi = ({ className }: { className?: string }) => {
-    const { filteredProducts } = useCatalog();
+    const { filteredProducts, resetFilters } = useCatalog();
     const [hoveredId, setHoveredId] = useState<number | null>(null);
 
     return (
-        <div className={`${className} min-h-screen text-[#111111] font-sans antialiased selection:bg-black selection:text-white`}>
+        <div className={`${className} text-[#111111] font-sans antialiased selection:bg-black selection:text-white`}>
             <PageStagger className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 relative">
                 {filteredProducts.map((product) => {
                     const isHovered = hoveredId === product.id;
@@ -92,15 +92,21 @@ export const CatalogListUi = ({ className }: { className?: string }) => {
                     );
                 })}
             </PageStagger>
-
-            {/* Заглушка пустого результата */}
             {filteredProducts.length === 0 && (
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-center py-32 bg-white rounded-3xl border border-black/2"
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="col-span-full py-20 text-center space-y-3"
                 >
-                    <p className="text-xs font-bold uppercase tracking-widest text-zinc-400">No objects found within this matrix.</p>
+                    <p className="text-sm font-bold uppercase tracking-wider text-zinc-400">
+                        Ничего не найдено
+                    </p>
+                    <button
+                        onClick={resetFilters}
+                        className="text-xs font-black uppercase tracking-widest border-b-2 border-black pb-1 hover:text-zinc-600 hover:border-zinc-600 transition-colors"
+                    >
+                        Сбросить фильтры
+                    </button>
                 </motion.div>
             )}
         </div>
