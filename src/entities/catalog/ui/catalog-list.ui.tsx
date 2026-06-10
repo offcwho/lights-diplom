@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Heart, ShoppingBag, ArrowRight, } from "lucide-react";
 import { useCatalog } from "../module/catalog.context";
 import Link from "next/link";
+import { PageItem, PageStagger } from "@/components/Animations";
 
 export const CatalogListUi = ({ className }: { className?: string }) => {
     const { filteredProducts } = useCatalog();
@@ -12,13 +13,12 @@ export const CatalogListUi = ({ className }: { className?: string }) => {
 
     return (
         <div className={`${className} min-h-screen text-[#111111] font-sans antialiased selection:bg-black selection:text-white`}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 relative">
+            <PageStagger className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 relative">
                 {filteredProducts.map((product) => {
                     const isHovered = hoveredId === product.id;
 
                     return (
-                        <Link
-                            href={'/product/1'}
+                        <PageItem
                             key={product.id}
                             className="relative z-10"
                             onMouseEnter={() => setHoveredId(Number(product.id))}
@@ -88,10 +88,10 @@ export const CatalogListUi = ({ className }: { className?: string }) => {
                                     </motion.div>
                                 )}
                             </AnimatePresence>
-                        </Link>
+                        </PageItem>
                     );
                 })}
-            </div>
+            </PageStagger>
 
             {/* Заглушка пустого результата */}
             {filteredProducts.length === 0 && (

@@ -33,9 +33,6 @@ export const HeaderUi = () => {
             <Navigation />
 
             <div className="items-center space-x-2 xs:hidden sm:flex">
-                <Link href={'/profile'} className={`p-2 rounded-full transition-colors ${page === 'profile' ? 'bg-black text-white' : 'hover:bg-black/5'}`}>
-                    <User size={20} />
-                </Link>
                 <Link
                     href={'/favourites'}
                     className={`p-2 rounded-full transition-colors relative ${page === 'profile' ? 'bg-black text-white' : 'hover:bg-black/5'}`}
@@ -55,6 +52,9 @@ export const HeaderUi = () => {
                             {cart.reduce((acc, i) => acc + i.quantity, 0)}
                         </span>
                     }
+                </Link>
+                <Link href={'/profile'} className={`p-2 rounded-full transition-colors ${page === 'profile' ? 'bg-black text-white' : 'hover:bg-black/5'}`}>
+                    <User size={20} />
                 </Link>
             </div>
         </header>

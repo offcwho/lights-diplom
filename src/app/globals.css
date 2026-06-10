@@ -56,3 +56,11 @@ body {
         max-height: calc(100dvh - var(--sheet-offset, 0px));
     }
 }
+
+::-webkit-scrollbar{
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb{
+  background: #181818;
+}
