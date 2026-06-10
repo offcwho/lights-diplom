@@ -1,9 +1,11 @@
+import { Container } from "@/components/Container"
 import { Mail } from "lucide-react"
 
 export const FooterUi = () => {
     return (
-        <footer className="bg-[#111111] text-[#e3e3e3] pt-16 pb-12 rounded-t-[40px]">
-            <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-12 pb-12 border-b border-black/10">
+        <footer className="lg:block xs:hidden">
+            <Container className="bg-[#111111] text-[#e3e3e3] rounded-t-[40px]">
+                <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-12 pb-12 border-b border-black/10">
 
                 {/* Инфо */}
                 <div className="md:col-span-3 space-y-4">
@@ -70,6 +72,7 @@ export const FooterUi = () => {
                     <a href="#" className="hover:underline">Terms of Service</a>
                 </div>
             </div>
+            </Container>
         </footer>
     )
 }

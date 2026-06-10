@@ -31,3 +31,15 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   background-color: #EAE8E4;
 }
+
+@media (min-width: 144px) {
+  #main-content {
+    padding-bottom: var(--bottom-pad, 0px);
+  }
+}
+
+@media (min-width: 768px) {
+  #main-content {
+    padding-bottom: 0px;
+  }
+}

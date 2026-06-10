@@ -2,8 +2,6 @@
 
 import { Footer } from "@/widgets/footer";
 import { Header, MobileNavigation } from "@/widgets/header";
-import { useEffect, useState } from "react";
-import { Providers } from "./Providers";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
 
 export default function Layout({
@@ -19,11 +17,15 @@ export default function Layout({
         <body className="relative h-screen overflow-hidden">
             <Header />
             <div
-                className="h-full overflow-y-auto"
-                style={{ paddingTop: headerHeight, paddingBottom: calculatePadding }}
+                className="h-full overflow-y-auto flex flex-col justify-between gap-12"
+                style={{
+                    paddingTop: headerHeight,
+                    ['--bottom-pad' as string]: calculatePadding,
+                }}
                 id="main-content"
             >
                 <main>{children}</main>
+                <Footer />
             </div>
 
             <MobileNavigation />
