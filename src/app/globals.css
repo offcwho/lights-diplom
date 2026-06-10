@@ -33,7 +33,7 @@ body {
 }
 
 @media (min-width: 144px) {
-    #main-content {
+     #main-content > main {
         padding-bottom: var(--bottom-pad, 0px);
         transition: padding-bottom 0.3s ease-out;
     }
