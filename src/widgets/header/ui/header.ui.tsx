@@ -77,9 +77,11 @@ export const MobileNavigationUi = () => {
     return (
         // Превращаем в изящный парящий док с мягкой тенью вместо скучной полоски на весь экран
         <nav className="md:hidden fixed bottom-3 inset-x-4 z-50" id="mobilenav">
-            {pathname === "/cart" && (
-                <CartTotals className="lg:hidden xs:block bottom-0 rounded-b-none border-b border-b-black/5" />
-            )}
+            <AnimatePresence>
+                {pathname === "/cart" && (
+                    <CartTotals className="lg:hidden xs:block bottom-0 rounded-b-none border-b border-b-black/5" />
+                )}
+            </AnimatePresence>
             <div className={`grid grid-cols-4 backdrop-blur-xl bg-white/80 border border-black/5 p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.06)] ${pathname === "/cart" ? 'rounded-b-3xl' : 'rounded-3xl'} ${pathname === "/cart" ? 'border-t-none' : ''}`}>
                 {links.map((item) => {
                     const isActive = pathname === item.link;

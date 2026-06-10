@@ -140,10 +140,13 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
     return (
         <motion.div
             ref={rootRef}
-            className={`lg:col-span-5 bg-white border border-black/5 rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] space-y-6 sticky xs:bottom-0 lg:top-16 ${className}`}
+            initial={{ y: 60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 60, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+            className={`lg:col-span-5 bg-white border border-black/5 rounded-3xl p-6 md:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.03)] space-y-6 lg:sticky lg:top-16 ${className}`}
             style={{
                 ...style,
-                maxHeight: `auto`,
                 overflowY: 'auto',
                 overscrollBehavior: 'contain',
                 y,
