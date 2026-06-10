@@ -1,3 +1,9 @@
-import { Cart } from '@/entities/cart';
+import { Cart, CartProvider } from '@/entities/cart';
 
-export default function CartPage() { return <Cart /> }
+export default function CartPage() { 
+    return (
+        <CartProvider>
+            <Cart />
+        </CartProvider>
+    ) 
+}

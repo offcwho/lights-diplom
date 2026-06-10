@@ -6,7 +6,7 @@ export const CartHeaderUi = () => {
     const { items } = useCart();
 
     return (
-        <div className="border-b border-black/10 pb-6 flex justify-between items-baseline">
+        <div className="border-b border-black/10 pb-6 flex justify-between items-baseline xs:flex-col lg:flex-row space-y-3">
             <h1 className="text-4xl md:text-6xl font-black tracking-tight uppercase">
                 Ваша корзина
             </h1>
