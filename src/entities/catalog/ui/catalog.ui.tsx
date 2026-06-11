@@ -23,7 +23,7 @@ export const CatalogUi = () => {
                 <PageItem>
                     <div className="sticky z-40" style={{ top: headerHeight + 8 }}>
                         <CatalogToolbarUi
-                            onOpen={() => setIsOpenFilters(true)}
+                            onOpen={() => setIsOpenFilters(!isOpenFilters)}
                         />
                     </div>
                     <StuckSentinel />
@@ -43,9 +43,13 @@ export const CatalogUi = () => {
                 {/* Товары */}
                 <PageItem>
                     <div className="grid grid-cols-1 lg:grid-cols-14 gap-8 items-start">
-                        <aside className="hidden lg:block lg:col-span-4">
-                            <CatalogFilters />
-                        </aside>
+
+                        <CatalogFilters
+                            className="lg:col-span-4"
+                            isOpen={isOpenFilters}
+                            onClose={() => setIsOpenFilters(!isOpenFilters)}
+                        />
+
 
                         <div className="lg:col-span-10">
                             <FlashSale />
@@ -60,15 +64,7 @@ export const CatalogUi = () => {
             </PageStagger>
 
             {/* Мобильная шторка фильтров */}
-            <AnimatePresence>
-                {isOpenFilters && (
-                    <CatalogFilters
-                        className="lg:hidden xs:absolute z-99 bottom-0 w-full left-0 rounded-none overflow-y-auto"
-                        onClose={() => setIsOpenFilters(false)}
-                        style={{ paddingTop: headerHeight + 8 + 'px' }}
-                    />
-                )}
-            </AnimatePresence>
+
         </Container>
     );
 };

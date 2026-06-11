@@ -51,6 +51,11 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+.filters-sheet {
+  max-height: calc(100vh - var(--sheet-offset2, 0px));
+  -webkit-overflow-scrolling: touch;
+}
+
 @supports (height: 100dvh) {
   .cart-sheet {
     max-height: calc(100dvh - var(--sheet-offset, 0px));
@@ -66,7 +71,3 @@ body {
   background: #181818;
 }
 */
-
-.car{
-  -webkit-backdrop-filter: ;
-}
