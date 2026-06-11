@@ -9,6 +9,7 @@ type LiquidGlassProps = {
     strength?: number;   // сила преломления (60–160)
     edge?: number;       // толщина преломляющей кромки, px
     dispersion?: number;
+    iditem?: string;
 };
 
 export const Glass = ({
@@ -18,6 +19,7 @@ export const Glass = ({
     strength = 110,
     edge = 18,
     dispersion = 0.08,
+    iditem,
     ...props
 }: LiquidGlassProps) => {
     const id = useId().replace(/:/g, '');
@@ -37,6 +39,7 @@ export const Glass = ({
         return () => ro.disconnect();
     }, []);
 
+    // генерируем карту смещения под текущий размер
     // генерируем карту смещения под текущий размер
     // генерируем карту смещения под текущий размер
     useEffect(() => {
@@ -82,6 +85,7 @@ export const Glass = ({
     return (
         <div
             ref={ref}
+            id={iditem}
             className={`relative overflow-hidden ${className} ${props}`}
             style={{
                 backdropFilter: supportsRefraction && mapUrl
@@ -98,6 +102,7 @@ export const Glass = ({
             }}
         >
             {/* SVG-фильтр преломления */}
+            {/* SVG-фильтр: преломление + хроматическая аберрация */}
             {mapUrl && (
                 <svg className="absolute w-0 h-0" aria-hidden>
                     <filter id={id} x="0" y="0" width="100%" height="100%"

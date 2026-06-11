@@ -11,9 +11,11 @@ import { useStuck } from "@/hooks/useStack";
 import { springSmooth } from "@/lib/motion";
 import { Glass } from "@/components/Glass";
 
+
 export const HeaderUi = () => {
     const { items } = useCart();
     const { isStuck } = useStuck();
+    const pathname = usePathname();
 
     const page = 'profile';
     const favorites = [
@@ -30,9 +32,11 @@ export const HeaderUi = () => {
             id="header"
         >
             <Glass
-                className="flex items-center justify-between inset-x-0  max-w-7xl w-full mx-auto px-6 py-6 rounded-b-4xl"
-                strength={30}
-                edge={10}
+                className="max-w-7xl w-full mx-auto px-6 py-6 rounded-b-4xl"
+                dispersion={0.5}
+                strength={10}
+                edge={100}
+                radius={10}
             >
                 <div className="flex justify-between items-center">
                     <Link
@@ -135,89 +139,101 @@ export const MobileNavigationUi = () => {
                     <CartTotals className="lg:hidden xs:block bottom-0 rounded-b-none border-b border-b-black/5 bg-white/30! backdrop-blur-xl!" />
                 )}
             </AnimatePresence>
-            <motion.div
-                id="mobiledock"
-                initial={false}
-                animate={{
-                    borderTopLeftRadius: showTotalsAttached ? 0 : 24,
-                    borderTopRightRadius: showTotalsAttached ? 0 : 24,
-                    borderBottomLeftRadius: 24,
-                    borderBottomRightRadius: 24,
-                }}
-                transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-                className={`grid grid-cols-4  p-1.5 ${showTotalsAttached ? 'border-t-0' : ''}`}
+            <Glass
+                className="bg-black rounded-[18px] h-full"
+                strength={30}
+                edge={10}
+                dispersion={0.5}
             >
-                {links.map((item) => {
-                    const isActive = pathname === item.link;
-                    const Icon = item.icon;
+                <motion.div
+                    id="mobiledock"
+                    initial={false}
+                    animate={{
+                        borderTopLeftRadius: showTotalsAttached ? 0 : 24,
+                        borderTopRightRadius: showTotalsAttached ? 0 : 24,
+                        borderBottomLeftRadius: 24,
+                        borderBottomRightRadius: 24,
+                    }}
+                    transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+                    className={`grid grid-cols-4  p-1.5 ${showTotalsAttached ? 'border-t-0' : ''}`}
+                >
+                    {links.map((item) => {
+                        const isActive = pathname === item.link;
+                        const Icon = item.icon;
 
-                    return (
-                        <Link key={item.link} href={item.link} className="relative select-none outline-none">
-                            <motion.div
-                                whileTap={{ scale: 0.93 }} // Эффект упругого продавливания кнопки пальцем
-                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                className="relative flex flex-col items-center justify-center py-2.5 h-full rounded-[18px] cursor-pointer"
-                            >
-                                {/* Скользящая капсула: теперь она занимает 100% пространства ячейки (минус inset). 
+                        return (
+                            <Link key={item.link} href={item.link} className="relative select-none outline-none">
+                                <motion.div
+                                    whileTap={{ scale: 0.93 }} // Эффект упругого продавливания кнопки пальцем
+                                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                    className="relative flex flex-col items-center justify-center py-2.5 h-full rounded-[18px] cursor-pointer"
+                                >
+                                    {/* Скользящая капсула: теперь она занимает 100% пространства ячейки (минус inset). 
                                 Это гарантирует идеальную центровку на любых экранах без хардкода пикселей.
                             */}
-                                {isActive && (
-                                    <motion.div
-                                        layoutId="active-nav-pill"
-                                        className="absolute inset-0  z-0"
-                                        transition={{
-                                            type: "spring",
-                                            stiffness: 380,
-                                            damping: 30, // Тягучая, дорогая инерция без лишнего дребезга
-                                        }}
-                                    >
-                                        <Glass className="bg-black rounded-[18px] h-full">
-                                            <div className="h-full"></div>
-                                        </Glass>
-                                    </motion.div>
-                                )}
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="active-nav-pill"
+                                            className="absolute inset-0  z-0"
+                                            transition={{
+                                                type: "spring",
+                                                stiffness: 380,
+                                                damping: 30, // Тягучая, дорогая инерция без лишнего дребезга
+                                            }}
+                                        >
+                                            <Glass
+                                                className="bg-black rounded-[18px] h-full"
+                                                strength={30}
+                                                edge={10}
+                                                dispersion={0.5}
+                                            >
+                                                <div className="h-full"></div>
+                                            </Glass>
+                                        </motion.div>
+                                    )}
 
-                                {/* Контейнер для контента: гарантирует, что элементы не будут прыгать во время анимации */}
-                                <div className="relative z-10 flex flex-col items-center justify-center space-y-0.5">
-                                    <motion.div
-                                        animate={{
-                                            y: isActive ? -1 : 0, // Тонкий архитектурный подъем вверх
-                                            scale: isActive ? 1.05 : 1,
-                                            color: isActive ? "#ffffff" : "#111111",
-                                        }}
-                                        transition={{ type: "spring", stiffness: 400, damping: 28 }}
-                                    >
-                                        <Icon
-                                            size={18}
-                                            strokeWidth={isActive ? 2.2 : 2}
-                                            fill={isActive && item.name === "Favourites" ? "currentColor" : "none"}
-                                        />
-                                    </motion.div>
+                                    {/* Контейнер для контента: гарантирует, что элементы не будут прыгать во время анимации */}
+                                    <div className="relative z-10 flex flex-col items-center justify-center space-y-0.5">
+                                        <motion.div
+                                            animate={{
+                                                y: isActive ? -1 : 0, // Тонкий архитектурный подъем вверх
+                                                scale: isActive ? 1.05 : 1,
+                                                color: isActive ? "#111111" : "#111111",
+                                            }}
+                                            transition={{ type: "spring", stiffness: 400, damping: 28 }}
+                                        >
+                                            <Icon
+                                                size={18}
+                                                strokeWidth={isActive ? 2.2 : 2}
+                                                fill={isActive && item.name === "Favourites" ? "currentColor" : "none"}
+                                            />
+                                        </motion.div>
 
-                                    {/* Вместо жесткого AnimatePresence, ломающего сетку, мы используем контролируемый сдвиг.
+                                        {/* Вместо жесткого AnimatePresence, ломающего сетку, мы используем контролируемый сдвиг.
                                     Текст всегда занимает свое место, но плавно проявляется и приподнимается.
                                 */}
-                                    <motion.span
-                                        initial={false}
-                                        animate={{
-                                            opacity: isActive ? 1 : 0,
-                                            height: isActive ? "auto" : 0,
-                                            marginTop: isActive ? 4 : 0,
-                                            scale: isActive ? 1 : 0.9,
-                                            color: isActive ? "#000" : "#111111",
-                                        }}
-                                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                                        className="block overflow-hidden text-[9px] font-bold uppercase tracking-wider font-sans"
-                                        style={{ pointerEvents: "none" }}
-                                    >
-                                        {item.name}
-                                    </motion.span>
-                                </div>
-                            </motion.div>
-                        </Link>
-                    );
-                })}
-            </motion.div>
+                                        <motion.span
+                                            initial={false}
+                                            animate={{
+                                                opacity: isActive ? 1 : 0,
+                                                height: isActive ? "auto" : 0,
+                                                marginTop: isActive ? 4 : 0,
+                                                scale: isActive ? 1 : 0.9,
+                                                color: isActive ? "#000" : "#111111",
+                                            }}
+                                            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                            className="block overflow-hidden text-[9px] font-bold uppercase tracking-wider font-sans"
+                                            style={{ pointerEvents: "none" }}
+                                        >
+                                            {item.name}
+                                        </motion.span>
+                                    </div>
+                                </motion.div>
+                            </Link>
+                        );
+                    })}
+                </motion.div>
+            </Glass>
         </nav>
     );
 };

@@ -14,7 +14,7 @@ export default function Layout({
     const calculatePadding = mobileNavHeight + 20 + 'px'
 
     return (
-        <body className="relative h-screen overflow-hidden">
+        <body className="relative h-screen overflow-hidden" id="body">
             <Header />
             <div
                 className="h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between gap-12"
