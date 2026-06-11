@@ -1,15 +1,15 @@
 'use client'
 
+import { AnimatePresence, motion } from "framer-motion";
 import { Search, Sliders, X } from "lucide-react"
 import { useCatalog } from "../module/catalog.context";
-import { animate, AnimatePresence, motion, useMotionValue } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
 import { CatalogCategories, CatalogColors, CatalogRange, CatalogSelect } from "..";
 import { PremiumSpring } from "../module/catalog.animations";
 import { PageItem, PageStagger } from "@/components/Animations";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
+import { useSheetDrag } from "@/hooks/useSheetDrag";
 
-export const CatalogFiltersUi = ({ className, style, onClose, isOpen }: { className?: string; style?: React.CSSProperties; onClose: () => void; isOpen?: boolean }) => {
+export const CatalogFiltersUi = ({ className, style, onClose, isOpen = false }: { className?: string; style?: React.CSSProperties; onClose: () => void; isOpen?: boolean }) => {
     const {
         selectedCategory,
         selectedColors,
@@ -20,113 +20,19 @@ export const CatalogFiltersUi = ({ className, style, onClose, isOpen }: { classN
     const isFiltered = selectedCategory !== "all" || selectedColors.length > 0 || maxPrice < 1500;
     const { headerHeight, dockHeight } = useHeaderHeight();
 
-    const y = useMotionValue(0);
-    const rootRef = useRef<HTMLDivElement>(null);
-
-    // Реактивный стейт для отслеживания мобильной версии
-    const [isMobile, setIsMobile] = useState(false);
-
-    // Сохраняем актуальные рефы для тач-событий
-    const isOpenRef = useRef(isOpen);
-    isOpenRef.current = isOpen;
-
-    const onCloseRef = useRef(onClose);
-    onCloseRef.current = onClose;
-
-    // --- 1. Отслеживание изменения размера экрана (для DevTools и ресайза) ---
-    useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(window.innerWidth < 1024);
-        };
-
-        handleResize(); // Проверка при монтировании
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    // --- 2. Синхронизация isOpen и адаптива с положением шторки ---
-    useEffect(() => {
-        if (!isMobile) {
-            // На десктопе сбрасываем сдвиг в 0, чтобы панель не улетала вниз
-            y.set(0);
-            return;
-        }
-
-        if (isOpen) {
-            // Плавно открываем шторку на мобилке
-            animate(y, 0, { type: 'spring', stiffness: 320, damping: 30 });
-        } else {
-            // Прячем шторку вниз за пределы экрана
-            animate(y, window.innerHeight || 1000, { type: 'spring', stiffness: 300, damping: 35 });
-        }
-    }, [isOpen, isMobile, y]);
-
-    // --- 3. Свайп-жесты по блоку ---
-    useEffect(() => {
-        const el = rootRef.current;
-        if (!el) return;
-
-        let startY = 0;
-        let startT = 0;
-        let mode: 'drag' | 'scroll' | undefined;
-
-        const onTouchStart = (e: TouchEvent) => {
-            startY = e.touches[0].clientY;
-            startT = Date.now();
-            mode = undefined;
-            y.stop();
-        };
-
-        const onTouchMove = (e: TouchEvent) => {
-            if (!isOpenRef.current || window.innerWidth >= 1024) return;
-
-            const delta = e.touches[0].clientY - startY;
-
-            if (mode === undefined && Math.abs(delta) > 8) {
-                mode = (delta > 0 && el.scrollTop <= 1) ? 'drag' : 'scroll';
-            }
-
-            if (mode === 'drag') {
-                e.preventDefault();
-                y.set(Math.max(delta, 0) * 0.55);
-            }
-        };
-
-        const onTouchEnd = (e: TouchEvent) => {
-            if (mode !== 'drag') { mode = undefined; return; }
-            mode = undefined;
-
-            const deltaY = e.changedTouches[0].clientY - startY;
-            const deltaT = Date.now() - startT;
-            const velocity = deltaY / Math.max(deltaT, 1);
-
-            if (deltaY > 50 || (deltaY > 15 && velocity > 0.4)) {
-                animate(y, window.innerHeight || 1000, {
-                    type: 'spring',
-                    stiffness: 300,
-                    damping: 30,
-                    onComplete: () => {
-                        onCloseRef.current();
-                    }
-                });
-            } else {
-                animate(y, 0, { type: 'spring', stiffness: 400, damping: 28 });
-            }
-        };
-
-        el.addEventListener('touchstart', onTouchStart, { passive: true });
-        el.addEventListener('touchmove', onTouchMove, { passive: false });
-        el.addEventListener('touchend', onTouchEnd, { passive: true });
-
-        return () => {
-            el.removeEventListener('touchstart', onTouchStart);
-            el.removeEventListener('touchmove', onTouchMove);
-            el.removeEventListener('touchend', onTouchEnd);
-        };
-    }, [y]);
+    // Подключаем наш обновленный хук умного трекинга скролла
+    const { rootRef, transformY, paddingBottom } = useSheetDrag({
+        isOpen,
+        setIsOpen: (openState) => {
+            if (!openState) onClose();
+        },
+        variant: 'dismiss',
+        maxPullUp: -60
+    });
 
     const filtersContent = (
-        <PageStagger className="overflow-y-auto overflow-x-hidden p-6 space-y-6">
+        // Убираем безусловный overflow-y-auto, переносим его только на десктоп (lg)
+        <PageStagger className="p-6 space-y-6 lg:overflow-y-auto lg:overflow-x-hidden">
             <PageItem>
                 <div className="flex items-center justify-between border-b border-black/5 pb-4 h-9">
                     <span className="text-xs font-black uppercase tracking-wider flex items-center text-zinc-900">
@@ -148,9 +54,10 @@ export const CatalogFiltersUi = ({ className, style, onClose, isOpen }: { classN
                             </motion.button>
                         )}
                     </AnimatePresence>
+                    
                     {/* debug
-                       <button
-                        className="lg:hidden xs:block"
+                     <button
+                        className="lg:hidden block"
                         onClick={onClose}
                     >
                         <X size={16} />
@@ -176,12 +83,13 @@ export const CatalogFiltersUi = ({ className, style, onClose, isOpen }: { classN
     return (
         <motion.div
             ref={rootRef}
-            className={`${className} xs:fixed z-10000 xs:bottom-0 xs:rounded-b-none md:rounded-3xl xs:w-full xs:left-0 w-auto filters-sheet backdrop-blur-xl bg-white/30 rounded-3xl border border-black/5 lg:sticky lg:top-6 shadow-[0_8px_30px_rgba(0,0,0,0.02)] overflow-hidden`}
+            className={`${className} xs:fixed z-10000 xs:bottom-0 xs:rounded-b-none md:rounded-3xl xs:w-full xs:left-0 w-auto filters-sheet backdrop-blur-xl bg-white/30 rounded-3xl border border-black/5 lg:sticky lg:top-6 shadow-[0_8px_30px_rgba(0,0,0,0.02)] overflow-hidden pb-[var(--sheet-pb)] [--sheet-pb:0px]`}
             style={{
                 ...style,
                 ['--sheet-offset' as string]: `${headerHeight + dockHeight + 36}px`,
                 overscrollBehavior: 'contain',
-                y,
+                y: transformY,
+                paddingBottom,
             }}
         >
             {/* Десктопная версия */}
@@ -191,14 +99,17 @@ export const CatalogFiltersUi = ({ className, style, onClose, isOpen }: { classN
 
             {/* Мобильная версия шторки */}
             <div className="lg:hidden block overflow-y-hidden overflow-x-hidden">
-                <div className="flex justify-center py-4 select-none sticky top-0">
+                {/* Индикатор/хэндл шторки */}
+                <div className="flex justify-center py-4 select-none sticky top-0 bg-transparent z-10">
                     <motion.div
                         className="w-10 h-1 rounded-full bg-zinc-300"
                         animate={{ y: [0, 3, 0] }}
                         transition={{ repeat: 2, duration: 0.9, delay: 0.5, ease: 'easeInOut' }}
                     />
                 </div>
-                <div className="overflow-y-scroll max-h-120">
+                
+                {/* Единый главный скролл-контейнер на мобилке */}
+                <div className="overflow-y-auto max-h-[75vh] pb-6">
                     {filtersContent}
                 </div>
             </div>

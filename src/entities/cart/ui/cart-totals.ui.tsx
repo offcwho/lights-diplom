@@ -111,7 +111,7 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
                             transition={{ duration: 0.3, ease: 'easeInOut' }}
                             className=""
                         >
-                            <div className="flex justify-center py-4 -mt-4 -mx-6 select-none">
+                            <div className="flex justify-center py-4 -mt-4 -mx-6 mb-3 select-none">
                                 <motion.div
                                     className="w-10 h-1 rounded-full bg-zinc-400"
                                     animate={{ y: [0, 3, 0] }}
