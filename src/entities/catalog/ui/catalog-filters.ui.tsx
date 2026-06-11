@@ -22,7 +22,7 @@ export const CatalogFiltersUi = ({ className, style, onClose, isOpen }: { classN
 
     const y = useMotionValue(0);
     const rootRef = useRef<HTMLDivElement>(null);
-    
+
     // Реактивный стейт для отслеживания мобильной версии
     const [isMobile, setIsMobile] = useState(false);
 
@@ -38,7 +38,7 @@ export const CatalogFiltersUi = ({ className, style, onClose, isOpen }: { classN
         const handleResize = () => {
             setIsMobile(window.innerWidth < 1024);
         };
-        
+
         handleResize(); // Проверка при монтировании
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
@@ -48,7 +48,7 @@ export const CatalogFiltersUi = ({ className, style, onClose, isOpen }: { classN
     useEffect(() => {
         if (!isMobile) {
             // На десктопе сбрасываем сдвиг в 0, чтобы панель не улетала вниз
-            y.set(0); 
+            y.set(0);
             return;
         }
 
@@ -101,9 +101,9 @@ export const CatalogFiltersUi = ({ className, style, onClose, isOpen }: { classN
             const velocity = deltaY / Math.max(deltaT, 1);
 
             if (deltaY > 50 || (deltaY > 15 && velocity > 0.4)) {
-                animate(y, window.innerHeight || 1000, { 
-                    type: 'spring', 
-                    stiffness: 300, 
+                animate(y, window.innerHeight || 1000, {
+                    type: 'spring',
+                    stiffness: 300,
                     damping: 30,
                     onComplete: () => {
                         onCloseRef.current();
@@ -148,12 +148,14 @@ export const CatalogFiltersUi = ({ className, style, onClose, isOpen }: { classN
                             </motion.button>
                         )}
                     </AnimatePresence>
-                    <button
+                    {/* debug
+                       <button
                         className="lg:hidden xs:block"
                         onClick={onClose}
                     >
                         <X size={16} />
                     </button>
+                    */}
                 </div>
             </PageItem>
             <PageItem>
@@ -174,7 +176,7 @@ export const CatalogFiltersUi = ({ className, style, onClose, isOpen }: { classN
     return (
         <motion.div
             ref={rootRef}
-            className={`${className} xs:fixed z-100 xs:bottom-0 xs:rounded-b-none md:rounded-3xl xs:w-full xs:left-0 w-auto filters-sheet backdrop-blur-xl bg-white/30 rounded-3xl border border-black/5 lg:sticky lg:top-6 shadow-[0_8px_30px_rgba(0,0,0,0.02)] overflow-hidden`}
+            className={`${className} xs:fixed z-10000 xs:bottom-0 xs:rounded-b-none md:rounded-3xl xs:w-full xs:left-0 w-auto filters-sheet backdrop-blur-xl bg-white/30 rounded-3xl border border-black/5 lg:sticky lg:top-6 shadow-[0_8px_30px_rgba(0,0,0,0.02)] overflow-hidden`}
             style={{
                 ...style,
                 ['--sheet-offset' as string]: `${headerHeight + dockHeight + 36}px`,
@@ -188,15 +190,17 @@ export const CatalogFiltersUi = ({ className, style, onClose, isOpen }: { classN
             </div>
 
             {/* Мобильная версия шторки */}
-            <div className="lg:hidden block overflow-y-auto overflow-x-hidden">
-                <div className="flex justify-center py-4 select-none">
+            <div className="lg:hidden block overflow-y-hidden overflow-x-hidden">
+                <div className="flex justify-center py-4 select-none sticky top-0">
                     <motion.div
                         className="w-10 h-1 rounded-full bg-zinc-300"
                         animate={{ y: [0, 3, 0] }}
                         transition={{ repeat: 2, duration: 0.9, delay: 0.5, ease: 'easeInOut' }}
                     />
                 </div>
-                {filtersContent}
+                <div className="overflow-y-scroll max-h-120">
+                    {filtersContent}
+                </div>
             </div>
         </motion.div>
     )

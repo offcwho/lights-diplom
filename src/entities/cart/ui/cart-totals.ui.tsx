@@ -26,9 +26,11 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
                 <h2 className="text-[11px] font-mono font-bold uppercase tracking-[0.25em] text-zinc-400">
                     Сумма корзины
                 </h2>
+                {/* debug
                 <button onClick={() => setIsOpen(false)} className="lg:hidden">
                     <X size={16} />
                 </button>
+                */}
             </div>
 
             <div className="space-y-4 border-b border-black/5 pb-6 text-xs font-medium">
@@ -83,17 +85,17 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 60, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-            className={`cart-sheet lg:col-span-5 border border-black/5 rounded-3xl pt-6 px-6 md:pt-8 md:px-8 pb-[var(--sheet-pb)] [--sheet-pb:1.5rem] md:[--sheet-pb:2rem] shadow-[0_20px_50px_rgba(0,0,0,0.03)] xs:space-y-6 sm:space-y-0 lg:sticky lg:top-16 ${className}`}
+            className={`cart-sheet lg:col-span-5 pb-0 border border-black/5 rounded-3xl pt-6  md:pt-8 [--sheet-pb:1.5rem] md:[--sheet-pb:2rem] shadow-[0_20px_50px_rgba(0,0,0,0.03)] xs:space-y-6 sm:space-y-0 lg:sticky lg:top-16 ${className}`}
             style={{
                 ...style,
                 ['--sheet-offset' as string]: `${headerHeight + dockHeight + 36}px`,
                 overscrollBehavior: 'contain',
-                y: transformY, 
-                paddingBottom, 
+                y: transformY,
+                paddingBottom,
             }}
         >
             {/* ДЕСКТОП */}
-            <div className="hidden lg:block space-y-6">
+            <div className="hidden lg:block space-y-6 px-6 md:px-8">
                 {totalsContent}
             </div>
 
@@ -107,7 +109,7 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.3, ease: 'easeInOut' }}
-                            className="space-y-6"
+                            className=""
                         >
                             <div className="flex justify-center py-4 -mt-4 -mx-6 select-none">
                                 <motion.div
@@ -117,7 +119,9 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
                                 />
                             </div>
 
-                            {totalsContent}
+                            <div className="space-y-6 max-h-100 overflow-y-auto px-6 md:px-8 pb-0">
+                                {totalsContent}
+                            </div>
                         </motion.div>
                     ) : (
                         <motion.div
