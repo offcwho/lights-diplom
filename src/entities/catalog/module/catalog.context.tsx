@@ -31,6 +31,7 @@ type CatalogContextValue = {
     setShowMobileFilters: (v: boolean) => void;
     resetFilters: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     handleColorToggle: (v: string) => void;
+    countByCategory: (catId: string) => void;
 
 
     // результат
@@ -83,6 +84,11 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
         setMaxPrice(1500);
     };
 
+    const countByCategory = (catId: string) =>
+        catId === 'all'
+            ? PRODUCTS_DATA.length
+            : PRODUCTS_DATA.filter(p => p.category === catId).length;
+
     const handleColorToggle = (colorId: string) => {
         setSelectedColors(prev =>
             prev.includes(colorId) ? prev.filter(c => c !== colorId) : [...prev, colorId]
@@ -128,6 +134,7 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
         cart, addToCart,
         resetFilters,
         handleColorToggle,
+        countByCategory
     };
 
     return (

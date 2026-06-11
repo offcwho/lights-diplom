@@ -3,7 +3,7 @@ import { Container } from "@/components/Container"
 export const AboutUi = () => {
     return (
         <div className="bg-[#F5F4F1] rounded-[40px]">
-            <Container className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <Container className=" grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                 <div className="lg:col-span-5 order-last lg:order-first">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="bg-[#EAE8E4] p-8 rounded-3xl space-y-2">

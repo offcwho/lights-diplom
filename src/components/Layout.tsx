@@ -17,7 +17,7 @@ export default function Layout({
         <body className="relative h-screen overflow-hidden">
             <Header />
             <div
-                className="h-full overflow-y-auto flex flex-col justify-between gap-12"
+                className="h-full overflow-y-auto overflow-x-hidden flex flex-col justify-between gap-12"
                 style={{
                     paddingTop: headerHeight,
                     ['--bottom-pad' as string]: mobileNavHeight + 24 + 'px',

@@ -13,13 +13,7 @@ const SORT_OPTIONS = [
     { value: 'price-desc', label: 'Сначала дороже' },
 ] as const;
 
-export const CatalogToolbarUi = ({
-    onOpen,
-    className,
-}: {
-    onOpen?: () => void;
-    className?: string;
-}) => {
+export const CatalogToolbarUi = ({ onOpen, className }: { onOpen?: () => void; className?: string; }) => {
     const {
         searchQuery, setSearchQuery,
         selectedCategory, selectedColors, maxPrice,
@@ -33,37 +27,66 @@ export const CatalogToolbarUi = ({
         (maxPrice < 1500 ? 1 : 0);
 
     return (
-        <div className={`flex items-center gap-2 sm:gap-3 ${className ?? ''}`}>
-            {/* ЕДИНАЯ КАПСУЛА: поиск | счётчик | сортировка */}
-            <div className={`flex-1 min-w-0 flex items-center bg-white border border-black/10 rounded-2xl
-                            shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-colors
-                            focus-within:border-black/30 `}>
-                {/* Поиск */}
-                <CatalogSearch />
+        <div className={`flex items-stretch gap-2 sm:gap-3 ${className ?? ''}`}>
+            {/* ЕДИНАЯ КАПСУЛА — фиксированная высота h-12 на всё */}
+            <div className="flex-1 min-w-0 h-12 flex items-stretch bg-white border border-black/10 rounded-2xl
+                            shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden
+                            transition-colors focus-within:border-black/30">
 
-                {/* Счётчик результатов — обновляется с лёгким "тиком" */}
-                <div className="hidden md:block px-4 border-l border-black/5 shrink-0">
+                {/* Поиск — голый, без своей коробки */}
+                <div className="relative flex-1 min-w-0 flex items-center">
+                    <Search size={14} className="absolute left-4 text-zinc-400 pointer-events-none" />
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Поиск светильников..."
+                        className="w-full h-full bg-transparent pl-10 pr-9 text-xs font-medium outline-none
+                                   placeholder:text-zinc-400"
+                    />
+                    <AnimatePresence>
+                        {searchQuery.length > 0 && (
+                            <motion.button
+                                type="button"
+                                initial={{ opacity: 0, scale: 0.6 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.6 }}
+                                whileTap={{ scale: 0.85 }}
+                                transition={springSmooth}
+                                onClick={() => setSearchQuery('')}
+                                aria-label="Очистить поиск"
+                                className="absolute right-2.5 p-1 rounded-full text-zinc-400 hover:text-black hover:bg-black/5 transition-colors"
+                            >
+                                <X size={12} />
+                            </motion.button>
+                        )}
+                    </AnimatePresence>
+                </div>
+
+                {/* Счётчик */}
+                <div className="hidden md:flex items-center px-4 border-l border-black/5 shrink-0">
                     <motion.span
                         key={filteredProducts.length}
                         initial={{ opacity: 0.4, y: 4 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.25 }}
-                        className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest whitespace-nowrap block"
+                        className="text-[10px] font-mono font-bold text-zinc-400 whitespace-nowrap tabular-nums"
                     >
-                        [{filteredProducts.length} поз.]
+                        {filteredProducts.length} поз.
                     </motion.span>
                 </div>
 
-                {/* Кастомная сортировка */}
+                {/* Сортировка */}
                 <SortDropdown value={sortBy} onChange={setSortBy} />
             </div>
 
-            {/* Кнопка фильтров — мобилка */}
+            {/* Кнопка фильтров — мобилка, та же высота h-12 */}
             <motion.button
                 whileTap={{ scale: 0.93 }}
                 transition={springSmooth}
                 onClick={onOpen}
-                className={`lg:hidden relative shrink-0 bg-[#111111] text-white p-3.5 rounded-2xl shadow-sm`}
+                className="lg:hidden relative shrink-0 w-12 h-12 bg-[#111111] text-white rounded-2xl shadow-sm
+                           flex items-center justify-center"
                 aria-label="Открыть фильтры"
             >
                 <Sliders size={16} />
@@ -106,11 +129,11 @@ const SortDropdown = ({ value, onChange }: {
     const current = SORT_OPTIONS.find(o => o.value === value) ?? SORT_OPTIONS[0];
 
     return (
-        <div ref={ref} className="hidden lg:block relative shrink-0 border-l border-black/5">
+        <div ref={ref} className="hidden lg:flex relative shrink-0 border-l border-black/5">
             <button
                 onClick={() => setOpen(prev => !prev)}
-                className="flex items-center gap-2 px-4 py-3.5 text-[10px] font-bold uppercase tracking-wider
-                           text-zinc-700 hover:text-black transition-colors whitespace-nowrap"
+                className="h-full flex items-center gap-2 px-5 text-[11px] font-semibold
+                   text-zinc-700 hover:text-black hover:bg-black/[0.03] transition-colors whitespace-nowrap"
             >
                 {current.label}
                 <motion.span animate={{ rotate: open ? 180 : 0 }} transition={springSmooth}>
