@@ -90,8 +90,8 @@ export const Glass = ({
             style={{
                 backdropFilter: supportsRefraction && mapUrl
                     ? `url(#${id}) blur(1.5px) saturate(1.5)`
-                    : `blur(16px) saturate(1.6) url(#${id})`, // фолбэк: Safari/Firefox
-                WebkitBackdropFilter: `blur(16px) saturate(1.6) url(#${id})`,
+                    : 'blur(16px) saturate(1.6)', // фолбэк: Safari/Firefox
+                WebkitBackdropFilter: `blur(16px) saturate(1.6)`,
                 background: 'linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06))',
                 boxShadow: `
                     inset 0 1px 1px rgba(255,255,255,0.7),
