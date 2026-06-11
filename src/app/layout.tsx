@@ -42,6 +42,15 @@ export default function RootLayout({
       className={`${SNPro.variable} h-full antialiased`}
     >
       <Providers>
+        <div
+          style={{
+            position: 'fixed', top: 100, left: 20, zIndex: 99999,
+            width: 150, height: 80, borderRadius: 16,
+            background: 'rgba(255,255,255,0.2)',
+            WebkitBackdropFilter: 'blur(16px)',
+            backdropFilter: 'blur(16px)',
+          }}
+        />
         <Layout>
           {children}
         </Layout>
