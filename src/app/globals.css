@@ -71,3 +71,17 @@ body {
   background: #181818;
 }
 */
+
+header {
+  position: sticky;
+  top: 0;
+  padding-top: calc(env(safe-area-inset-top) + 10px);
+  z-index: 100;
+
+  /* Делаем фон шапки полупрозрачным */
+  background-color: rgba(255, 255, 255, 0.7);
+
+  /* Эффект матового стекла (работает в Safari и Chrome) */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
