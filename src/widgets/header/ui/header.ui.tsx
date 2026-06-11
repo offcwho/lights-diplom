@@ -136,7 +136,9 @@ export const MobileNavigationUi = () => {
         <nav className="md:hidden fixed bottom-3 inset-x-4 z-50" id="mobilenav">
             <AnimatePresence>
                 {pathname === "/cart" && (
-                    <CartTotals className="lg:hidden xs:block bottom-0 rounded-b-none border-b border-b-black/5 bg-white/30! backdrop-blur-xl!" />
+                    <div className="px-4">
+                        <CartTotals className="lg:hidden xs:block bottom-0 rounded-b-none border-b border-b-black/5 bg-white/30! backdrop-blur-xl!" />
+                    </div>
                 )}
             </AnimatePresence>
             <Glass
