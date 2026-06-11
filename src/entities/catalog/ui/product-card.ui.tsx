@@ -1,9 +1,9 @@
 import { ArrowRight, Heart, ShoppingBag } from "lucide-react";
 import { useState } from "react";
-import { useCatalog } from "../module/catalog.context";
+import { Product, useCatalog } from "../module/catalog.context";
 import { AnimatePresence, motion } from "framer-motion";
 
-export const ProductCardUi = ({ product }: { product: any[] }) => {
+export const ProductCardUi = ({ product }: { product: Product  }) => {
     const { favorites, toggleFavorite, addToCart } = useCatalog();
     const [isHovered, setIsHovered] = useState(false);
     const isFav = favorites.includes(product.id);

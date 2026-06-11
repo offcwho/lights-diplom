@@ -1,7 +1,7 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import { INITIAL_PRODUCTS } from "../module/catalog.data";
 
-type Product = {
+export type Product = {
     id: string | number;
     name: string;
     category: string;
@@ -31,7 +31,7 @@ type CatalogContextValue = {
     setShowMobileFilters: (v: boolean) => void;
     resetFilters: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     handleColorToggle: (v: string) => void;
-    countByCategory: (catId: string) => void;
+    countByCategory: (catId: string) => React.ReactNode;
 
 
     // результат
