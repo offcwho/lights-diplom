@@ -3,11 +3,14 @@
 import { createContext, useContext, useState } from "react";
 import { INITIAL_ITEMS } from "./cart.data";
 
+type CartItem = (typeof INITIAL_ITEMS)[number];
+
 type CartContextValue = {
     items: typeof INITIAL_ITEMS;
     setItems: (v: typeof INITIAL_ITEMS) => void;
     coupon: string;
     setCoupon: (v: string) => void;
+    addItem: (item: Omit<CartItem, "quantity">) => void;
     updateQuantity: (id: string, delta: number) => void;
     removeItem: (id: string) => void;
     subtotal: number;
@@ -19,6 +22,19 @@ const CartContext = createContext<CartContextValue | undefined>(undefined);
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     const [items, setItems] = useState(INITIAL_ITEMS);
     const [coupon, setCoupon] = useState('');
+
+    // Добавить товар (или +1 к количеству, если уже есть)
+    const addItem = (item: Omit<CartItem, "quantity">) => {
+        setItems(prev => {
+            const existing = prev.find(i => i.id === item.id);
+            if (existing) {
+                return prev.map(i =>
+                    i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+                );
+            }
+            return [...prev, { ...item, quantity: 1 } as CartItem];
+        });
+    };
 
     const updateQuantity = (id: string, delta: number) => {
         setItems(prev => prev.map(item => {
@@ -43,6 +59,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         setItems,
         coupon,
         setCoupon,
+        addItem,
         updateQuantity,
         removeItem,
         subtotal,

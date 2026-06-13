@@ -24,8 +24,6 @@ export const HeaderUi = () => {
         }
     ]
 
-    console.log(isStuck)
-
     return (
         <header
             className={`fixed top-0 z-9999 w-full`}
