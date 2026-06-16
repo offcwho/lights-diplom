@@ -16,7 +16,7 @@ export default function Layout({
         const lock = async () => {
             try {
                 await document.documentElement.requestFullscreen();
-                await screen.orientation.lock('portrait');
+                await (screen.orientation as any).lock('portrait');
             } catch { }
         };
         window.addEventListener('pointerdown', lock, { once: true });
