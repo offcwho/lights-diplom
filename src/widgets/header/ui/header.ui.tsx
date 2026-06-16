@@ -139,11 +139,11 @@ export const MobileNavigationUi = () => {
     console.log(`user: ${user}`)
 
     const links = [
-        { name: "Catalog", link: "/catalog", icon: LayoutGrid, auth: null },
-        { name: "Favourites", link: "/favourites", icon: Heart, auth: true },
-        { name: "Cart", link: "/cart", icon: ShoppingCart, auth: true },
-        { name: "Profile", link: "/profile", icon: User, auth: true },
-        { name: "SignIn", link: "/sign-in", icon: User, auth: false }
+        { name: "Каталог", link: "/catalog", icon: LayoutGrid, auth: null },
+        { name: "Избранное", link: "/favourites", icon: Heart, auth: true },
+        { name: "Корзина", link: "/cart", icon: ShoppingCart, auth: true },
+        { name: "Профиль", link: "/profile", icon: User, auth: true },
+        { name: "Войти", link: "/sign-in", icon: User, auth: false }
     ];
 
     const showTotalsAttached = pathname === "/cart" && total > 0;
