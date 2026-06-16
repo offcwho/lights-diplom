@@ -5,14 +5,11 @@ import { CartHeader, CartList, CartTotals } from ".."
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
 import { useEffect } from "react";
 import { PageItem, PageStagger } from "@/components/Animations";
-import { useCart } from "../module/cart.context";
 
 export const CartUi = () => {
     const { mobileNavHeight } = useHeaderHeight();
-    const { setItems } = useCart();
 
     useEffect(() => {
-        const mainContent = document.getElementById('main-content');
         const section = document.querySelector('section');
         if (section) {
             section.style.paddingBottom = '0';
