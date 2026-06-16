@@ -53,7 +53,7 @@ export default function FavouritesPage() {
         items
             .filter((i) => selected.has(i.id))
             .forEach((i) => {
-                addItem(i);     // подгони под свою сигнатуру addItem
+                addItem(i.id);     // подгони под свою сигнатуру addItem
                 removeItem(i.id);
             });
         setSelected(new Set());
