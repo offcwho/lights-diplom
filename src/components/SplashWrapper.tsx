@@ -5,25 +5,48 @@ import { useState, useEffect } from 'react';
 import SplashScreen from './SplashScreen';
 
 export default function SplashWrapper({ children }: { children: React.ReactNode }) {
-    const [isLoading, setIsLoading] = useState(true);
+    const [isVisible, setIsVisible] = useState(true);
+    const [isFading, setIsFading] = useState(false);
 
     useEffect(() => {
         const isAppLoaded = sessionStorage.getItem('luxf_light_loaded');
 
         if (isAppLoaded) {
-            setIsLoading(false);
+            // Если это повторный переход — никакого сплэша, показываем сайт сразу
+            setIsVisible(false);
         } else {
-            const timer = setTimeout(() => {
+            // 1. Даем нашей SVG-вспышке полностью отыграть (2 секунды)
+            const fadeTimer = setTimeout(() => {
+                setIsFading(true); // Включаем fade-out эффект (opacity: 0)
                 sessionStorage.setItem('luxf_light_loaded', 'true');
-                setIsLoading(false);
-            }, 2200);
+            }, 2000);
 
-            return () => clearTimeout(timer);
+            // 2. Ждем еще 500мс, пока завершится анимация растворения, и полностью удаляем сплэш
+            const unmountTimer = setTimeout(() => {
+                setIsVisible(false);
+            }, 2500); // 2000мс заставка + 500мс плавный переход
+
+            return () => {
+                clearTimeout(fadeTimer);
+                clearTimeout(unmountTimer);
+            };
         }
     }, []);
 
-    if (isLoading) {
-        return <SplashScreen />;
+    if (!isVisible) {
+        return <>{children}</>;
     }
-    return <>{children}</>;
+
+    return (
+        <>
+            <div
+                className={`fixed inset-0 z-99999 bg-white flex items-center justify-center transition-opacity duration-500 ease-in-out ${isFading ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            >
+                <SplashScreen />
+            </div>
+            <div className="w-full h-full">
+                {children}
+            </div>
+        </>
+    );
 }
