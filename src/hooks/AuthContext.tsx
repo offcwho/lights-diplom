@@ -12,6 +12,7 @@ interface AuthContextValue {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string,) => Promise<void>;
+  refreshUser: () => void;
   logout: () => void;
 }
 
@@ -36,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     authApi
       .me()
-      .then((me) => setUser({ id: me.id, email: me.email, name: me.name, role: me.role }))
+      .then((me) => setUser({ id: me.id, email: me.email, name: me.name, role: me.role, address: me.address, avatarUrl: me.avatarUrl, phone: me.phone }))
       .catch((e) => {
         // токен сбрасываем ТОЛЬКО если он реально невалиден (401),
         // сетевые/временные ошибки сессию не убивают
@@ -45,6 +46,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const refreshUser = async () => {
+    try {
+      // Проверяем, есть ли вообще токен в localStorage перед запросом
+      if (authApi.isAuthenticated()) {
+        const freshUserData = await authApi.me(); // Твой метод '/auth/me'
+        setUser(freshUserData); // Обновляем глобальный стейт
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('Не удалось обновить данные пользователя:', error);
+      setUser(null);
+    }
+  };
 
   const login = async (email: string, password: string) => {
     const res = await authApi.login({ email, password });
@@ -61,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
