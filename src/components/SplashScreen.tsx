@@ -2,7 +2,7 @@
 'use client';
 
 import Image from "next/image";
-import icon from "../../public/animated-icon.svg";
+import icon from "../../public/icons/animated-icon.svg";
 
 export default function SplashScreen() {
     return (
