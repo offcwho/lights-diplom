@@ -41,6 +41,9 @@ export default function SplashWrapper({ children }: { children: React.ReactNode 
             >
                 <SplashScreen />
             </div>
+            <div className="w-full h-full opacity-0">
+                {children}
+            </div>
         </>
     );
 }
