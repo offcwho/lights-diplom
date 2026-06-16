@@ -5,24 +5,12 @@ import { Header } from "@/widgets/header";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
 import SplashWrapper from "./SplashWrapper";
 import { MobileNavigation } from "@/widgets/mobile-navigation";
-import { useEffect } from "react";
 
 export default function Layout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    useEffect(() => {
-        const lock = async () => {
-            try {
-                await document.documentElement.requestFullscreen();
-                await (screen.orientation as any).lock('portrait');
-            } catch { }
-        };
-        window.addEventListener('pointerdown', lock, { once: true });
-        return () => window.removeEventListener('pointerdown', lock);
-    }, []);
-
     const { mobileNavHeight, headerHeight } = useHeaderHeight();
 
     const calculatePadding = mobileNavHeight + 20 + 'px'
