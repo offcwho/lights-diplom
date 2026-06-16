@@ -9,12 +9,14 @@ import { PageItem, PageStagger } from "@/components/Animations";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
 import { useSheetDrag } from "@/hooks/useSheetDrag";
 
-export const CatalogFiltersUi = ({ className, style, onClose, isOpen = false }: { className?: string; style?: React.CSSProperties; onClose: () => void; isOpen?: boolean }) => {
+export const CatalogFiltersUi = ({ className, style }: { className?: string; style?: React.CSSProperties; onClose: () => void; isOpen?: boolean }) => {
     const {
         selectedCategory,
         selectedColors,
         maxPrice,
         resetFilters,
+        setIsOpenFilters,
+        isOpenFilters
     } = useCatalog();
 
     const isFiltered = selectedCategory !== "all" || selectedColors.length > 0 || maxPrice < 1500;
@@ -22,9 +24,9 @@ export const CatalogFiltersUi = ({ className, style, onClose, isOpen = false }: 
 
     // Подключаем наш обновленный хук умного трекинга скролла
     const { rootRef, transformY, paddingBottom } = useSheetDrag({
-        isOpen,
+        isOpen: isOpenFilters,
         setIsOpen: (openState) => {
-            if (!openState) onClose();
+            if (!openState) setIsOpenFilters(false);
         },
         variant: 'dismiss',
         maxPullUp: -60
@@ -54,7 +56,7 @@ export const CatalogFiltersUi = ({ className, style, onClose, isOpen = false }: 
                             </motion.button>
                         )}
                     </AnimatePresence>
-                    
+
                     {/* debug
                      <button
                         className="lg:hidden block"
@@ -107,7 +109,7 @@ export const CatalogFiltersUi = ({ className, style, onClose, isOpen = false }: 
                         transition={{ repeat: 2, duration: 0.9, delay: 0.5, ease: 'easeInOut' }}
                     />
                 </div>
-                
+
                 {/* Единый главный скролл-контейнер на мобилке */}
                 <div className="overflow-y-auto max-h-[75vh] pb-6">
                     {filtersContent}

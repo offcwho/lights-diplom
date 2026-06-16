@@ -27,7 +27,7 @@ export const CatalogToolbarUi = ({ onOpen, className }: { onOpen?: () => void; c
         (maxPrice < 1500 ? 1 : 0);
 
     return (
-        <div className={`flex items-stretch gap-2 sm:gap-3 ${className ?? ''}`}>
+        <div className={`items-stretch gap-2 sm:gap-3 hidden md:flex ${className ?? ''}`}>
             {/* ЕДИНАЯ КАПСУЛА — фиксированная высота h-12 на всё */}
             <div className="flex-1 min-w-0 h-12 flex items-stretch bg-white border border-black/10 rounded-2xl
                             shadow-[0_4px_20px_rgba(0,0,0,0.03)] overflow-hidden

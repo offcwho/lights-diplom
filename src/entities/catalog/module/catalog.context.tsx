@@ -1,3 +1,5 @@
+'use client'
+
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { productsApi } from "@/lib/api";
 import type { Product as ApiProduct } from "@/lib/types";
@@ -47,6 +49,10 @@ type CatalogContextValue = {
     handleColorToggle: (v: string) => void;
     countByCategory: (categoryId: string) => React.ReactNode;
 
+    isOpenFilters: boolean;
+    setIsOpenFilters: (open: boolean) => void;
+    openFilters: (open: boolean) => void;
+
     loading: boolean;
     filteredProducts: Product[];
 
@@ -72,6 +78,7 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
 
     const [favorites, setFavorites] = useState<(string | number)[]>([]);
     const [cart, setCart] = useState<Product[]>([]);
+    const [isOpenFilters, setIsOpenFilters] = useState(false);
 
     useEffect(() => {
         productsApi
@@ -86,6 +93,10 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
             prev.includes(id) ? prev.filter((product) => product !== id) : [...prev, id]
         );
     };
+
+    const openFilters = (open: boolean) => {
+        setIsOpenFilters(open);
+    }
 
     const addToCart = (item: Product) => {
         setCart((prev) => [...prev, item]);
@@ -151,6 +162,9 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
         resetFilters,
         handleColorToggle,
         countByCategory,
+        isOpenFilters,
+        setIsOpenFilters,
+        openFilters,
     };
 
     return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>;
