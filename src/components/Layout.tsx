@@ -1,9 +1,10 @@
 'use client'
 
 import { Footer } from "@/widgets/footer";
-import { Header, MobileNavigation } from "@/widgets/header";
+import { Header } from "@/widgets/header";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
 import SplashWrapper from "./SplashWrapper";
+import { MobileNavigation } from "@/widgets/mobile-navigation";
 
 export default function Layout({
     children,
