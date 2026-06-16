@@ -100,6 +100,7 @@ export interface User {
     name: string;
     phone?: string | null;
     address?: string | null;
+    avatarUrl: string | null;
     role: UserRole;
     createdAt: string;
     updatedAt: string;
@@ -107,5 +108,5 @@ export interface User {
 
 export interface AuthResponse {
     accessToken: string;
-    user: Pick<User, 'id' | 'email' | 'name' | 'role'>;
+    user: Pick<User, 'id' | 'email' | 'name' | 'role' | 'address' | 'avatarUrl' | 'phone'>;
 }

@@ -154,7 +154,7 @@ export const usersApi = {
         const { data } = await api.get<User>('/users/me');
         return data;
     },
-    async updateProfile(dto: { name?: string; phone?: string; address?: string }) {
+    async updateProfile(dto: { name?: string; phone?: string; address?: string, avatarUrl?: string }) {
         const { data } = await api.patch<User>('/users/me', dto);
         return data;
     },
