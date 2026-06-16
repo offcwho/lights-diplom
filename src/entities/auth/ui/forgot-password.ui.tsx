@@ -16,7 +16,7 @@ export const ForgotPasswordPage = () => {
     }
 
     return (
-        <AuthShell switchNode={<SwitchLink text="Вспомнили?" label="Вход" href="/login" />}>
+        <AuthShell switchNode={<SwitchLink text="Вспомнили?" label="Вход" href="/sign-in" />}>
             <Eyebrow>Восстановление</Eyebrow>
             <h1 className="mt-3 text-2xl font-black uppercase tracking-tight text-zinc-900">
                 Сброс пароля

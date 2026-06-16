@@ -23,7 +23,7 @@ export const SignUpPage = () => {
     }
 
     return (
-        <AuthShell switchNode={<SwitchLink text="Уже с нами?" label="Вход" href="/login" />}>
+        <AuthShell switchNode={<SwitchLink text="Уже с нами?" label="Вход" href="/sign-in" />}>
             <Eyebrow>Регистрация</Eyebrow>
             <h1 className="mt-3 text-2xl font-black uppercase tracking-tight text-zinc-900">
                 Создать аккаунт
