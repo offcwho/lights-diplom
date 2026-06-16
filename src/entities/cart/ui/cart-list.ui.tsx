@@ -114,17 +114,17 @@ export const CartListUi = () => {
                                     </button>
 
                                     <div className="w-20 h-24 bg-zinc-100 rounded-xl overflow-hidden shadow-sm flex-shrink-0">
-                                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                        <img src={item.img} alt={item.name} className="w-full h-full object-cover" />
                                     </div>
                                     <div className="space-y-1">
                                         <span className="text-[9px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">
-                                            {item.category}
+                                            {item.cartItemId}
                                         </span>
                                         <h3 className="text-sm font-black uppercase tracking-tight text-zinc-900">
                                             {item.name}
                                         </h3>
                                         <p className="text-xs text-zinc-500 font-medium">
-                                            {item.specs}
+                                            {item.price}
                                         </p>
                                     </div>
                                 </div>

@@ -1,82 +1,127 @@
 'use client'
 
-import { createContext, useContext, useState } from "react";
-import { INITIAL_ITEMS } from "./cart.data";
+import { createContext, useContext, useEffect, useState } from "react";
+import { cartApi, authApi } from "@/lib/api";
+import type { Cart as ApiCart } from "@/lib/types";
+import { useAuth } from "@/hooks/AuthContext";
 
-type CartItem = (typeof INITIAL_ITEMS)[number];
+export type CartItem = {
+    id: string;          // id товара (совпадает с product.id из каталога)
+    cartItemId: string;  // id строки корзины на бэке — нужен для update/remove
+    name: string;
+    price: number;
+    img: string;
+    color: string;
+    quantity: number;
+};
+
+// ответ API -> твои items
+function toCartItems(cart: ApiCart): CartItem[] {
+    return cart.items.map((i) => ({
+        id: i.productId,
+        cartItemId: i.id,
+        name: i.product.name,
+        price: i.product.price,
+        img: i.product.imageUrl,
+        color: i.product.color ?? "",
+        quantity: i.quantity,
+    }));
+}
 
 type CartContextValue = {
-    items: typeof INITIAL_ITEMS;
-    setItems: (v: typeof INITIAL_ITEMS) => void;
+    items: CartItem[];
     coupon: string;
     setCoupon: (v: string) => void;
-    addItem: (item: Omit<CartItem, "quantity">) => void;
-    updateQuantity: (id: string, delta: number) => void;
-    removeItem: (id: string) => void;
+    addItem: (id: string | number) => Promise<void>;
+    updateQuantity: (id: string, delta: number) => Promise<void>;
+    removeItem: (id: string) => Promise<void>;
+    clear: () => Promise<void>;
+    refresh: () => Promise<void>;
+    loading: boolean;
     subtotal: number;
     total: number;
-}
+};
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-    const [items, setItems] = useState(INITIAL_ITEMS);
+    const [items, setItems] = useState<CartItem[]>([]);
     const [coupon, setCoupon] = useState('');
+    const [loading, setLoading] = useState(true);
+    const { user } = useAuth();
 
-    // Добавить товар (или +1 к количеству, если уже есть)
-    const addItem = (item: Omit<CartItem, "quantity">) => {
-        setItems(prev => {
-            const existing = prev.find(i => i.id === item.id);
-            if (existing) {
-                return prev.map(i =>
-                    i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-                );
-            }
-            return [...prev, { ...item, quantity: 1 } as CartItem];
-        });
+    const refresh = async () => {
+        if (!authApi.isAuthenticated()) { setItems([]); return; }
+        try {
+            const cart = await cartApi.get();
+            setItems(toCartItems(cart));
+        } catch { /* 401 и т.п. — оставляем пустую корзину */ }
     };
 
-    const updateQuantity = (id: string, delta: number) => {
-        setItems(prev => prev.map(item => {
-            if (item.id === id) {
-                const newQty = item.quantity + delta;
-                return newQty > 0 ? { ...item, quantity: newQty } : item;
-            }
-            return item;
-        }));
+    useEffect(() => {
+        refresh().finally(() => setLoading(false));
+    }, [user]);
+
+    // Добавить товар (бэк сам делает +1, если уже есть)
+    const addItem = async (id: string | number) => {
+        if (!authApi.isAuthenticated()) return;
+        try {
+            const cart = await cartApi.add(String(id), 1);
+            setItems(toCartItems(cart));
+        } catch { /* ignore */ }
     };
 
-    const removeItem = (id: string) => {
-        setItems(prev => prev.filter(item => item.id !== id));
+    // delta (+1 / -1) переводим в абсолютное количество для бэка
+    const updateQuantity = async (id: string, delta: number) => {
+        const current = items.find((i) => i.id === id);
+        if (!current) return;
+        const newQty = current.quantity + delta;
+        if (newQty < 1) { await removeItem(id); return; }
+        try {
+            const cart = await cartApi.updateItem(current.cartItemId, newQty);
+            setItems(toCartItems(cart));
+        } catch { /* ignore */ }
     };
 
-    const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    const shipping = subtotal > 0 ? 0 : 0;
+    const removeItem = async (id: string) => {
+        const current = items.find((i) => i.id === id);
+        if (!current) return;
+        try {
+            const cart = await cartApi.removeItem(current.cartItemId);
+            setItems(toCartItems(cart));
+        } catch { /* ignore */ }
+    };
+
+    const clear = async () => {
+        try {
+            const cart = await cartApi.clear();
+            setItems(toCartItems(cart));
+        } catch { /* ignore */ }
+    };
+
+    const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const shipping = 0;
     const total = subtotal + shipping;
 
     const value: CartContextValue = {
         items,
-        setItems,
         coupon,
         setCoupon,
         addItem,
         updateQuantity,
         removeItem,
+        clear,
+        refresh,
+        loading,
         subtotal,
-        total
+        total,
     };
 
-    return (
-        <CartContext.Provider value={value}>
-            {children}
-        </CartContext.Provider>
-    );
-}
+    return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+};
 
 export const useCart = () => {
     const context = useContext(CartContext);
-    if (!context) {
-        throw new Error('useCart must be used within a CartProvider');
-    }
+    if (!context) throw new Error('useCart must be used within a CartProvider');
     return context;
-}
+};

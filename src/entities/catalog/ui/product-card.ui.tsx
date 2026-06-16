@@ -2,9 +2,11 @@ import { ArrowRight, Heart, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { Product, useCatalog } from "../module/catalog.context";
 import { AnimatePresence, motion } from "framer-motion";
+import { useCart } from "@/entities/cart/module/cart.context";
 
-export const ProductCardUi = ({ product }: { product: Product  }) => {
-    const { favorites, toggleFavorite, addToCart } = useCatalog();
+export const ProductCardUi = ({ product }: { product: Product }) => {
+    const { favorites, toggleFavorite } = useCatalog();
+    const { addItem, items } = useCart();
     const [isHovered, setIsHovered] = useState(false);
     const isFav = favorites.includes(product.id);
 
@@ -48,7 +50,7 @@ export const ProductCardUi = ({ product }: { product: Product  }) => {
                         <p className="text-[10px] text-zinc-400 font-bold uppercase mt-0.5">From ${product.price}</p>
                     </div>
                     <button
-                        onClick={() => addToCart(product)}
+                        onClick={() => addItem(product.id)}
                         aria-label="В корзину"
                         className="shrink-0 w-8 h-8 rounded-full bg-[#F4F3F0] hover:bg-black hover:text-white
                                    flex items-center justify-center transition-colors"
@@ -105,13 +107,15 @@ export const ProductCardUi = ({ product }: { product: Product  }) => {
 
                         <motion.button
                             whileTap={{ scale: 0.98 }}
-                            onClick={() => addToCart(product)}
+                            onClick={() => addItem(product.id)}
                             className="w-full bg-[#111111] text-white py-3.5 rounded-2xl text-xs font-bold uppercase
                                        tracking-widest hover:bg-zinc-800 transition-colors
                                        flex items-center justify-center gap-2"
                         >
                             <ShoppingBag size={14} />
-                            <span>Добавить в корзину</span>
+                            <span>
+                                {items.length > 0 ? items.map((item) => item.id === product.id ? `Уже в корзине ${item.quantity}` : 'Добавить в корзину') : 'Добавить в корзину'}
+                            </span>
                         </motion.button>
                     </motion.div>
                 )}

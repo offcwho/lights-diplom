@@ -1,11 +1,13 @@
 'use client'
 
 import { Toggle } from "@/components/Toggle";
+import { useAuth } from "@/hooks/AuthContext";
 import { useState } from "react";
 
 export const ProfileSettingsTab = () => {
     const [notifyOrders, setNotifyOrders] = useState(true);
     const [notifyPromo, setNotifyPromo] = useState(false);
+    const { user } = useAuth();
 
     return (
         <>
@@ -23,7 +25,8 @@ export const ProfileSettingsTab = () => {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block">Имя</span>
                         <input
                             type="text"
-                            defaultValue="Александр Б."
+                            placeholder={user?.name}
+                            defaultValue={user?.name}
                             className="w-full bg-white border border-black/10 rounded-xl px-4 py-2.5 text-xs font-medium outline-none focus:border-black/30 transition-colors"
                         />
                     </label>
@@ -31,7 +34,8 @@ export const ProfileSettingsTab = () => {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block">Email</span>
                         <input
                             type="email"
-                            defaultValue="alex@luxf.design"
+                            placeholder={user?.email}
+                            defaultValue={user?.email}
                             className="w-full bg-white border border-black/10 rounded-xl px-4 py-2.5 text-xs font-medium outline-none focus:border-black/30 transition-colors"
                         />
                     </label>

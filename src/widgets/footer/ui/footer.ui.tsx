@@ -9,7 +9,7 @@ export const FooterUi = () => {
 
                 {/* Инфо */}
                 <div className="md:col-span-3 space-y-4">
-                    <h3 className="text-xl font-black tracking-tight">luxf.light</h3>
+                    <h3 className="text-xl font-black tracking-tight">Свет.Ру</h3>
                     <div className="flex space-x-3 text-zinc-700">
                         {/*
                         <Instagram size={18} className="hover:text-black cursor-pointer" />
@@ -66,7 +66,7 @@ export const FooterUi = () => {
             </div>
 
             <div className="max-w-7xl mx-auto px-6 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500">
-                <p>© 2026 luxf.light. All rights reserved.</p>
+                <p>© 2026 Свет.Ру. All rights reserved.</p>
                 <div className="flex space-x-6 mt-4 sm:mt-0">
                     <a href="#" className="hover:underline">Privacy Policy</a>
                     <a href="#" className="hover:underline">Terms of Service</a>
