@@ -61,6 +61,7 @@ type CatalogContextValue = {
     addToCart: (item: Product) => void;
     openFilters: (open: boolean) => void;
 
+    products: Product[] | undefined;
     categories: Category[] | undefined;
 };
 
@@ -137,7 +138,6 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
         setSearchQuery("");
         setSelectedCategory("all");
         setSelectedColors([]);
-        setMaxPrice(1500);
     };
 
     const countByCategory = (categoryId: string) =>
@@ -179,6 +179,7 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
     }, [products, searchQuery, selectedCategory, selectedColors, maxPrice, sortBy]);
 
     const value: CatalogContextValue = {
+        products,
         searchQuery, setSearchQuery,
         selectedCategory, setSelectedCategory,
         selectedMaterial, setSelectedMaterial,
