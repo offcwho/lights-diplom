@@ -88,7 +88,7 @@ export const HeaderUi = () => {
                     >
                         {user && (
                             <Link href={'/profile'} className="relative shrink-0 active:scale-95 transition-transform">
-                                <div className="w-11 h-11 rounded-2xl bg-linear-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-sm shadow-amber-500/30">
+                                <div className="w-11 h-11 rounded-2xl bg-linear-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-sm shadow-amber-500/30 overflow-hidden">
                                     {user.avatarUrl ? (
                                         <img
                                             src={user.avatarUrl}
