@@ -8,7 +8,17 @@ export const ProfileHeaderUi = () => {
 
     return (
         <div className="flex items-center gap-3 pb-4 mb-2 md:mb-4 border-b border-black/10">
-            <div className="w-10 h-10 shrink-0 bg-black text-white rounded-full flex items-center justify-center font-bold">A</div>
+            {user?.avatarUrl ? (
+                <div className="w-10 h-10 rounded-full overflow-hidden">
+                    <img
+                        src={user.avatarUrl}
+                        alt=""
+                        className="w-full h-full"
+                    />
+                </div>
+            ) : (
+                <div className="w-10 h-10 shrink-0 bg-black text-white rounded-full flex items-center justify-center font-bold">A</div>
+            )}
             <div className="min-w-0 flex-1">
                 <h3 className="text-sm font-bold truncate">{user?.name}</h3>
                 <p className="text-[10px] text-zinc-500 truncate">{user?.email}</p>
