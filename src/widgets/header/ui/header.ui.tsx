@@ -89,9 +89,16 @@ export const HeaderUi = () => {
                         {user && (
                             <Link href={'/profile'} className="relative shrink-0 active:scale-95 transition-transform">
                                 <div className="w-11 h-11 rounded-2xl bg-linear-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-sm shadow-amber-500/30">
-                                    <User size={20} />
+                                    {user.avatarUrl ? (
+                                        <Image
+                                            src={user.avatarUrl}
+                                            alt={`Аватар пользователя: ${user.name}`}
+                                        />
+                                    ) : (
+                                        <User size={20} />
+                                    )}
                                 </div>
-                                {user && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-amber-500 ring-2 ring-white" />}
+                                {/* {user && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-amber-500 ring-2 ring-white" />} */}
                             </Link>
                         )}
 
