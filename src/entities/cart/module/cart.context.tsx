@@ -10,7 +10,7 @@ export type CartItem = {
     cartItemId: string;  // id строки корзины на бэке — нужен для update/remove
     name: string;
     price: number;
-    img: string;
+    images: string;
     color: string;
     quantity: number;
 };
@@ -22,7 +22,7 @@ function toCartItems(cart: ApiCart): CartItem[] {
         cartItemId: i.id,
         name: i.product.name,
         price: i.product.price,
-        img: i.product.imageUrl,
+        images: i.product.images?.[0],
         color: i.product.color ?? "",
         quantity: i.quantity,
     }));
