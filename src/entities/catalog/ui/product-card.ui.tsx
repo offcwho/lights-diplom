@@ -1,15 +1,17 @@
-import { ArrowRight, Heart, ShoppingBag } from "lucide-react";
+import { ArrowRight, Heart, Plus, ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { Product, useCatalog } from "../module/catalog.context";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCart } from "@/entities/cart/module/cart.context";
 import Link from "next/link";
+import { useFavourites } from "@/entities/favorites";
 
 export const ProductCardUi = ({ product }: { product: Product }) => {
     const { favorites, toggleFavorite } = useCatalog();
     const { addItem, items } = useCart();
     const [isHovered, setIsHovered] = useState(false);
-    const isFav = favorites.includes(product.id);
+    const { toggleItem, favouriteItems } = useFavourites();
+    const isFav = favouriteItems.some(item => item.id === product.id);
 
     const cartItem = items.find((item) => item.id === product.id);
     return (
@@ -36,7 +38,7 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                     {/* Избранное — на базовой карточке, для мобилки */}
                     <motion.button
                         whileTap={{ scale: 0.85 }}
-                        onClick={() => toggleFavorite(product.id)}
+                        onClick={() => toggleItem(String(product.id))}
                         aria-label="В избранное"
                         className="lg:hidden absolute top-3 right-3 w-8 h-8 rounded-full bg-white
                                    flex items-center justify-center shadow-sm"
@@ -46,19 +48,25 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                     </motion.button>
                 </div>
 
-                <div className="pt-4 pb-1 border-t border-black/5 mt-4 flex items-center justify-between">
+                <div className="pt-4 pb-1 border-t border-black/5 mt-4 flex items-center justify-between gap-2">
                     <div className="min-w-0">
                         <h3 className="text-xs font-black tracking-tight uppercase truncate">{product.name}</h3>
-                        <p className="text-[10px] text-zinc-400 font-bold uppercase mt-0.5">From ${product.price}</p>
+                        <p className={`text-[10px] font-bold uppercase mt-0.5 ${cartItem ? 'text-green-600' : 'text-zinc-400'}`}>
+                            {cartItem ? `В корзине · ${cartItem.quantity}` : `From $${product.price}`}
+                        </p>
                     </div>
-                    <button
+
+                    <motion.button
+                        whileTap={{ scale: 0.85 }}
                         onClick={() => addItem(product.id)}
-                        aria-label="В корзину"
-                        className="shrink-0 w-8 h-8 rounded-full bg-[#F4F3F0] hover:bg-black hover:text-white
-                                   flex items-center justify-center transition-colors"
+                        aria-label={cartItem ? `В корзине: ${cartItem.quantity} шт. Добавить ещё` : 'В корзину'}
+                        className={`relative shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors ${cartItem ? 'bg-black text-white' : 'bg-[#F4F3F0] hover:bg-black hover:text-white'
+                            }`}
                     >
-                        <ArrowRight size={14} />
-                    </button>
+                        {cartItem
+                            ? <span className="text-[11px] font-bold leading-none"><Plus size={14} /></span>
+                            : <ArrowRight size={14} />}
+                    </motion.button>
                 </div>
             </div>
 

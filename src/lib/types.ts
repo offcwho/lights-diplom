@@ -46,6 +46,12 @@ export interface Paginated<T> {
     pages: number;
 }
 
+export interface FavouriteItem {
+    id: string;
+    user: User;
+    product: Product;
+}
+
 export interface ProductQuery {
     category?: string;
     color?: ProductColor;

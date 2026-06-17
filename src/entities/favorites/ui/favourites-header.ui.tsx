@@ -1,15 +1,15 @@
 'use client'
 
-import { ArrowLeft } from "lucide-react";
-import { useCart } from "../module/cart.context";
+import { ArrowLeft } from "lucide-react"
+import { useFavourites } from "../module/favorites.context"
 import { useRouter } from "next/navigation";
 
-export const CartHeaderUi = () => {
-    const { items } = useCart();
+export const FavouritesHeaderUi = () => {
+    const { favouriteItems } = useFavourites();
     const router = useRouter();
 
     return (
-        <div className="flex items-center justify-between w-full mb-6">
+        <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-4">
                 <button
                     onClick={() => router.back()}
@@ -18,9 +18,9 @@ export const CartHeaderUi = () => {
                     <ArrowLeft size={18} strokeWidth={2.5} />
                 </button>
                 <div>
-                    <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900">Корзина</h1>
+                    <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900">Избранное</h1>
                     <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mt-0.5">
-                        {items.length} предметов всего
+                        {favouriteItems.length} предметов всего
                     </p>
                 </div>
             </div>
