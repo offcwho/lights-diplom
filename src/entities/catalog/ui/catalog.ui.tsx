@@ -14,8 +14,8 @@ import Link from "next/link"
 export const CatalogUi = () => {
     const { headerHeight } = useHeaderHeight();
     const [isOpenFilters, setIsOpenFilters] = useState(false);
-    const { filteredProducts } = useCatalog();
-
+    const { filteredProducts, resetFilters } = useCatalog();
+    
     return (
         <Container className="px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
             <PageStagger className="space-y-10 lg:space-y-4">
@@ -60,7 +60,26 @@ export const CatalogUi = () => {
                             <FlashSale />
                             <SortChips />
                             <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-7 lg:gap-x-6 lg:gap-y-10">
-                                {filteredProducts.map(product => <ProductCard key={product.id} product={product} />)}
+
+                                {filteredProducts.length === 0 ? (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 12 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="col-span-full py-20 text-center space-y-3"
+                                    >
+                                        <p className="text-sm font-bold uppercase tracking-wider text-zinc-400">
+                                            Ничего не найдено
+                                        </p>
+                                        <button
+                                            onClick={resetFilters}
+                                            className="text-xs font-black uppercase tracking-widest border-b-2 border-black pb-1 hover:text-zinc-600 hover:border-zinc-600 transition-colors"
+                                        >
+                                            Сбросить фильтры
+                                        </button>
+                                    </motion.div>
+                                ) : (
+                                    filteredProducts.map(product => <ProductCard key={product.id} product={product} />)
+                                )}
                             </div>
                         </div>
                     </div>
