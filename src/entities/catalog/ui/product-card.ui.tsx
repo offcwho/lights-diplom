@@ -20,7 +20,7 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
         >
             {/* БАЗОВАЯ КАРТОЧКА */}
             <div className="bg-white p-4 rounded-[28px] border border-black/5 shadow-[0_4px_20px_rgba(0,0,0,0.02)]
-                            flex flex-col justify-between aspect-[3/4]">
+                            flex flex-col justify-between aspect-3/4">
                 <div className="w-full aspect-square rounded-[20px] overflow-hidden bg-[#F4F3F0] relative
                                 flex items-center justify-center p-6">
                     <img
@@ -30,7 +30,7 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                     />
                     <span className="absolute top-3 left-3 text-[9px] font-black tracking-widest bg-[#F4F3F0]
                                      border border-black/5 px-2.5 py-0.5 rounded-full uppercase text-zinc-500">
-                        {product.category}
+                        {product.category.name}
                     </span>
 
                     {/* Избранное — на базовой карточке, для мобилки */}
@@ -70,17 +70,17 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.96, y: 10 }}
                         transition={{ type: "spring", stiffness: 350, damping: 26 }}
-                        className="hidden lg:flex absolute -inset-4 p-4 bg-white rounded-[32px]
+                        className="hidden lg:flex absolute -inset-4 p-4 bg-white rounded-4xl
                                    shadow-[0_20px_50px_rgba(0,0,0,0.12)] z-50 flex-col justify-between
                                    border border-black/5 cursor-default"
                     >
-                        <div className="w-full aspect-[16/11] rounded-[22px] overflow-hidden bg-zinc-900 relative">
+                        <div className="w-full aspect-16/11 rounded-[22px] overflow-hidden bg-zinc-900 relative">
                             <img
                                 src={product.images[0]}
                                 alt=""
                                 className="w-full h-full object-cover contrast-[1.05]"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                            <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
                             <motion.button
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => toggleFavorite(product.id)}

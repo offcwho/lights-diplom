@@ -32,7 +32,7 @@ export const CatalogListUi = ({ className }: { className?: string }) => {
                                         className="max-h-full max-w-full object-contain mix-blend-multiply"
                                     />
                                     <span className="absolute top-3 left-3 text-[9px] font-black tracking-widest bg-[#F4F3F0] border border-black/5 px-2.5 py-0.5 rounded-full uppercase text-zinc-500">
-                                        {product.category}
+                                        {product.category.name}
                                     </span>
                                 </div>
 

@@ -1,13 +1,13 @@
 'use client'
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { productsApi } from "@/lib/api";
-import type { Product as ApiProduct } from "@/lib/types";
+import { categoriesApi, productsApi } from "@/lib/api";
+import type { Product as ApiProduct, Category } from "@/lib/types";
 
 export type Product = {
     id: string | number;
     name: string;
-    category: string;
+    category: Category;
     price: string | number;
     color: string;
     images: string[];
@@ -20,7 +20,7 @@ function toProduct(product: ApiProduct): Product {
     return {
         id: product.id,
         name: product.name,
-        category: product.category?.name ?? "",
+        category: product.category ?? "",
         price: product.price,
         color: product.color ?? "",
         images: product.images,
@@ -60,6 +60,8 @@ type CatalogContextValue = {
     cart: Product[];
     addToCart: (item: Product) => void;
     openFilters: (open: boolean) => void;
+
+    categories: Category[] | undefined;
 };
 
 const CatalogContext = createContext<CatalogContextValue | null>(null);
@@ -79,6 +81,35 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
     const [favorites, setFavorites] = useState<(string | number)[]>([]);
     const [cart, setCart] = useState<Product[]>([]);
     const [isOpenFilters, setIsOpenFilters] = useState(false);
+    const [categories, setCategories] = useState<Category[]>();
+
+    useEffect(() => {
+        setLoading(true);
+        categoriesApi.list()
+            .then((data) => {
+                // 1. Создаем копию массива, чтобы не мутировать исходные данные
+                const shuffled = [...data];
+
+                // 2. Перемешиваем массив
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+
+                // 3. Берем первые 3 категории из перемешанного списка
+                const randomThree = shuffled.slice(0, 3);
+
+                // 4. Всегда добавляем "all" в самое начало
+                const finalCategories = [
+                    { id: 'all', name: 'Все товары', slug: '' }, // Иконку подвяжем в самом UI
+                    ...randomThree
+                ];
+
+                setCategories(finalCategories);
+            })
+            .catch(() => setCategories([{ id: 'all', name: 'Все товары', slug: '' }]))
+            .finally(() => setLoading(false));
+    }, []);
 
     useEffect(() => {
         productsApi
@@ -112,7 +143,7 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
     const countByCategory = (categoryId: string) =>
         categoryId === "all"
             ? products.length
-            : products.filter((product) => product.category === categoryId).length;
+            : products.filter((product) => product.category.id === categoryId).length;
 
     const handleColorToggle = (colorId: string) => {
         setSelectedColors((prev) =>
@@ -126,20 +157,20 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
         const query = searchQuery.trim().toLowerCase();
         if (query) {
             result = result.filter(
-                (p) =>
-                    p.name.toLowerCase().includes(query) ||
-                    p.desc.toLowerCase().includes(query) ||
-                    p.material.toLowerCase().includes(query)
+                (product) =>
+                    product.name.toLowerCase().includes(query) ||
+                    product.desc.toLowerCase().includes(query) ||
+                    product.material.toLowerCase().includes(query)
             );
         }
 
         if (selectedCategory !== "all") {
-            result = result.filter((p) => p.category === selectedCategory);
+            result = result.filter((product) => product.category.id === selectedCategory);
         }
         if (selectedColors.length > 0) {
-            result = result.filter((p) => selectedColors.includes(p.color));
+            result = result.filter((product) => selectedColors.includes(product.color));
         }
-        result = result.filter((p) => Number(p.price) <= maxPrice);
+        result = result.filter((product) => Number(product.price) <= maxPrice);
 
         if (sortBy === "price-asc") result.sort((a, b) => Number(a.price) - Number(b.price));
         if (sortBy === "price-desc") result.sort((a, b) => Number(b.price) - Number(a.price));
@@ -165,6 +196,7 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
         isOpenFilters,
         setIsOpenFilters,
         openFilters,
+        categories,
     };
 
     return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>;
