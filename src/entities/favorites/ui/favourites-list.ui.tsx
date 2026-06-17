@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useFavourites } from "../module/favorites.context";
 import { springSmooth } from "@/lib/motion";
-import { Check, Heart, LayoutGrid, Plus } from "lucide-react";
+import { Check, Heart, HeartCrack, LayoutGrid, Plus } from "lucide-react";
 import { useCart } from "@/entities/cart/module/cart.context";
 
 export const FavouritesListUi = () => {
@@ -69,14 +69,14 @@ export const FavouritesListUi = () => {
                                     </div>
 
                                     {/* Низ карточки: на мобиле — столбик, на sm+ — в ряд */}
-                                    <div className="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-neutral-100 px-1 sm:px-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                    <div className="mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-neutral-100 px-1 sm:px-2 flex flex-col sm:items-left gap-3">
                                         <span className="text-lg sm:text-xl font-bold text-neutral-900 font-mono">
                                             ${product.price}
                                         </span>
 
                                         <button
                                             onClick={() => handleAddToCart(product.id)}
-                                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-5 py-3 sm:py-3.5 rounded-full text-[11px] uppercase tracking-widest font-extrabold bg-[#92C348] text-white hover:bg-[#82B13F] shadow-[0_8px_25px_-5px_rgba(146,195,72,0.45)] transition-all active:scale-95"
+                                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 sm:px-5 py-3 sm:py-3.5 rounded-full text-[11px] uppercase tracking-widest font-extrabold bg-neutral-950 text-white hover:bg-neutral-800 shadow-[0_8px_25px_-5px_rgba(146,195,72,0.45)] transition-all active:scale-95"
                                         >
                                             <Plus size={14} strokeWidth={3} className="shrink-0" />
                                             <span>В корзину</span>
@@ -95,7 +95,7 @@ export const FavouritesListUi = () => {
                         className="bg-white rounded-[36px] py-24 text-center flex flex-col items-center justify-center p-8 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.04)]"
                     >
                         <div className="w-16 h-16 bg-[#F4F3F8] text-neutral-300 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
-                            <Heart size={28} strokeWidth={1.5} />
+                            <HeartCrack size={28} strokeWidth={1.5} />
                         </div>
                         <h3 className="text-xl font-bold text-neutral-900 tracking-tight">В избранном пусто</h3>
                         <button className="mt-6 flex items-center gap-3 px-6 py-4 bg-neutral-950 text-white text-xs font-extrabold uppercase tracking-widest rounded-2xl shadow-lg">

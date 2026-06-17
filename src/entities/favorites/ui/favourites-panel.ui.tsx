@@ -17,7 +17,7 @@ export const FavouritesPanelUi = () => {
                 <div className="bg-white rounded-3xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_15px_35px_-10px_rgba(0,0,0,0.03)]">
 
                     {/* Чекбокс "Выбрать все" */}
-                    <div className="flex w-full justify-between">
+                    <div className="flex xs:w-full md:w-auto justify-between gap-6">
                         <button
                             onClick={toggleSelectAll}
                             className="flex items-center gap-3 py-2 hover:bg-neutral-50 rounded-xl transition-colors w-full sm:w-auto"
@@ -54,20 +54,20 @@ export const FavouritesPanelUi = () => {
                                 exit={{ opacity: 0, scale: 0.95, y: 5 }}
                                 className="flex items-center xs:flex-col md:flex-row gap-3 w-full sm:w-auto justify-end"
                             >
-                                <div className="flex w-full justify-between items-center">
-                                    <span className="text-xs font-mono font-bold text-neutral-400 mr-2 h-fit">
+                                <div className="flex w-full justify-between items-center gap-6">
+                                    <h4 className="text-xs font-mono font-bold text-neutral-400 mr-2 h-fit w-full">
                                         Выбрано: {selectedIds.length}
-                                    </span>
+                                    </h4>
 
                                     <button
                                         onClick={() => selectedIds.map((id) => {
                                             addItem(id)
                                             removeItem(id)
                                         })}
-                                        className="flex items-center gap-2 px-5 py-3 rounded-xl text-xs uppercase tracking-widest font-extrabold bg-[#92C348] text-white hover:bg-[#82B13F] shadow-[0_8px_20px_-4px_rgba(146,195,72,0.3)] transition-all active:scale-95"
+                                        className="flex items-center gap-2 px-5 py-3 rounded-xl text-xs uppercase tracking-widest font-extrabold bg-neutral-950 text-white hover:bg-neutral-900 shadow-[0_8px_20px_-4px_rgba(146,195,72,0.3)] transition-all active:scale-95"
                                     >
                                         <ShoppingBag size={14} className="stroke-[2.5]" />
-                                        <span>В корзину</span>
+                                        <span className="w-full">В корзину</span>
                                     </button>
 
                                     {/* Удалить выбранные */}

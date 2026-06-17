@@ -91,7 +91,7 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                             <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent" />
                             <motion.button
                                 whileTap={{ scale: 0.9 }}
-                                onClick={() => toggleFavorite(product.id)}
+                                onClick={() => toggleItem(String(product.id))}
                                 aria-label="В избранное"
                                 className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-md
                                            flex items-center justify-center shadow-sm hover:scale-105 transition-transform"
