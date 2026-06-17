@@ -9,6 +9,7 @@ import { PageItem, PageStagger } from "@/components/Animations"
 import { useEffect, useState } from "react"
 import { CatalogToolbarUi } from "./catalog-toolbar.ui"
 import { StuckSentinel, useStuck } from "@/hooks/useStack"
+import Link from "next/link"
 
 export const CatalogUi = () => {
     const { headerHeight } = useHeaderHeight();
@@ -19,8 +20,24 @@ export const CatalogUi = () => {
         <Container className="px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
             <PageStagger className="space-y-10 lg:space-y-4">
 
-                {/* ТУЛБАР — первый, прилипает при скролле */}
-                <PageItem>
+                <PageItem className="mb-10">
+                    <PromoBanner />
+                </PageItem>
+
+                <PageItem className="mb-8">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-base font-black tracking-tight">Категории</h2>
+                        <Link
+                            href={'/categories'}
+                            className="text-xs"
+                        >
+                            Все категории {`>`}
+                        </Link>
+                    </div>
+                    <CategoryRow />
+                </PageItem>
+
+                <PageItem className="xs:hidden md:block">
                     <div className="sticky z-40" style={{ top: headerHeight + 8 }}>
                         <CatalogToolbarUi
                             onOpen={() => setIsOpenFilters(!isOpenFilters)}
@@ -29,18 +46,6 @@ export const CatalogUi = () => {
                     <StuckSentinel />
                 </PageItem>
 
-                {/* Баннер */}
-                <PageItem className="mb-10">
-                    <PromoBanner />
-                </PageItem>
-
-                {/* Категории */}
-                <PageItem className="mb-8">
-                    <h2 className="text-base font-black tracking-tight mb-4">Категории</h2>
-                    <CategoryRow />
-                </PageItem>
-
-                {/* Товары */}
                 <PageItem>
                     <div className="grid grid-cols-1 lg:grid-cols-14 gap-8 items-start">
 

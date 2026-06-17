@@ -17,7 +17,7 @@ export const BankCardUi = ({ data, focusedField }: { data: CardData; focusedFiel
     };
 
     return (
-        <div className="w-full max-w-[360px] aspect-[1.586/1] relative perspective-1000 mx-auto lg:mx-0">
+        <div className="w-full max-w-90 aspect-[1.586/1] relative perspective-1000 mx-auto lg:mx-0">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}

@@ -14,9 +14,9 @@ export const CategoryRowUi = () => {
     const { selectedCategory, setSelectedCategory, countByCategory } = useCatalog();
 
     return (
-        <div className="flex gap-3 overflow-x-auto -mx-4 px-4
-                        lg:grid lg:grid-cols-4 lg:gap-4 lg:overflow-visible lg:mx-0 lg:px-0
-                        [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="gap-3 overflow-x-auto -mx-4 px-4
+                        lg:grid lg:grid-cols-4 xs:grid-cols-2 grid lg:gap-4 lg:overflow-visible lg:mx-0 lg:px-0
+                        scrollbar-none [&::-webkit-scrollbar]:hidden">
             {CATEGORIES.map(cat => {
                 const Icon = cat.icon;
                 const isActive = selectedCategory === cat.id;
@@ -31,9 +31,9 @@ export const CategoryRowUi = () => {
                         className={`
                             shrink-0 transition-colors duration-200 border rounded-2xl
                             /* мобилка: вертикальный квадратик */
-                            flex flex-col items-center gap-2 w-20 py-4
+                            flex flex-col items-center gap-2 py-4
                             /* десктоп: горизонтальная карточка во всю ячейку */
-                            lg:w-auto lg:flex-row lg:items-center lg:gap-4 lg:px-5 lg:py-4
+                            lg:w-auto lg:flex-row lg:items-center lg:gap-4 lg:px-5 lg:py-4 w-full
                             ${isActive
                                 ? 'bg-[#111111] text-white border-black shadow-[0_8px_24px_rgba(0,0,0,0.15)]'
                                 : 'bg-white text-zinc-700 border-black/5 hover:border-black/20 shadow-[0_2px_12px_rgba(0,0,0,0.03)]'}

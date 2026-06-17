@@ -14,7 +14,7 @@ export const ProfileTabsUi = () => {
     const { activeTab, setActiveTab } = useProfile();
 
     return (
-        <nav className="flex md:flex-col gap-1 md:gap-2 overflow-x-auto md:overflow-visible -mx-4 px-4 md:mx-0 md:px-0 pb-1 md:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <nav className="flex md:flex-col gap-1 md:gap-2 overflow-x-auto md:overflow-visible -mx-4 px-4 md:mx-0 md:px-0 pb-1 md:pb-0 scrollbar-none [&::-webkit-scrollbar]:hidden">
             {TABS.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;

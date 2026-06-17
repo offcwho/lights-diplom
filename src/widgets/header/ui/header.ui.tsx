@@ -88,7 +88,7 @@ export const HeaderUi = () => {
                     >
                         {user && (
                             <Link href={'/profile'} className="relative shrink-0 active:scale-95 transition-transform">
-                                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-sm shadow-amber-500/30">
+                                <div className="w-11 h-11 rounded-2xl bg-linear-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-sm shadow-amber-500/30">
                                     <User size={20} />
                                 </div>
                                 {user && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-amber-500 ring-2 ring-white" />}
@@ -124,7 +124,7 @@ export const HeaderUi = () => {
                     </motion.div>
 
                     {/* Row 2 — поиск + избранное + фильтр (появляется при скролле) */}
-                    {pathname === '/catalog' && (
+                    {pathname === '/' && (
                         <motion.div
                             initial={{ opacity: 0, y: -6 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -164,7 +164,7 @@ export const HeaderUi = () => {
                                     whileTap={{ scale: 0.9, }}
                                     transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
                                     onClick={() => setIsOpenFilters(!isOpenFilters)}
-                                    className="h-12 rounded-2xl border-1 border-black/80 flex items-center justify-center shrink-0 overflow-hidden active:scale-95"
+                                    className="h-12 rounded-2xl border border-black/80 flex items-center justify-center shrink-0 overflow-hidden active:scale-95"
                                 >
                                     <Sliders size={18} />
                                 </motion.button>

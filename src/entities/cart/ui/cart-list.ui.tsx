@@ -12,7 +12,7 @@ type ItemId = string | number;
 // Чекбокс в стиле проекта
 const Checkbox = ({ checked, indeterminate = false }: { checked: boolean; indeterminate?: boolean }) => (
     <span
-        className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200 flex-shrink-0
+        className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200 shrink-0
             ${checked || indeterminate
                 ? "bg-black border-black"
                 : "bg-white border-black/20 hover:border-black/50"}`}
@@ -107,13 +107,13 @@ export const CartListUi = () => {
                                     {/* Чекбокс выбора товара */}
                                     <button
                                         onClick={() => toggleItem(item.id)}
-                                        className="flex-shrink-0"
+                                        className="shrink-0"
                                         aria-label="Выбрать товар"
                                     >
                                         <Checkbox checked={isSelected} />
                                     </button>
 
-                                    <div className="w-20 h-24 bg-zinc-100 rounded-xl overflow-hidden shadow-sm flex-shrink-0">
+                                    <div className="w-20 h-24 bg-zinc-100 rounded-xl overflow-hidden shadow-sm shrink-0">
                                         <img src={item.img} alt={item.name} className="w-full h-full object-cover" />
                                     </div>
                                     <div className="space-y-1">
@@ -151,7 +151,7 @@ export const CartListUi = () => {
                                     </div>
 
                                     {/* Цена */}
-                                    <div className="text-right min-w-[70px]">
+                                    <div className="text-right min-w-17.5">
                                         <span className="text-xs font-mono font-black text-zinc-900">
                                             ${(item.price * item.quantity).toFixed(2)}
                                         </span>
