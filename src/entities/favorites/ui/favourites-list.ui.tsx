@@ -54,7 +54,11 @@ export const FavouritesListUi = () => {
                                         </button>
 
                                         <div className="text-neutral-300 font-bold text-[10px] sm:text-xs tracking-widest text-center uppercase">
-                                            [ Изображение ]
+                                            <img
+                                                src={product.images?.[0]}
+                                                alt="" 
+                                                className="w-full h-full"
+                                            />
                                         </div>
                                     </div>
 
