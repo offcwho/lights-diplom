@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'luxf.light',
+    title: 'Свет.Ру',
     startupImage: [
       { url: '../../public/animated-icon.svg', media: '(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)' },
     ],
