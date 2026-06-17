@@ -12,7 +12,8 @@ export const CatalogRangeComponent = () => {
         setCurrentPrice(max);
     }, [products])
 
-    const { min, max } = (products ?? []).reduce(
+    const min = 0;
+    const { max } = (products ?? []).reduce(
         (items, product) => ({ min: Math.min(items.min, Number(product.price)), max: Math.max(items.max, Number(product.price)) }),
         { min: Infinity, max: -Infinity }
     );
