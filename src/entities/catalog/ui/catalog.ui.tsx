@@ -55,7 +55,7 @@ export const CatalogUi = () => {
                             <FlashSale />
                             <SortChips />
                             <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-7 lg:gap-x-6 lg:gap-y-10">
-                                {filteredProducts.map(p => <ProductCard key={p.id} product={p} />)}
+                                {filteredProducts.map(product => <ProductCard key={product.id} product={product} />)}
                             </div>
                         </div>
                     </div>

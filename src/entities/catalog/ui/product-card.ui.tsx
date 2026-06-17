@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Product, useCatalog } from "../module/catalog.context";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCart } from "@/entities/cart/module/cart.context";
+import Link from "next/link";
 
 export const ProductCardUi = ({ product }: { product: Product }) => {
     const { favorites, toggleFavorite } = useCatalog();
@@ -10,6 +11,7 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
     const [isHovered, setIsHovered] = useState(false);
     const isFav = favorites.includes(product.id);
 
+    const cartItem = items.find((item) => item.id === product.id);
     return (
         <article
             className="relative"
@@ -22,7 +24,7 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                 <div className="w-full aspect-square rounded-[20px] overflow-hidden bg-[#F4F3F0] relative
                                 flex items-center justify-center p-6">
                     <img
-                        src={product.img}
+                        src={product.lifestyleImg}
                         alt={product.name}
                         className="max-h-full max-w-full object-contain mix-blend-multiply"
                     />
@@ -74,7 +76,7 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                     >
                         <div className="w-full aspect-[16/11] rounded-[22px] overflow-hidden bg-zinc-900 relative">
                             <img
-                                src={product.lifestyleImg}
+                                src={product.images[0]}
                                 alt=""
                                 className="w-full h-full object-cover contrast-[1.05]"
                             />
@@ -91,7 +93,9 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                             </motion.button>
                         </div>
 
-                        <div className="space-y-3 py-4 grow flex flex-col justify-center">
+                        <Link
+                            href={`/product/${product.id}`}
+                            className="space-y-3 py-4 grow flex flex-col justify-center">
                             <div className="flex justify-between items-baseline gap-2">
                                 <h2 className="text-sm font-black uppercase tracking-tight truncate">{product.name}</h2>
                                 <span className="text-sm font-mono font-bold shrink-0">${product.price}.00</span>
@@ -103,7 +107,7 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                                 <span className="text-zinc-400 block text-[9px] mb-0.5">Материал</span>
                                 {product.material}
                             </div>
-                        </div>
+                        </Link>
 
                         <motion.button
                             whileTap={{ scale: 0.98 }}
@@ -114,7 +118,7 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                         >
                             <ShoppingBag size={14} />
                             <span>
-                                {items.length > 0 ? items.map((item) => item.id === product.id ? `Уже в корзине ${item.quantity}` : 'Добавить в корзину') : 'Добавить в корзину'}
+                                {cartItem ? `Уже в корзине ${cartItem.quantity}` : 'Добавить в корзину'}
                             </span>
                         </motion.button>
                     </motion.div>

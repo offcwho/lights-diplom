@@ -27,7 +27,7 @@ export const CatalogListUi = ({ className }: { className?: string }) => {
                             <div className="bg-white p-4 rounded-[28px] border border-black/2 shadow-[0_4px_20px_rgba(0,0,0,0.01)] transition-all duration-300 flex flex-col justify-between aspect-3/4">
                                 <div className="w-full aspect-4/4 rounded-[20px] overflow-hidden bg-[#F4F3F0] relative flex items-center justify-center p-6">
                                     <img
-                                        src={product.img}
+                                        src={product.lifestyleImg}
                                         alt={product.name}
                                         className="max-h-full max-w-full object-contain mix-blend-multiply"
                                     />

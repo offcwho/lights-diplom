@@ -1,13 +1,5 @@
-import { About } from "@/widgets/about";
-import { Hero } from "@/widgets/hero";
-import { Info } from "@/widgets/info";
+import { CatalogUi as Catalog } from "@/entities/catalog/ui/catalog.ui";
 
 export default function Home() {
-  return (
-    <>
-      <Hero />
-      <About />
-      <Info />
-    </>
-  );
+  return <Catalog />
 }

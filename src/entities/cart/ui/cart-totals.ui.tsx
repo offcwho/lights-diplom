@@ -6,11 +6,13 @@ import { useCart } from "../module/cart.context";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
 import { useState } from "react";
 import { useSheetDrag } from "@/hooks/useSheetDrag"; // Путь к вашему хуку
+import { useRouter } from "next/navigation";
 
 export const CartTotalsUi = ({ className, style }: { className?: string; style?: React.CSSProperties }) => {
     const { items, coupon, setCoupon, subtotal, total } = useCart();
     const [isOpen, setIsOpen] = useState(false);
     const { headerHeight, dockHeight } = useHeaderHeight();
+    const route = useRouter();
 
     const { rootRef, transformY, paddingBottom } = useSheetDrag({
         isOpen,
@@ -70,7 +72,10 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
             </div>
 
             <div className="pt-2">
-                <button className="w-full bg-black text-white py-4 px-6 rounded-2xl text-xs font-bold tracking-widest hover:bg-zinc-900 active:scale-[0.99] transition-all flex items-center justify-between group">
+                <button
+                    onClick={() => route.push('/cart/checkout')}
+                    className="w-full bg-black text-white py-4 px-6 rounded-2xl text-xs font-bold tracking-widest hover:bg-zinc-900 active:scale-[0.99] transition-all flex items-center justify-between group"
+                >
                     <span className="uppercase">Перейти к оплате</span>
                     <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </button>

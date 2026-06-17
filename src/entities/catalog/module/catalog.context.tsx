@@ -10,7 +10,7 @@ export type Product = {
     category: string;
     price: string | number;
     color: string;
-    img: string;
+    images: string[];
     lifestyleImg: string;
     desc: string;
     material: string;
@@ -20,11 +20,11 @@ function toProduct(product: ApiProduct): Product {
     return {
         id: product.id,
         name: product.name,
-        category: product.category?.slug ?? "",
+        category: product.category?.name ?? "",
         price: product.price,
         color: product.color ?? "",
-        img: product.imageUrl,
-        lifestyleImg: product.images?.[0] ?? product.imageUrl,
+        images: product.images,
+        lifestyleImg: product.images?.[0],
         desc: product.description ?? "",
         material: product.material ?? "",
     };
@@ -51,7 +51,6 @@ type CatalogContextValue = {
 
     isOpenFilters: boolean;
     setIsOpenFilters: (open: boolean) => void;
-    openFilters: (open: boolean) => void;
 
     loading: boolean;
     filteredProducts: Product[];
@@ -60,6 +59,7 @@ type CatalogContextValue = {
     toggleFavorite: (id: string | number) => void;
     cart: Product[];
     addToCart: (item: Product) => void;
+    openFilters: (open: boolean) => void;
 };
 
 const CatalogContext = createContext<CatalogContextValue | null>(null);

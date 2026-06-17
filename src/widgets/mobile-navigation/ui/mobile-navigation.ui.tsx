@@ -15,7 +15,7 @@ export const MobileNavigationUi = () => {
     console.log(`user: ${user}`)
 
     const links = [
-        { name: "Каталог", link: "/catalog", icon: LayoutGrid, auth: null },
+        { name: "Каталог", link: "/", icon: LayoutGrid, auth: null },
         { name: "Избранное", link: "/favourites", icon: Heart, auth: true },
         { name: "Корзина", link: "/cart", icon: ShoppingCart, auth: true },
         { name: "Профиль", link: "/profile", icon: User, auth: true },

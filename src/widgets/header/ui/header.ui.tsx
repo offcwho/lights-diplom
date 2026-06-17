@@ -46,7 +46,7 @@ export const HeaderUi = () => {
                         <Image src={AppIcon} width={160} alt="Логотип компании" />
                     </Link>
 
-                    <Navigation />
+                    {/*<Navigation /> */}
 
                     <div className="items-center space-x-2 hidden sm:flex">
                         <Link

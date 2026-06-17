@@ -59,7 +59,7 @@ export const CartListUi = () => {
                 <div className="flex items-center justify-between mb-4">
                     <button
                         onClick={toggleAll}
-                        className="flex items-center gap-3 group"
+                        className="flex items-center gap-3 group py-1.5"
                     >
                         <Checkbox checked={allSelected} indeterminate={someSelected} />
                         <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 group-hover:text-zinc-900 transition-colors">

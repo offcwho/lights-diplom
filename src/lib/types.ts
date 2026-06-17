@@ -26,11 +26,10 @@ export interface Product {
     description?: string | null;
     price: number;
     categoryId?: string | null;
-    category?: Category | null;
+    category: Category;
     color?: ProductColor | null;
     material?: string | null;
-    imageUrl: string;
-    images?: string[];
+    images: string[];
     isOnSale: boolean;
     discountPercent: number;
     popularity: number;
