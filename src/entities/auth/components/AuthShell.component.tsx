@@ -25,7 +25,7 @@ export const AuthShellComponent = ({
             </motion.div>
 
             <p className="text-center text-[10px] font-mono uppercase tracking-wider text-zinc-400 mt-5">
-                © 2026 luxf.light
+                © 2026 Свет.Ру
             </p>
         </div>
     </div>

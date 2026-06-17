@@ -29,7 +29,7 @@ export const SignUpPage = () => {
                 Создать аккаунт
             </h1>
             <p className="mt-2 text-xs text-zinc-500">
-                Присоединяйтесь к luxf.light.
+                Присоединяйтесь к Свет.Ру.
             </p>
 
             <form onSubmit={onSubmit} className="mt-6 space-y-3.5">
