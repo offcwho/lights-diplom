@@ -133,7 +133,7 @@ const SortDropdown = ({ value, onChange }: {
             <button
                 onClick={() => setOpen(prev => !prev)}
                 className="h-full flex items-center gap-2 px-5 text-[11px] font-semibold
-                   text-zinc-700 hover:text-black hover:bg-black/[0.03] transition-colors whitespace-nowrap"
+                   text-zinc-700 hover:text-black hover:bg-black/3 transition-colors whitespace-nowrap"
             >
                 {current.label}
                 <motion.span animate={{ rotate: open ? 180 : 0 }} transition={springSmooth}>

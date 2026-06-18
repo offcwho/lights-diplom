@@ -6,11 +6,15 @@ import { useEffect, useState } from "react"
 
 export const CatalogRangeComponent = () => {
     const [currentPrice, setCurrentPrice] = useState(0);
-    const { products } = useCatalog();
+    const { products, setMaxPrice } = useCatalog();
 
     useEffect(() => {
         setCurrentPrice(max);
     }, [products])
+
+    useEffect(() => {
+        setMaxPrice(currentPrice)
+    }, [currentPrice])
 
     const min = 0;
     const { max } = (products ?? []).reduce(
