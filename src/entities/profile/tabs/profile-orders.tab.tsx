@@ -9,11 +9,12 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight, Package, ShoppingBag } from 'lucide-react';
 
 const STATUS_MAP: Record<OrderStatus, { label: string; color: string }> = {
-    pending:   { label: 'Ожидает оплаты', color: 'bg-amber-100 text-amber-700' },
-    paid:      { label: 'Оплачен',        color: 'bg-blue-100 text-blue-700' },
-    shipped:   { label: 'В доставке',     color: 'bg-violet-100 text-violet-700' },
-    completed: { label: 'Доставлен',      color: 'bg-green-100 text-green-700' },
-    cancelled: { label: 'Отменён',        color: 'bg-red-100 text-red-500' },
+    new: { label: 'Ожидает оплаты', color: 'bg-amber-100 text-amber-700' },
+    paid: { label: 'Оплачен', color: 'bg-blue-100 text-blue-700' },
+    sent: { label: 'Отправлен', color: 'bg-blue-100 text-blue-700' },
+    shipped: { label: 'В доставке', color: 'bg-violet-100 text-violet-700' },
+    completed: { label: 'Доставлен', color: 'bg-green-100 text-green-700' },
+    cancelled: { label: 'Отменён', color: 'bg-red-100 text-red-500' },
 };
 
 const DONE: OrderStatus[] = ['completed', 'cancelled'];
@@ -105,7 +106,7 @@ function ActiveCard({ order }: { order: Order }) {
             <div className="flex items-center justify-between px-5 py-4 bg-zinc-50/80 border-t border-black/5">
                 <div>
                     {order.shippingAddress && (
-                        <p className="text-[10px] text-zinc-400 max-w-[200px] truncate">
+                        <p className="text-[10px] text-zinc-400 max-w-50 truncate">
                             📍 {order.shippingAddress}
                         </p>
                     )}
@@ -139,7 +140,7 @@ export const ProfileOrdersTab = () => {
     }, [user]);
 
     const active = orders.filter((o) => !DONE.includes(o.status));
-    const done   = orders.filter((o) =>  DONE.includes(o.status));
+    const done = orders.filter((o) => DONE.includes(o.status));
 
     if (loading) {
         return (
