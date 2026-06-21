@@ -1,17 +1,13 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCatalog } from "../module/catalog.context";
 import { AnimatePresence, motion } from "framer-motion";
 
 export const CatalogSelectComponent = () => {
     const [isSortOpen, setIsSortOpen] = useState(false);
-
-    useEffect(() => {
-        setSortBy("popularity")
-    }, [])
-
     const { sortBy, setSortBy } = useCatalog();
+
     return (
         <div className="pt-4 border-t border-black/5 space-y-3 relative">
             <h4 className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 select-none">Сортировать</h4>
@@ -24,8 +20,8 @@ export const CatalogSelectComponent = () => {
                     className="w-full bg-[#F4F3F0] hover:bg-[#eae9e5] text-xs font-bold uppercase tracking-wider rounded-xl p-3 flex items-center justify-between outline-none transition-colors select-none"
                 >
                     <span>
-                        {sortBy === "popularity" && "По популярности"}
-                        {sortBy === "price-asc" && "от низкой к высокой"}
+                        {(sortBy === "popularity" || sortBy === "default" || sortBy === "popular") && "По популярности"}
+                        {sortBy === "price-asc" && "Цена: от низкой к высокой"}
                         {sortBy === "price-desc" && "Цена: от высокой к низкой"}
                     </span>
 
@@ -64,7 +60,7 @@ export const CatalogSelectComponent = () => {
                             className="absolute left-0 right-0 mt-1.5 bg-white border border-black/5 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.08)] overflow-hidden z-20 p-1"
                         >
                             {[
-                                { value: "popularity", label: "По популярности" },
+                                { value: "default", label: "По популярности" },
                                 { value: "price-asc", label: "Цена: от низкой к высокой" },
                                 { value: "price-desc", label: "Цена: от высокой к низкой" }
                             ].map((option) => {

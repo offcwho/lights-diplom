@@ -8,7 +8,7 @@ export type ProductColor =
 
 export type ProductSort = 'popular' | 'price_asc' | 'price_desc' | 'newest';
 
-export type OrderStatus = 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled';
+export type OrderStatus = 'new' | 'paid' | 'shipped' | 'sent' | 'completed' | 'cancelled';
 
 export type UserRole = 'user' | 'admin';
 
@@ -34,6 +34,7 @@ export interface Product {
     discountPercent: number;
     popularity: number;
     stock: number;
+    attributes?: { name: string; value: string }[] | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -99,6 +100,18 @@ export interface Order {
     createdAt: string;
 }
 
+export interface Address {
+    id: string;
+    label?: string | null;
+    city: string;
+    street: string;
+    house: string;
+    apartment?: string | null;
+    zipCode?: string | null;
+    isDefault: boolean;
+    createdAt: string;
+}
+
 export interface User {
     id: string;
     email: string;
@@ -114,4 +127,26 @@ export interface User {
 export interface AuthResponse {
     accessToken: string;
     user: Pick<User, 'id' | 'email' | 'name' | 'role' | 'address' | 'avatarUrl' | 'phone'>;
+}
+
+export interface Banner {
+    id: string;
+    title: string;
+    subtitle?: string | null;
+    description?: string | null;
+    imageUrl: string;
+    action?: string | null;
+    buttonLabel?: string | null;
+    isActive: boolean;
+    order: number;
+}
+
+export interface Review {
+    id: string;
+    productId: string;
+    userId: string;
+    user: Pick<User, 'id' | 'name' | 'avatarUrl'>;
+    rating: number;
+    comment: string;
+    createdAt: string;
 }

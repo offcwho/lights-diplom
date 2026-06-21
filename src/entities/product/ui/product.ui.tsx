@@ -1,182 +1,292 @@
-import { Container } from "@/components/Container";
-import { ArrowLeft, ArrowRight, Plus, Star } from "lucide-react"
+'use client'
 
-interface Props {
-    productId: string;
+import { useEffect, useState } from 'react';
+import { productsApi, reviewsApi } from '@/lib/api';
+import Link from 'next/link';
+import { Package, Tag, Layers, ArrowLeft, Star } from 'lucide-react';
+import { ProductGalleryUi } from './product-gallery.ui';
+import { ProductActionsUi } from './product-actions.ui';
+import { ProductTabsUi } from './product-tabs.ui';
+import { ProductRelatedUi } from './product-related.ui';
+import type { Product, Review } from '@/lib/types';
+
+const colorLabels: Record<string, string> = {
+    white_ivory: 'Белый / Слоновая кость',
+    architectural_grey: 'Архитектурный серый',
+    carbon_black: 'Карбон чёрный',
+    olive_green: 'Оливковый',
+};
+
+const Stars = ({ rating }: { rating: number }) => (
+    <div className="flex gap-0.5">
+        {[1, 2, 3, 4, 5].map(i => (
+            <Star
+                key={i}
+                size={13}
+                fill={i <= Math.round(rating) ? 'currentColor' : 'none'}
+                className={i <= Math.round(rating) ? 'text-amber-400' : 'text-zinc-200'}
+            />
+        ))}
+    </div>
+);
+
+function plural(n: number) {
+    if (n % 10 === 1 && n % 100 !== 11) return 'отзыв';
+    if ([2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100)) return 'отзыва';
+    return 'отзывов';
 }
 
-export const ProductUi: React.FC<Props> = ({ productId }) => {
-    const recommendations = [
-        { id: 2, name: 'YUN MINIMAL BRASS', price: '650.00$', tag: 'BRASS', img: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?q=80&w=400' },
-        { id: 3, name: 'TICK INDUSTRIAL FLOOR', price: '520.00$', tag: 'STEEL', img: 'https://images.unsplash.com/photo-1565814636199-ae8133055c1c?q=80&w=400' },
-    ];
+interface Props {
+    slug: string;
+}
 
-    return (
-        <div className="space-y-24 py-12 max-w-7xl mx-auto px-6 text-[#111111]">
+export const ProductUi = ({ slug }: Props) => {
+    const [product, setProduct] = useState<Product | null>(null);
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [related, setRelated] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
-            {/* --- ГЛАВНЫЙ ЭКРАН ТОВАРА --- */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+    useEffect(() => {
+        let cancelled = false;
+        setLoading(true);
+        setError(false);
 
-                {/* Левая колонка: Галерея */}
-                <div className="lg:col-span-6 relative top-6">
-                    <div className="w-full aspect-4/5 rounded-4xl overflow-hidden bg-zinc-300 relative shadow-sm">
-                        <img
-                            src="https://images.unsplash.com/photo-1507473885765-e6ed057f782c?q=80&w=1000&auto=format&fit=crop"
-                            alt="Main Product"
-                            className="w-full h-full object-cover"
-                        />
-                        <div className="absolute bottom-6 left-6 flex space-x-2">
-                            <button className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-transform">
-                                <ArrowLeft size={16} />
-                            </button>
-                            <button className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-transform">
-                                <ArrowRight size={16} />
-                            </button>
+        (async () => {
+            try {
+                const p = await productsApi.getBySlug(slug);
+                if (cancelled) return;
+                setProduct(p);
+
+                const [reviewsData, relatedPage] = await Promise.all([
+                    reviewsApi.list(p.id).catch(() => [] as Review[]),
+                    productsApi.list({ limit: 5 }).catch(() => ({ items: [] as Product[] })),
+                ]);
+                if (cancelled) return;
+                setReviews(reviewsData);
+                setRelated(relatedPage.items.filter(r => r.id !== p.id).slice(0, 4));
+            } catch {
+                if (!cancelled) setError(true);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+
+        return () => { cancelled = true; };
+    }, [slug]);
+
+    if (loading) {
+        return (
+            <div className="max-w-7xl mx-auto px-6 py-16">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-14">
+                    <div className="lg:col-span-6 aspect-square rounded-3xl bg-white animate-pulse" />
+                    <div className="lg:col-span-6 space-y-5 pt-4">
+                        <div className="h-4 w-24 bg-white rounded-full animate-pulse" />
+                        <div className="h-10 w-3/4 bg-white rounded-2xl animate-pulse" />
+                        <div className="h-8 w-32 bg-white rounded-2xl animate-pulse" />
+                        <div className="h-px bg-black/5" />
+                        <div className="space-y-2">
+                            <div className="h-3 bg-white rounded animate-pulse" />
+                            <div className="h-3 bg-white rounded animate-pulse w-5/6" />
+                            <div className="h-3 bg-white rounded animate-pulse w-4/6" />
                         </div>
                     </div>
                 </div>
+            </div>
+        );
+    }
 
-                {/* Правая колонка: Инфо, Покупка и Характеристики */}
-                <div className="lg:col-span-6 space-y-10">
-                    <div className="space-y-6">
-                        <div>
-                            <span className="text-xs uppercase font-bold tracking-[0.2em] text-zinc-500 block mb-2">The pendant lamp</span>
-                            <h1 className="text-5xl md:text-6xl font-black tracking-tight leading-none uppercase">CONCRETE<br />LIGHTS</h1>
+    if (error || !product) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center space-y-4">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">404</p>
+                    <h1 className="text-2xl font-black uppercase tracking-tight">Товар не найден</h1>
+                    <Link
+                        href="/"
+                        className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-black transition-colors"
+                    >
+                        <ArrowLeft size={12} />
+                        В каталог
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
-                            <div className="flex items-center justify-between border-t border-black/10 pt-4 mt-6">
-                                <h2 className="text-xl font-bold text-zinc-800">Jasper Vintage Cement</h2>
-                                <span className="text-2xl font-bold tracking-tight">650.00$</span>
-                            </div>
-                        </div>
+    const hasDiscount = product.isOnSale && product.discountPercent > 0;
+    const finalPrice = hasDiscount
+        ? product.price * (1 - product.discountPercent / 100)
+        : product.price;
 
-                        <p className="text-sm text-zinc-600 leading-relaxed">
-                            Минималистичный дизайн, вдохновленный необработанным бетоном и четкой геометрией сфер. Идеально подходит для создания мягкого акцентного освещения в интерьерах лофт и минимализм.
-                        </p>
+    const avgRating = reviews.length > 0
+        ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+        : 0;
 
-                        <div className="flex items-center space-x-4 pt-2">
-                            <button className="bg-[#111111] text-white px-10 py-4 rounded-full text-xs font-bold tracking-widest hover:bg-zinc-800 transition-all active:scale-95 shadow-sm">
-                                КУПИТЬ СЕЙЧАС
-                            </button>
-                        </div>
+    const attributeSpecs = product.attributes
+        ? product.attributes.map(a => ({ label: a.name, value: a.value }))
+        : [];
+
+    const specs: { label: string; value: string; highlight?: 'green' | 'red' }[] = [
+        product.category && { label: 'Категория', value: product.category.name },
+        product.material && { label: 'Материал', value: product.material },
+        product.color && { label: 'Цвет', value: colorLabels[product.color] ?? product.color },
+        ...attributeSpecs,
+        {
+            label: 'Наличие',
+            value: product.stock > 0 ? `${product.stock} шт. в наличии` : 'Нет в наличии',
+            highlight: product.stock > 0 ? 'green' : 'red',
+        },
+        { label: 'Артикул', value: product.slug.toUpperCase() },
+    ].filter(Boolean) as { label: string; value: string; highlight?: 'green' | 'red' }[];
+
+    return (
+        <div className="min-h-screen">
+
+            {/* Breadcrumb */}
+            <div className="max-w-7xl mx-auto px-6 pt-8 pb-6">
+                <Link
+                    href="/"
+                    className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-black transition-colors group"
+                >
+                    <ArrowLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
+                    Каталог
+                    {product.category && (
+                        <>
+                            <span className="text-zinc-300">/</span>
+                            <span className="text-zinc-500">{product.category.name}</span>
+                        </>
+                    )}
+                    <span className="text-zinc-300">/</span>
+                    <span className="text-zinc-700">{product.name}</span>
+                </Link>
+            </div>
+
+            {/* HERO — 2-column */}
+            <div className="max-w-7xl mx-auto px-6 pb-16">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+
+                    {/* LEFT: sticky gallery */}
+                    <div className="lg:col-span-6 lg:sticky lg:top-8">
+                        <ProductGalleryUi images={product.images} name={product.name} />
                     </div>
 
-                    {/* ХАРАКТЕРИСТИКИ (Тонкая журнальная таблица) */}
-                    <div className="pt-8 border-t border-black/10 space-y-4">
-                        <h3 className="text-xs uppercase font-bold tracking-widest text-zinc-400">Спецификация объекта</h3>
-                        <div className="text-xs divide-y divide-black/5 font-medium">
-                            <div className="flex justify-between py-3">
-                                <span className="text-zinc-500">Материал купола</span>
-                                <span className="font-bold text-right">Архитектурный мелкозернистый бетон M500</span>
+                    {/* RIGHT: product info */}
+                    <div className="lg:col-span-6 space-y-7">
+
+                        {/* Badges row */}
+                        <div className="flex flex-wrap gap-2">
+                            {product.category && (
+                                <span className="text-[9px] font-black tracking-[0.25em] uppercase text-zinc-500 bg-white border border-black/8 px-3 py-1.5 rounded-full">
+                                    {product.category.name}
+                                </span>
+                            )}
+                            {hasDiscount && (
+                                <span className="text-[9px] font-black tracking-widest uppercase text-white bg-[#111111] px-3 py-1.5 rounded-full">
+                                    −{product.discountPercent}% SALE
+                                </span>
+                            )}
+                            {product.stock > 0 && product.stock <= 5 && (
+                                <span className="text-[9px] font-black tracking-widest uppercase text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full">
+                                    Осталось {product.stock} шт.
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Name */}
+                        <div className="space-y-3">
+                            <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tight leading-[0.93]">
+                                {product.name}
+                            </h1>
+                            {reviews.length > 0 && (
+                                <div className="flex items-center gap-3">
+                                    <Stars rating={avgRating} />
+                                    <span className="text-xs text-zinc-400 font-bold">
+                                        {avgRating.toFixed(1)} · {reviews.length} {plural(reviews.length)}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Price */}
+                        <div className="flex items-baseline gap-4">
+                            <span className="text-3xl font-black tracking-tight">{finalPrice.toFixed(0)} ₽</span>
+                            {hasDiscount && (
+                                <span className="text-lg text-zinc-400 line-through font-medium">
+                                    {product.price.toFixed(0)} ₽
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="border-t border-black/8" />
+
+                        {product.description && (
+                            <p className="text-sm text-zinc-600 leading-relaxed line-clamp-4">
+                                {product.description}
+                            </p>
+                        )}
+
+                        {/* Attribute chips */}
+                        <div className="flex flex-wrap gap-2">
+                            {product.material && (
+                                <div className="flex items-center gap-2 bg-white border border-black/8 rounded-full px-4 py-2 text-xs font-bold text-zinc-700">
+                                    <Package size={12} className="text-zinc-400 shrink-0" />
+                                    {product.material}
+                                </div>
+                            )}
+                            {product.color && (
+                                <div className="flex items-center gap-2 bg-white border border-black/8 rounded-full px-4 py-2 text-xs font-bold text-zinc-700">
+                                    <Tag size={12} className="text-zinc-400 shrink-0" />
+                                    {colorLabels[product.color] ?? product.color}
+                                </div>
+                            )}
+                            {product.category && (
+                                <div className="flex items-center gap-2 bg-white border border-black/8 rounded-full px-4 py-2 text-xs font-bold text-zinc-700">
+                                    <Layers size={12} className="text-zinc-400 shrink-0" />
+                                    {product.category.name}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Add to cart + favorites */}
+                        <ProductActionsUi productId={product.id} inStock={product.stock > 0} />
+
+                        {/* Specs table */}
+                        <div className="bg-white rounded-3xl border border-black/5 overflow-hidden">
+                            <div className="px-6 py-4 border-b border-black/5">
+                                <h3 className="text-[9px] uppercase font-black tracking-[0.3em] text-zinc-400">
+                                    Характеристики
+                                </h3>
                             </div>
-                            <div className="flex justify-between py-3">
-                                <span className="text-zinc-500">Внутреннее напыление</span>
-                                <span className="font-bold text-right">Матовая латунь / Шлифовка</span>
-                            </div>
-                            <div className="flex justify-between py-3">
-                                <span className="text-zinc-500">Габариты купола</span>
-                                <span className="font-bold text-right">Ø 240 мм × Высота 320 мм</span>
-                            </div>
-                            <div className="flex justify-between py-3">
-                                <span className="text-zinc-500">Источник света</span>
-                                <span className="font-bold text-right">LED-матрица COB (CRI &gt; 95), 2700K теплый свет</span>
-                            </div>
-                            <div className="flex justify-between py-3">
-                                <span className="text-zinc-500">Длина кабеля</span>
-                                <span className="font-bold text-right">1.5 м в текстильной черной оплетке</span>
-                            </div>
-                            <div className="flex justify-between py-3">
-                                <span className="text-zinc-500">Вес нетто</span>
-                                <span className="font-bold text-right">3.4 кг</span>
+                            <div className="divide-y divide-black/5 text-xs">
+                                {specs.map(({ label, value, highlight }) => (
+                                    <div key={label} className="flex justify-between items-center px-6 py-3.5 gap-4">
+                                        <span className="text-zinc-400 shrink-0">{label}</span>
+                                        <span className={`font-bold text-right ${
+                                            highlight === 'green' ? 'text-green-700' :
+                                            highlight === 'red' ? 'text-red-500' : ''
+                                        }`}>
+                                            {value}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
-                    </div>
 
+                    </div>
                 </div>
             </div>
 
-            {/* --- ОТЗЫВЫ РЕЗИДЕНТОВ (Премиальные текстовые цитаты) --- */}
-            <section className="pt-16 border-t border-black/10 space-y-12">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                    <div>
-                        <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-zinc-400">Мнения</span>
-                        <h2 className="text-3xl font-black uppercase tracking-tight mt-1">Опыт интеграции в интерьер</h2>
-                    </div>
-                    <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider">
-                        <span className="text-zinc-500">Общая оценка резидентов:</span>
-                        <span className="flex items-center bg-white px-3 py-1 rounded-full border border-black/5 shadow-sm">
-                            4.9 <Star size={12} className="ml-1 fill-black text-black" />
-                        </span>
-                    </div>
-                </div>
+            {/* TABS — Description / Reviews */}
+            <div className="max-w-7xl mx-auto px-6">
+                <ProductTabsUi description={product.description} reviews={reviews} />
+            </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Отзыв 1 */}
-                    <div className="bg-[#F5F4F1] p-8 rounded-3xl flex flex-col justify-between space-y-6">
-                        <p className="text-sm text-zinc-800 italic leading-relaxed">
-                            «Использовал три таких подвеса над кухонным островом в проекте ЖК Наследие. Качество литья поразило — пористость бетона распределена равномерно, нет грубых раковин. Нижний свет идеален: конус четкий, латунь внутри дает потрясающий уютный оттенок золота.»
-                        </p>
-                        <div className="flex justify-between items-center pt-4 border-t border-black/5 text-xs">
-                            <div>
-                                <h4 className="font-bold uppercase tracking-wide">Константин Ш.</h4>
-                                <p className="text-zinc-500 mt-0.5">Ведущий архитектор K-Studio</p>
-                            </div>
-                            <span className="text-zinc-400 font-medium">12 Мая 2026</span>
-                        </div>
-                    </div>
-
-                    {/* Отзыв 2 */}
-                    <div className="bg-[#F5F4F1] p-8 rounded-3xl flex flex-col justify-between space-y-6">
-                        <p className="text-sm text-zinc-800 italic leading-relaxed">
-                            «Искала светильник, который закроет потребность в акцентном пятне над круглым обеденным столом. Бетон тяжелый, основательный. Провод регулируется легко. Магазину отдельное спасибо за премиальную деревянную упаковку — распаковка как отдельный вид искусства.»
-                        </p>
-                        <div className="flex justify-between items-center pt-4 border-t border-black/5 text-xs">
-                            <div>
-                                <h4 className="font-bold uppercase tracking-wide">Елена В.</h4>
-                                <p className="text-zinc-500 mt-0.5">Частный дизайнер, Спб</p>
-                            </div>
-                            <span className="text-zinc-400 font-medium">29 Апреля 2026</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* --- РЕКОМЕНДАЦИИ (Соберите комплект) --- */}
-            <section className="pt-16 border-t border-black/10 space-y-10">
-                <div>
-                    <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-zinc-400">Архитектурный ансамбль</span>
-                    <h2 className="text-3xl font-black uppercase tracking-tight mt-1">Дополните световой сценарий</h2>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {recommendations.map((item) => (
-                        <div key={item.id} className="group flex flex-col space-y-3">
-                            <div className="w-full aspect-3/4 overflow-hidden rounded-3xl relative bg-zinc-300 shadow-sm">
-                                <img
-                                    src={item.img}
-                                    alt={item.name}
-                                    className="w-full h-full object-cover grayscale-15 group-hover:grayscale-0 group-hover:scale-103 transition-all duration-500"
-                                />
-                                <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex justify-end items-end">
-                                    <button className="bg-white text-black p-2.5 rounded-full shadow-md hover:bg-black hover:text-white transition-all transform translate-y-2 group-hover:translate-y-0 duration-300">
-                                        <Plus size={14} />
-                                    </button>
-                                </div>
-                                <span className="absolute bottom-3 left-3 text-[9px] font-bold tracking-widest bg-white/90 px-2.5 py-0.5 rounded-full uppercase">
-                                    {item.tag}
-                                </span>
-                            </div>
-                            <div className="flex items-start justify-between px-1 text-xs">
-                                <div>
-                                    <h4 className="font-black uppercase tracking-tight group-hover:underline underline-offset-2 cursor-pointer">{item.name}</h4>
-                                    <p className="text-[10px] text-zinc-500 uppercase tracking-wide mt-0.5">Коллекционные объекты</p>
-                                </div>
-                                <span className="font-bold text-zinc-900">{item.price}</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
+            {/* RELATED PRODUCTS */}
+            <div className="max-w-7xl mx-auto px-6">
+                <ProductRelatedUi products={related} />
+            </div>
 
         </div>
-    )
-}
+    );
+};

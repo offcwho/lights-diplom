@@ -7,6 +7,7 @@ import type { Product as ApiProduct, Category } from "@/lib/types";
 export type Product = {
     id: string | number;
     name: string;
+    slug: string;
     category: Category;
     price: string | number;
     color: string;
@@ -14,12 +15,15 @@ export type Product = {
     lifestyleImg: string;
     desc: string;
     material: string;
+    stock: number;
+    attributes: { name: string; value: string }[];
 };
 
 function toProduct(product: ApiProduct): Product {
     return {
         id: product.id,
         name: product.name,
+        slug: product.slug,
         category: product.category ?? "",
         price: product.price,
         color: product.color ?? "",
@@ -27,6 +31,8 @@ function toProduct(product: ApiProduct): Product {
         lifestyleImg: product.images?.[0],
         desc: product.description ?? "",
         material: product.material ?? "",
+        stock: product.stock,
+        attributes: Array.isArray(product.attributes) ? product.attributes as { name: string; value: string }[] : [],
     };
 }
 
@@ -43,6 +49,8 @@ type CatalogContextValue = {
     setSelectedMaterial: (v: string) => void;
     sortBy: string;
     setSortBy: (v: string) => void;
+    inStockOnly: boolean;
+    setInStockOnly: (v: boolean) => void;
     showMobileFilters: boolean;
     setShowMobileFilters: (v: boolean) => void;
     resetFilters: () => void;
@@ -75,6 +83,7 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
     const [showMobileFilters, setShowMobileFilters] = useState(false);
     const [selectedColors, setSelectedColors] = useState<string[]>([]);
     const [maxPrice, setMaxPrice] = useState<number>(1500);
+    const [inStockOnly, setInStockOnly] = useState(false);
 
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
@@ -138,6 +147,7 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
         setSearchQuery("");
         setSelectedCategory("all");
         setSelectedColors([]);
+        setInStockOnly(false);
     };
 
     const countByCategory = (categoryId: string) =>
@@ -171,12 +181,13 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
             result = result.filter((product) => selectedColors.includes(product.color));
         }
         result = result.filter((product) => Number(product.price) <= maxPrice);
+        if (inStockOnly) result = result.filter((product) => product.stock > 0);
 
         if (sortBy === "price-asc") result.sort((a, b) => Number(a.price) - Number(b.price));
         if (sortBy === "price-desc") result.sort((a, b) => Number(b.price) - Number(a.price));
 
         return result;
-    }, [products, searchQuery, selectedCategory, selectedColors, maxPrice, sortBy]);
+    }, [products, searchQuery, selectedCategory, selectedColors, maxPrice, sortBy, inStockOnly]);
 
     const value: CatalogContextValue = {
         products,
@@ -184,6 +195,7 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
         selectedCategory, setSelectedCategory,
         selectedMaterial, setSelectedMaterial,
         sortBy, setSortBy,
+        inStockOnly, setInStockOnly,
         showMobileFilters, setShowMobileFilters,
         loading,
         filteredProducts,

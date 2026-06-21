@@ -1,42 +1,52 @@
 'use client'
 
 import { Container } from "@/components/Container"
-import { CatalogProvider, useCatalog } from "../module/catalog.context"
-import { CatalogFilters, CatalogList, CatalogTopbar, CategoryRow, FlashSale, ProductCard, PromoBanner, SortChips } from ".."
+import { useCatalog } from "../module/catalog.context"
+import { BannerSlider, CatalogFilters, CatalogList, CatalogTopbar, CategoryRow, FlashSale, ProductCard, SortChips } from ".."
 import { useHeaderHeight } from "@/hooks/useHeaderHeight"
-import { AnimatePresence, motion } from "framer-motion"
+import { motion } from "framer-motion"
 import { PageItem, PageStagger } from "@/components/Animations"
-import { useEffect, useState } from "react"
 import { CatalogToolbarUi } from "./catalog-toolbar.ui"
-import { StuckSentinel, useStuck } from "@/hooks/useStack"
+import { StuckSentinel } from "@/hooks/useStack"
 import Link from "next/link"
+import { LayoutGrid } from "lucide-react"
 
 export const CatalogUi = () => {
     const { headerHeight } = useHeaderHeight();
-    const [isOpenFilters, setIsOpenFilters] = useState(false);
-    const { filteredProducts, resetFilters } = useCatalog();
-    
+    const { filteredProducts, resetFilters, setIsOpenFilters, isOpenFilters } = useCatalog();
+
     return (
         <Container className="px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
-            <PageStagger className="space-y-10 lg:space-y-4">
+            <PageStagger className="space-y-10 lg:space-y-6">
 
-                <PageItem className="mb-10">
-                    <PromoBanner />
+                {/* Баннер-слайдер */}
+                <PageItem>
+                    <BannerSlider />
                 </PageItem>
 
-                <PageItem className="mb-8">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-base font-black tracking-tight">Категории</h2>
+                {/* Секция категорий */}
+                <PageItem>
+                    <div className="flex items-end justify-between mb-5">
+                        <div>
+                            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 mb-1">
+                                По типу
+                            </p>
+                            <h2 className="text-xl font-black uppercase tracking-tight leading-none">
+                                Коллекции
+                            </h2>
+                        </div>
                         <Link
-                            href={'/categories'}
-                            className="text-xs"
+                            href="/categories"
+                            className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-black transition-colors group"
                         >
-                            Все категории {`>`}
+                            <LayoutGrid size={12} />
+                            Все
                         </Link>
                     </div>
                     <CategoryRow />
                 </PageItem>
 
+                {/* Тулбар поиска (только md+) */}
                 <PageItem className="xs:hidden md:block">
                     <div className="sticky z-40" style={{ top: headerHeight + 8 }}>
                         <CatalogToolbarUi
@@ -46,49 +56,48 @@ export const CatalogUi = () => {
                     <StuckSentinel />
                 </PageItem>
 
+                {/* Основная сетка: фильтры + товары */}
                 <PageItem>
                     <div className="grid grid-cols-1 lg:grid-cols-14 gap-8 items-start">
 
                         <CatalogFilters
                             className="lg:col-span-4"
                             isOpen={isOpenFilters}
-                            onClose={() => setIsOpenFilters(!isOpenFilters)}
+                            onClose={() => setIsOpenFilters(false)}
                         />
-
 
                         <div className="lg:col-span-10">
                             <FlashSale />
                             <SortChips />
-                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-7 lg:gap-x-6 lg:gap-y-10">
 
-                                {filteredProducts.length === 0 ? (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 12 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="col-span-full py-20 text-center space-y-3"
+                            {filteredProducts.length === 0 ? (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="py-24 text-center space-y-4"
+                                >
+                                    <p className="text-sm font-black uppercase tracking-widest text-zinc-300">
+                                        Ничего не найдено
+                                    </p>
+                                    <button
+                                        onClick={resetFilters}
+                                        className="text-[10px] font-black uppercase tracking-widest bg-[#111111] text-white px-6 py-3 rounded-xl hover:bg-zinc-800 transition-colors"
                                     >
-                                        <p className="text-sm font-bold uppercase tracking-wider text-zinc-400">
-                                            Ничего не найдено
-                                        </p>
-                                        <button
-                                            onClick={resetFilters}
-                                            className="text-xs font-black uppercase tracking-widest border-b-2 border-black pb-1 hover:text-zinc-600 hover:border-zinc-600 transition-colors"
-                                        >
-                                            Сбросить фильтры
-                                        </button>
-                                    </motion.div>
-                                ) : (
-                                    filteredProducts.map(product => <ProductCard key={product.id} product={product} />)
-                                )}
-                            </div>
+                                        Сбросить фильтры
+                                    </button>
+                                </motion.div>
+                            ) : (
+                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-7 lg:gap-x-6 lg:gap-y-10">
+                                    {filteredProducts.map(product => (
+                                        <ProductCard key={product.id} product={product} />
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </PageItem>
 
             </PageStagger>
-
-            {/* Мобильная шторка фильтров */}
-
         </Container>
     );
 };

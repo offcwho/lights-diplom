@@ -1,301 +1,396 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, CreditCard, Landmark, MapPin, Plus } from 'lucide-react';
-import { BankCardUi } from './bankcard.ui';
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, Loader2, MapPin, Package, Phone, Plus, User } from 'lucide-react';
+import Link from 'next/link';
 import { useAuth } from '@/hooks/AuthContext';
+import { useCart } from '@/entities/cart/module/cart.context';
+import { addressesApi, ordersApi } from '@/lib/api';
+import type { Address } from '@/lib/types';
 
-type PaymentMethod = 'sbp' | 'card';
+function Field({
+    label, icon, error, ...props
+}: React.InputHTMLAttributes<HTMLInputElement> & { label: string; icon: React.ReactNode; error?: string }) {
+    return (
+        <div className="space-y-1.5">
+            <label className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400">{label}</label>
+            <div className={`flex items-center gap-3 bg-white border rounded-2xl px-4 py-3.5 transition-all focus-within:border-black/40 focus-within:shadow-[0_0_0_3px_rgba(0,0,0,0.04)] ${error ? 'border-red-300' : 'border-black/8'}`}>
+                <span className="text-zinc-300 shrink-0">{icon}</span>
+                <input {...props} className="flex-1 text-sm font-medium outline-none bg-transparent placeholder:text-zinc-300 text-zinc-800" />
+            </div>
+            {error && <p className="text-[10px] text-red-500 font-bold">{error}</p>}
+        </div>
+    );
+}
+
+function formatAddress(a: Address) {
+    return [a.city, a.street, `д. ${a.house}`, a.apartment ? `кв. ${a.apartment}` : '', a.zipCode].filter(Boolean).join(', ');
+}
 
 export const CheckoutUi = () => {
     const { user } = useAuth();
+    const { items, total, subtotal, clear } = useCart();
+    const router = useRouter();
 
-    // Имитация списка адресов (если в user.addresses пусто)
-    const savedAddresses = [
-        { id: '1', title: 'Дом', city: 'Москва', street: 'ул. Ленина, д. 12, кв. 45' },
-        { id: '2', title: 'Офис', city: 'Москва', street: 'Пресненская наб., д. 6, стр. 2' },
-    ];
+    const [name, setName]   = useState(user?.name  ?? '');
+    const [phone, setPhone] = useState(user?.phone ?? '');
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [submitting, setSubmitting] = useState(false);
+    const [done, setDone] = useState(false);
 
-    // Состояния формы
-    const [selectedAddressId, setSelectedAddressId] = useState(savedAddresses[0]?.id || '');
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
+    // Address
+    const [addresses, setAddresses] = useState<Address[]>([]);
+    const [addrLoading, setAddrLoading] = useState(true);
+    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [useManual, setUseManual] = useState(false);
+    const [manualFields, setManualFields] = useState({ city: '', street: '', house: '', apartment: '', zipCode: '' });
+    const setMF = (k: keyof typeof manualFields, v: string) => setManualFields(p => ({ ...p, [k]: v }));
 
-    const [formData, setFormData] = useState({
-        name: user?.name || '',
-        phone: user?.phone || '',
-        email: user?.email || '',
-    });
+    useEffect(() => {
+        addressesApi.list()
+            .then(data => {
+                setAddresses(data);
+                const def = data.find(a => a.isDefault) ?? data[0];
+                if (def) setSelectedId(def.id);
+                if (data.length === 0) setUseManual(true);
+            })
+            .catch(() => setUseManual(true))
+            .finally(() => setAddrLoading(false));
+    }, []);
 
-    const [cardData, setCardData] = useState({
-        number: '',
-        expiry: '',
-        cvc: '',
-        holder: '',
-    });
-    const [focusedField, setFocusedField] = useState('');
+    const manualAddress = [
+        manualFields.city,
+        manualFields.street,
+        manualFields.house ? `д. ${manualFields.house}` : '',
+        manualFields.apartment ? `кв. ${manualFields.apartment}` : '',
+        manualFields.zipCode,
+    ].filter(Boolean).join(', ');
 
-    const handleCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        // Ограничения на длину полей ввода для чистоты UI
-        if (name === 'number' && value.length > 16) return;
-        if (name === 'expiry' && value.length > 4) return;
-        if (name === 'cvc' && value.length > 3) return;
+    const resolvedAddress = useManual
+        ? manualAddress
+        : addresses.find(a => a.id === selectedId)
+            ? formatAddress(addresses.find(a => a.id === selectedId)!)
+            : '';
 
-        setCardData(prev => ({ ...prev, [name]: value }));
+    const validate = () => {
+        const e: Record<string, string> = {};
+        if (!name.trim())            e.name    = 'Введите ФИО';
+        if (!phone.trim())           e.phone   = 'Введите телефон';
+        if (!resolvedAddress)        e.address = 'Выберите или введите адрес';
+        setErrors(e);
+        return Object.keys(e).length === 0;
     };
 
-    const handleSubmitOrder = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const orderPayload = {
-            contactInfo: formData,
-            addressId: selectedAddressId,
-            paymentMethod,
-            ...(paymentMethod === 'card' && { cardDigits: cardData.number.slice(-4) })
-        };
-        console.log('Отправка заказа на NestJS:', orderPayload);
-        // Здесь вызов вашего API (ordersApi.create)
+        if (!validate()) return;
+        setSubmitting(true);
+        try {
+            const order = await ordersApi.checkout({ shippingAddress: resolvedAddress, phone: phone.trim() });
+            await clear();
+            setDone(true);
+            setTimeout(() => router.push(`/order/detail/${order.id}`), 1200);
+        } catch {
+            setErrors({ submit: 'Не удалось оформить заказ. Попробуйте ещё раз.' });
+        } finally {
+            setSubmitting(false);
+        }
     };
+
+    if (done) {
+        return (
+            <div className="min-h-[60vh] flex items-center justify-center">
+                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center space-y-4">
+                    <motion.div
+                        initial={{ scale: 0 }} animate={{ scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.1 }}
+                        className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto"
+                    >
+                        <CheckCircle2 size={28} className="text-green-600" />
+                    </motion.div>
+                    <h2 className="text-xl font-black uppercase tracking-tight">Заказ оформлен!</h2>
+                    <p className="text-sm text-zinc-400">Перенаправляем на страницу заказа…</p>
+                </motion.div>
+            </div>
+        );
+    }
+
+    if (items.length === 0) {
+        return (
+            <div className="min-h-[60vh] flex items-center justify-center text-center">
+                <div className="space-y-3">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Корзина пуста</p>
+                    <Link href="/" className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-tight hover:opacity-60 transition-opacity">
+                        <ArrowLeft size={14} /> В каталог
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="max-w-4xl mx-auto px-4 py-12 lg:py-24">
-            <h1 className="text-xl md:text-2xl font-bold uppercase tracking-widest text-zinc-900 mb-12">
-                Оформление заказа
-            </h1>
+        <div className="max-w-5xl mx-auto px-6 py-10 lg:py-16">
+            <Link href="/cart" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-black transition-colors group mb-10">
+                <ArrowLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
+                Назад в корзину
+            </Link>
 
-            <form onSubmit={handleSubmitOrder} className="space-y-12">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
 
-                {/* СЕКЦИЯ 1: КОНТАКТНЫЕ ДАННЫЕ */}
-                <section className="space-y-6">
-                    <div className="flex items-center gap-3 border-b border-zinc-100 pb-3">
-                        <span className="font-mono text-xs text-zinc-400">01 /</span>
-                        <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Контактные данные</h2>
+                {/* ── LEFT: Form ── */}
+                <form onSubmit={handleSubmit} className="lg:col-span-7 space-y-10">
+                    <div>
+                        <p className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 mb-1">Оформление заказа</p>
+                        <h1 className="text-3xl font-black uppercase tracking-tight leading-none">Доставка</h1>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] uppercase tracking-wider text-zinc-400 font-medium">ФИО Получателя</label>
-                            <input
-                                type="text"
-                                required
-                                value={formData.name}
-                                onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
-                                className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-xl px-4 py-3 text-xs font-medium outline-none transition-colors"
-                                placeholder="Иванов Иван Иванович"
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] uppercase tracking-wider text-zinc-400 font-medium">Телефон</label>
-                            <input
-                                type="tel"
-                                required
-                                value={formData.phone}
-                                onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))}
-                                className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-xl px-4 py-3 text-xs font-medium outline-none transition-colors"
-                                placeholder="+7 (999) 000-00-00"
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] uppercase tracking-wider text-zinc-400 font-medium">Email для чека</label>
-                            <input
-                                type="email"
-                                required
-                                value={formData.email}
-                                onChange={e => setFormData(p => ({ ...p, email: e.target.value }))}
-                                className="w-full bg-zinc-50 border border-zinc-200 focus:border-black rounded-xl px-4 py-3 text-xs font-medium outline-none transition-colors"
-                                placeholder="example@light.ru"
-                            />
-                        </div>
-                    </div>
-                </section>
+                    {/* 01 — Contacts */}
+                    <section className="space-y-4">
+                        <p className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 pb-3 border-b border-black/5">01 / Контакты</p>
+                        <Field label="ФИО получателя" icon={<User size={15} />} placeholder="Иванов Иван Иванович"
+                            value={name} onChange={e => setName(e.target.value)} error={errors.name} autoComplete="name" />
+                        <Field label="Телефон" icon={<Phone size={15} />} placeholder="+7 (999) 000-00-00" type="tel"
+                            value={phone} onChange={e => setPhone(e.target.value)} error={errors.phone} autoComplete="tel" />
+                    </section>
 
-                {/* СЕКЦИЯ 2: ВЫБОР АДРЕСА */}
-                <section className="space-y-6">
-                    <div className="flex items-center gap-3 border-b border-zinc-100 pb-3">
-                        <span className="font-mono text-xs text-zinc-400">02 /</span>
-                        <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Адрес доставки</h2>
-                    </div>
+                    {/* 02 — Address */}
+                    <section className="space-y-4">
+                        <p className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 pb-3 border-b border-black/5">02 / Адрес доставки</p>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        {savedAddresses.map((addr) => {
-                            const isSelected = selectedAddressId === addr.id;
-                            return (
-                                <div
-                                    key={addr.id}
-                                    onClick={() => setSelectedAddressId(addr.id)}
-                                    className={`relative cursor-pointer p-4 rounded-xl border transition-all flex flex-col justify-between h-32 select-none ${isSelected
-                                            ? 'border-black bg-white shadow-md'
-                                            : 'border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50'
-                                        }`}
-                                >
-                                    <div>
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded">
-                                                {addr.title}
-                                            </span>
-                                            {isSelected && (
-                                                <motion.div layoutId="activeCheck">
-                                                    <Check size={14} className="text-black" />
-                                                </motion.div>
-                                            )}
-                                        </div>
-                                        <p className="text-xs font-bold text-zinc-800">{addr.city}</p>
-                                        <p className="text-[11px] text-zinc-500 line-clamp-2 mt-1 leading-relaxed">{addr.street}</p>
+                        {addrLoading ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {[...Array(2)].map((_, i) => <div key={i} className="h-20 rounded-2xl bg-white animate-pulse" />)}
+                            </div>
+                        ) : (
+                            <>
+                                {/* Saved addresses */}
+                                {addresses.length > 0 && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <AnimatePresence>
+                                            {addresses.map(a => {
+                                                const isSelected = !useManual && selectedId === a.id;
+                                                return (
+                                                    <motion.button
+                                                        key={a.id}
+                                                        type="button"
+                                                        onClick={() => { setSelectedId(a.id); setUseManual(false); }}
+                                                        whileTap={{ scale: 0.98 }}
+                                                        className={`relative text-left p-4 rounded-2xl border transition-all ${
+                                                            isSelected
+                                                                ? 'border-[#111111] bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)]'
+                                                                : 'border-black/8 bg-white/60 hover:bg-white hover:border-black/20'
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-start justify-between gap-2 mb-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${isSelected ? 'bg-[#111111]' : 'bg-zinc-100'}`}>
+                                                                    <MapPin size={11} className={isSelected ? 'text-white' : 'text-zinc-400'} />
+                                                                </div>
+                                                                <span className="text-[10px] font-black uppercase tracking-wide text-zinc-700">
+                                                                    {a.label || a.city}
+                                                                </span>
+                                                            </div>
+                                                            {isSelected && (
+                                                                <div className="w-5 h-5 rounded-full bg-[#111111] flex items-center justify-center shrink-0">
+                                                                    <Check size={10} strokeWidth={3} className="text-white" />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-[11px] text-zinc-500 leading-relaxed pl-8">
+                                                            {formatAddress(a)}
+                                                        </p>
+                                                        {a.isDefault && (
+                                                            <span className="absolute top-2 right-8 text-[8px] font-black uppercase tracking-widest text-zinc-400">
+                                                                основной
+                                                            </span>
+                                                        )}
+                                                    </motion.button>
+                                                );
+                                            })}
+                                        </AnimatePresence>
+
+                                        {/* Manual toggle */}
+                                        <button
+                                            type="button"
+                                            onClick={() => { setUseManual(true); setSelectedId(null); }}
+                                            className={`text-left p-4 rounded-2xl border border-dashed transition-all flex items-center gap-3 ${
+                                                useManual
+                                                    ? 'border-[#111111] bg-white'
+                                                    : 'border-zinc-200 hover:border-zinc-400 text-zinc-400 hover:text-zinc-600'
+                                            }`}
+                                        >
+                                            <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${useManual ? 'bg-[#111111]' : 'bg-zinc-100'}`}>
+                                                <Plus size={11} className={useManual ? 'text-white' : 'text-zinc-400'} />
+                                            </div>
+                                            <span className="text-[10px] font-black uppercase tracking-wide">Другой адрес</span>
+                                        </button>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                )}
 
-                        {/* Кнопка добавления нового адреса */}
-                        <button
-                            type="button"
-                            className="p-4 rounded-xl border border-dashed border-zinc-300 hover:border-zinc-400 transition-colors flex flex-col items-center justify-center gap-2 h-32 text-zinc-400 hover:text-zinc-600"
-                        >
-                            <Plus size={16} />
-                            <span className="text-[10px] font-bold uppercase tracking-widest">Добавить адрес</span>
-                        </button>
-                    </div>
-                </section>
+                                {/* Manual input — structured fields */}
+                                <AnimatePresence>
+                                    {useManual && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div className="bg-white border border-black/8 rounded-2xl p-4 space-y-3">
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div className="col-span-2 space-y-1.5">
+                                                        <label className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400">Город <span className="text-red-400">*</span></label>
+                                                        <input
+                                                            placeholder="Москва"
+                                                            value={manualFields.city}
+                                                            onChange={e => setMF('city', e.target.value)}
+                                                            className="w-full bg-zinc-50 border border-black/8 rounded-xl px-3.5 py-2.5 text-sm font-medium outline-none focus:border-black/30 transition-colors placeholder:text-zinc-300"
+                                                        />
+                                                    </div>
+                                                    <div className="col-span-2 space-y-1.5">
+                                                        <label className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400">Улица <span className="text-red-400">*</span></label>
+                                                        <input
+                                                            placeholder="ул. Пушкина"
+                                                            value={manualFields.street}
+                                                            onChange={e => setMF('street', e.target.value)}
+                                                            className="w-full bg-zinc-50 border border-black/8 rounded-xl px-3.5 py-2.5 text-sm font-medium outline-none focus:border-black/30 transition-colors placeholder:text-zinc-300"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400">Дом <span className="text-red-400">*</span></label>
+                                                        <input
+                                                            placeholder="12"
+                                                            value={manualFields.house}
+                                                            onChange={e => setMF('house', e.target.value)}
+                                                            className="w-full bg-zinc-50 border border-black/8 rounded-xl px-3.5 py-2.5 text-sm font-medium outline-none focus:border-black/30 transition-colors placeholder:text-zinc-300"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400">Квартира</label>
+                                                        <input
+                                                            placeholder="45"
+                                                            value={manualFields.apartment}
+                                                            onChange={e => setMF('apartment', e.target.value)}
+                                                            className="w-full bg-zinc-50 border border-black/8 rounded-xl px-3.5 py-2.5 text-sm font-medium outline-none focus:border-black/30 transition-colors placeholder:text-zinc-300"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400">Индекс</label>
+                                                        <input
+                                                            placeholder="101000"
+                                                            value={manualFields.zipCode}
+                                                            onChange={e => setMF('zipCode', e.target.value)}
+                                                            className="w-full bg-zinc-50 border border-black/8 rounded-xl px-3.5 py-2.5 text-sm font-medium outline-none focus:border-black/30 transition-colors placeholder:text-zinc-300"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
 
-                {/* СЕКЦИЯ 3: ТИП ОПЛАТЫ */}
-                <section className="space-y-6">
-                    <div className="flex items-center gap-3 border-b border-zinc-100 pb-3">
-                        <span className="font-mono text-xs text-zinc-400">03 /</span>
-                        <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Способ оплаты</h2>
-                    </div>
+                                {errors.address && (
+                                    <p className="text-[10px] text-red-500 font-bold">{errors.address}</p>
+                                )}
 
-                    {/* Кастомный переключатель табов */}
-                    <div className="flex gap-2 bg-zinc-100 p-1 rounded-xl max-w-xs">
-                        <button
-                            type="button"
-                            onClick={() => setPaymentMethod('card')}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all relative ${paymentMethod === 'card' ? 'text-black font-extrabold' : 'text-zinc-400'}`}
-                        >
-                            {paymentMethod === 'card' && (
-                                <motion.div layoutId="activeTabBg" className="absolute inset-0 bg-white rounded-lg shadow-sm z-0" />
-                            )}
-                            <span className="relative z-10 flex items-center gap-1.5">
-                                <CreditCard size={14} /> Карта
-                            </span>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setPaymentMethod('sbp')}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all relative ${paymentMethod === 'sbp' ? 'text-black font-extrabold' : 'text-zinc-400'}`}
-                        >
-                            {paymentMethod === 'sbp' && (
-                                <motion.div layoutId="activeTabBg" className="absolute inset-0 bg-white rounded-lg shadow-sm z-0" />
-                            )}
-                            <span className="relative z-10 flex items-center gap-1.5">
-                                <Landmark size={14} /> СБП
-                            </span>
-                        </button>
-                    </div>
+                                {addresses.length === 0 && !useManual && (
+                                    <p className="text-[10px] text-zinc-400">
+                                        Нет сохранённых адресов.{' '}
+                                        <Link href="/profile" className="underline hover:text-black transition-colors">
+                                            Добавить в профиле
+                                        </Link>
+                                    </p>
+                                )}
+                            </>
+                        )}
+                    </section>
 
-                    {/* Динамическая зона контента оплаты */}
-                    <div className="bg-zinc-50 border border-zinc-200/60 rounded-2xl p-6">
-                        <AnimatePresence mode="wait">
-                            {paymentMethod === 'card' ? (
-                                <motion.div
-                                    key="card-form"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    className="flex flex-col lg:flex-row gap-8 items-center"
-                                >
-                                    {/* UI Компонент карты слева */}
-                                    <BankCardUi data={cardData} focusedField={focusedField} />
+                    <AnimatePresence>
+                        {errors.submit && (
+                            <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                                className="text-sm text-red-500 font-bold"
+                            >
+                                {errors.submit}
+                            </motion.p>
+                        )}
+                    </AnimatePresence>
 
-                                    {/* Поля ввода справа */}
-                                    <div className="flex-1 w-full grid grid-cols-2 gap-4">
-                                        <div className="col-span-2 space-y-1.5">
-                                            <label className="text-[9px] uppercase tracking-widest text-zinc-400 font-bold">Номер карты</label>
-                                            <input
-                                                type="text"
-                                                name="number"
-                                                placeholder="0000 0000 0000 0000"
-                                                value={cardData.number}
-                                                onChange={handleCardChange}
-                                                onFocus={() => setFocusedField('number')}
-                                                onBlur={() => setFocusedField('')}
-                                                className="w-full bg-white border border-zinc-200 focus:border-black rounded-xl px-4 py-3 text-xs font-mono outline-none transition-colors"
-                                            />
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <label className="text-[9px] uppercase tracking-widest text-zinc-400 font-bold">Срок действия</label>
-                                            <input
-                                                type="text"
-                                                name="expiry"
-                                                placeholder="MM/YY"
-                                                value={cardData.expiry}
-                                                onChange={handleCardChange}
-                                                onFocus={() => setFocusedField('expiry')}
-                                                onBlur={() => setFocusedField('')}
-                                                className="w-full bg-white border border-zinc-200 focus:border-black rounded-xl px-4 py-3 text-xs font-mono outline-none transition-colors"
-                                            />
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <label className="text-[9px] uppercase tracking-widest text-zinc-400 font-bold">CVC код</label>
-                                            <input
-                                                type="password"
-                                                name="cvc"
-                                                placeholder="•••"
-                                                value={cardData.cvc}
-                                                onChange={handleCardChange}
-                                                onFocus={() => setFocusedField('cvc')}
-                                                onBlur={() => setFocusedField('')}
-                                                className="w-full bg-white border border-zinc-200 focus:border-black rounded-xl px-4 py-3 text-xs font-mono outline-none transition-colors"
-                                            />
-                                        </div>
-                                        <div className="col-span-2 space-y-1.5">
-                                            <label className="text-[9px] uppercase tracking-widest text-zinc-400 font-bold">Имя владельца</label>
-                                            <input
-                                                type="text"
-                                                name="holder"
-                                                placeholder="IVAN IVANOV"
-                                                value={cardData.holder}
-                                                onChange={handleCardChange}
-                                                onFocus={() => setFocusedField('holder')}
-                                                onBlur={() => setFocusedField('')}
-                                                className="w-full bg-white border border-zinc-200 focus:border-black rounded-xl px-4 py-3 text-xs font-mono uppercase outline-none transition-colors"
-                                            />
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    key="sbp-form"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    className="text-center py-6 max-w-sm mx-auto space-y-4"
-                                >
-                                    {/* Заглушка под будущий QR/Инструкцию СБП */}
-                                    <div className="w-24 h-24 bg-white border-2 border-dashed border-zinc-200 rounded-xl mx-auto flex items-center justify-center text-zinc-300">
-                                        <Landmark size={32} className="text-zinc-400" />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-xs font-bold uppercase tracking-wider text-zinc-800">Система Быстрых Платежей</p>
-                                        <p className="text-[11px] text-zinc-400 leading-relaxed">
-                                            После нажатия кнопки оплаты откроется окно с QR-кодом для мгновенного подтверждения через приложение вашего банка.
-                                        </p>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </section>
-
-                {/* ФИНАЛЬНАЯ КНОПКА (если не используется липкий сайдбар) */}
-                <div className="pt-4">
                     <button
                         type="submit"
-                        className="w-full sm:w-auto bg-black text-white px-8 py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-zinc-900 transition-colors shadow-lg"
+                        disabled={submitting}
+                        className="w-full flex items-center justify-between bg-[#111111] text-white px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-zinc-800 transition-colors disabled:opacity-60 group"
                     >
-                        Подтвердить и оплатить
+                        <span>{submitting ? 'Оформляем…' : 'Подтвердить заказ'}</span>
+                        {submitting
+                            ? <Loader2 size={16} className="animate-spin" />
+                            : <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+                        }
                     </button>
+                </form>
+
+                {/* ── RIGHT: Summary ── */}
+                <div className="lg:col-span-5 lg:sticky lg:top-10 space-y-4">
+                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400">Ваш заказ</p>
+
+                    <div className="bg-white rounded-3xl border border-black/5 overflow-hidden">
+                        <div className="divide-y divide-black/5 max-h-72 overflow-y-auto">
+                            {items.map(item => (
+                                <div key={item.id} className="flex items-center gap-3 px-5 py-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-zinc-100 overflow-hidden shrink-0">
+                                        {item.images
+                                            ? <img src={item.images} alt={item.name} className="w-full h-full object-cover" />
+                                            : <div className="w-full h-full flex items-center justify-center"><Package size={16} className="text-zinc-300" /></div>
+                                        }
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-xs font-bold text-zinc-800 truncate">{item.name}</p>
+                                        <p className="text-[10px] text-zinc-400 mt-0.5">{item.quantity} шт.</p>
+                                    </div>
+                                    <span className="text-sm font-black shrink-0">
+                                        {(item.price * item.quantity).toLocaleString('ru-RU')} ₽
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="border-t border-black/5 px-5 py-4 space-y-2.5 bg-zinc-50/60">
+                            <div className="flex justify-between text-xs">
+                                <span className="text-zinc-400 font-medium">Товары ({items.length})</span>
+                                <span className="font-bold">{subtotal.toLocaleString('ru-RU')} ₽</span>
+                            </div>
+                            <div className="flex justify-between text-xs">
+                                <span className="text-zinc-400 font-medium">Доставка</span>
+                                <span className="font-black text-green-600 uppercase tracking-widest text-[10px]">Бесплатно</span>
+                            </div>
+                            <div className="flex justify-between items-baseline pt-2 border-t border-black/5">
+                                <span className="text-xs font-bold uppercase tracking-wide">Итого</span>
+                                <span className="text-xl font-black">{total.toLocaleString('ru-RU')} ₽</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Selected address preview */}
+                    <AnimatePresence>
+                        {resolvedAddress && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0 }}
+                                className="flex items-start gap-3 bg-white border border-black/5 rounded-2xl px-4 py-3.5"
+                            >
+                                <MapPin size={13} className="text-zinc-400 mt-0.5 shrink-0" />
+                                <p className="text-[11px] text-zinc-500 leading-relaxed">{resolvedAddress}</p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    <p className="text-[9px] text-zinc-400 text-center leading-relaxed">
+                        Нажимая «Подтвердить заказ», вы соглашаетесь с условиями доставки и возврата
+                    </p>
                 </div>
-            </form>
+            </div>
         </div>
     );
 };

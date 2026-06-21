@@ -102,7 +102,7 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                         </div>
 
                         <Link
-                            href={`/product/${product.id}`}
+                            href={`/product/${product.slug || product.id}`}
                             className="space-y-3 py-4 grow flex flex-col justify-center">
                             <div className="flex justify-between items-baseline gap-2">
                                 <h2 className="text-sm font-black uppercase tracking-tight truncate">{product.name}</h2>

@@ -1,11 +1,10 @@
 'use client'
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Search, Sliders, X } from "lucide-react"
+import { Check, Sliders } from "lucide-react"
 import { useCatalog } from "../module/catalog.context";
-import { CatalogCategories, CatalogColors, CatalogRange, CatalogSelect } from "..";
+import { CatalogCategories, CatalogRange, CatalogSelect } from "..";
 import { PremiumSpring } from "../module/catalog.animations";
-import { PageItem, PageStagger } from "@/components/Animations";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
 import { useSheetDrag } from "@/hooks/useSheetDrag";
 
@@ -14,12 +13,14 @@ export const CatalogFiltersUi = ({ className, style }: { className?: string; sty
         selectedCategory,
         selectedColors,
         maxPrice,
+        inStockOnly,
+        setInStockOnly,
         resetFilters,
         setIsOpenFilters,
         isOpenFilters
     } = useCatalog();
 
-    const isFiltered = selectedCategory !== "all" || selectedColors.length > 0 || maxPrice < 1500;
+    const isFiltered = selectedCategory !== "all" || selectedColors.length > 0 || maxPrice < 1500 || inStockOnly;
     const { headerHeight, dockHeight } = useHeaderHeight();
 
     // Подключаем наш обновленный хук умного трекинга скролла
@@ -33,9 +34,8 @@ export const CatalogFiltersUi = ({ className, style }: { className?: string; sty
     });
 
     const filtersContent = (
-        // Убираем безусловный overflow-y-auto, переносим его только на десктоп (lg)
-        <PageStagger className="p-6 space-y-6 lg:overflow-y-auto lg:overflow-x-hidden">
-            <PageItem>
+        <div className="p-6 space-y-6 lg:overflow-y-auto lg:overflow-x-hidden">
+            <div>
                 <div className="flex items-center justify-between border-b border-black/5 pb-4 h-9">
                     <span className="text-xs font-black uppercase tracking-wider flex items-center text-zinc-900">
                         <Sliders size={14} className="mr-2" /> Световые Сценарии
@@ -56,30 +56,34 @@ export const CatalogFiltersUi = ({ className, style }: { className?: string; sty
                             </motion.button>
                         )}
                     </AnimatePresence>
-
-                    {/* debug
-                     <button
-                        className="lg:hidden block"
-                        onClick={onClose}
-                    >
-                        <X size={16} />
-                    </button>
-                    */}
                 </div>
-            </PageItem>
-            <PageItem>
+            </div>
+            <div>
                 <CatalogCategories />
-            </PageItem>
-            <PageItem>
-                <CatalogColors />
-            </PageItem>
-            <PageItem className="xs:block sm:hidden">
+            </div>
+            <div className="xs:block sm:hidden">
                 <CatalogSelect />
-            </PageItem>
-            <PageItem>
+            </div>
+            <div>
                 <CatalogRange />
-            </PageItem>
-        </PageStagger>
+            </div>
+            <div>
+                <p className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-400 mb-3">Наличие</p>
+                <button
+                    onClick={() => setInStockOnly(!inStockOnly)}
+                    className="flex items-center gap-3 group w-full"
+                >
+                    <div className={`w-4 h-4 rounded-md border-[1.5px] flex items-center justify-center shrink-0 transition-all ${
+                        inStockOnly ? 'bg-[#111111] border-transparent' : 'border-zinc-300 group-hover:border-zinc-500'
+                    }`}>
+                        {inStockOnly && <Check size={9} strokeWidth={3} className="text-white" />}
+                    </div>
+                    <span className="text-xs font-bold text-zinc-700 group-hover:text-black transition-colors">
+                        Только в наличии
+                    </span>
+                </button>
+            </div>
+        </div>
     );
 
     return (

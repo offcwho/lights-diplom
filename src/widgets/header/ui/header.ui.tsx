@@ -1,6 +1,6 @@
 'use client'
 
-import { Bell, Heart, Search, ShoppingBag, Sliders, User, X } from "lucide-react"
+import { Heart, Search, ShoppingBag, Sliders, User, X } from "lucide-react"
 import { Navigation } from ".."
 import Link from "next/link"
 import { usePathname } from "next/navigation";
@@ -67,7 +67,6 @@ export const HeaderUi = () => {
                                 </span>
                             )}
                         </Link>
-                        {user && <Announcment className="md:relative" />}
                         <Link
                             href={user ? '/profile' : '/sign-in'}
                             className={`p-2 rounded-full transition-colors ${isActive('/profile') ? 'bg-black text-white' : 'hover:bg-black/5'}`}
@@ -126,7 +125,6 @@ export const HeaderUi = () => {
                                     <Heart size={19} fill={favorites.length > 0 ? 'currentColor' : 'none'} />
                                     {favorites.length > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-600 rounded-full" />}
                                 </Link>
-                                <Announcment />
                             </div>
                         }
                     </motion.div>
@@ -182,14 +180,5 @@ export const HeaderUi = () => {
                 </div>
             </Glass>
         </header>
-    )
-}
-
-const Announcment = ({ className }: { className?: string }) => {
-    return (
-        <button className={`${className ?? ''} relative w-11 h-11 md:w-12 md:h-12 flex items-center justify-center bg-black rounded-2xl text-white/90 active:scale-95 transition`}>
-            <Bell size={20} />
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-amber-500 rounded-full ring-2 ring-black" />
-        </button>
     )
 }

@@ -1,11 +1,13 @@
+'use client'
+
 import { Container } from "@/components/Container"
-import { FavouritesHeader, FavouritesList, FavouritesPanel } from ".."
+import { FavouritesList } from ".."
+import { FavouritesHeaderUi } from "./favourites-header.ui"
 
 export const FavouritesUi = () => {
     return (
-        <Container className="xs:space-y-4">
-            <FavouritesHeader />
-            <FavouritesPanel />
+        <Container className="py-8 lg:py-12 space-y-8">
+            <FavouritesHeaderUi />
             <FavouritesList />
         </Container>
     )

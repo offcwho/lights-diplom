@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import type {
-    AuthResponse, Cart, Category, Order, Paginated, Product, ProductQuery, User,
+    Address, AuthResponse, Banner, Cart, Category, Order, Paginated, Product, ProductQuery, Review, User,
 } from './types';
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:9000/api';
@@ -144,6 +144,51 @@ export const ordersApi = {
     },
     async getOne(id: string) {
         const { data } = await api.get<Order>(`/orders/${id}`);
+        return data;
+    },
+    async pay(id: string) {
+        const { data } = await api.post<Order>(`/orders/${id}/pay`);
+        return data;
+    },
+};
+
+/* --------------------------- Addresses -------------------------- */
+type AddressDto = { label?: string; city: string; street: string; house: string; apartment?: string; zipCode?: string; isDefault?: boolean };
+
+export const addressesApi = {
+    async list() {
+        const { data } = await api.get<Address[]>('/addresses');
+        return data;
+    },
+    async create(dto: AddressDto) {
+        const { data } = await api.post<Address>('/addresses', dto);
+        return data;
+    },
+    async update(id: string, dto: Partial<AddressDto>) {
+        const { data } = await api.patch<Address>(`/addresses/${id}`, dto);
+        return data;
+    },
+    async remove(id: string) {
+        await api.delete(`/addresses/${id}`);
+    },
+};
+
+/* ---------------------------- Banners --------------------------- */
+export const bannersApi = {
+    async list() {
+        const { data } = await api.get<Banner[]>('/banners');
+        return data;
+    },
+};
+
+/* ---------------------------- Reviews --------------------------- */
+export const reviewsApi = {
+    async list(productId: string) {
+        const { data } = await api.get<Review[]>(`/products/${productId}/reviews`);
+        return data;
+    },
+    async create(productId: string, dto: { rating: number; comment: string }) {
+        const { data } = await api.post<Review>(`/products/${productId}/reviews`, dto);
         return data;
     },
 };

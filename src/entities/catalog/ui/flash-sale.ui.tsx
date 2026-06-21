@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Zap } from "lucide-react";
 
 const useCountdown = (target: Date) => {
     const [left, setLeft] = useState(() => Math.max(0, target.getTime() - Date.now()));
@@ -14,24 +15,31 @@ const useCountdown = (target: Date) => {
 };
 
 export const FlashSaleUi = () => {
-    // конец акции через 24 часа от текущего момента
     const saleEndsAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const [h, m, s] = useCountdown(saleEndsAt);
 
-    const [h, m, s] = useCountdown(saleEndsAt); // дата конца акции
     return (
-        <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-black tracking-tight">Распродажа</h2>
-            <div className="flex items-center gap-1.5">
-                <span className="text-[10px] text-zinc-400 font-medium mr-1">До конца:</span>
-                {[h, m, s].map((v, i) => (
-                    <span key={i} className="flex items-center gap-1.5">
-                        <span className="bg-[#111111] text-white text-[10px] font-mono font-bold
-                                         w-7 h-6 rounded-md flex items-center justify-center tabular-nums">
-                            {v}
+        <div className="flex items-center gap-4 mb-6 px-5 py-3.5 bg-[#111111] rounded-2xl text-white">
+            <div className="flex items-center gap-2 shrink-0">
+                <Zap size={14} className="text-amber-400 fill-amber-400" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Flash Sale</span>
+            </div>
+
+            <div className="flex-1 h-px bg-white/10" />
+
+            <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[10px] text-white/40 font-medium">До конца:</span>
+                <div className="flex items-center gap-1">
+                    {[h, m, s].map((v, i) => (
+                        <span key={i} className="flex items-center gap-1">
+                            <span className="bg-white/10 text-white text-[11px] font-mono font-black
+                                             w-8 h-7 rounded-lg flex items-center justify-center tabular-nums tracking-tight">
+                                {v}
+                            </span>
+                            {i < 2 && <span className="text-white/30 text-xs font-bold">:</span>}
                         </span>
-                        {i < 2 && <span className="text-zinc-300 text-xs font-bold">:</span>}
-                    </span>
-                ))}
+                    ))}
+                </div>
             </div>
         </div>
     );
