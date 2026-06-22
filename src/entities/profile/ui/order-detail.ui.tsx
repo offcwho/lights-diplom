@@ -5,6 +5,7 @@ import { ordersApi } from '@/lib/api';
 import type { Order, OrderStatus } from '@/lib/types';
 import Link from 'next/link';
 import { ArrowLeft, Box, CheckCircle2, Clock, CreditCard, Loader2, Package, Truck, XCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 const STATUS_MAP: Record<OrderStatus, { label: string; color: string; icon: React.ReactNode }> = {
     new: { label: 'Ожидает оплаты', color: 'text-amber-600 bg-amber-50 border-amber-200', icon: <Clock size={15} /> },
@@ -68,17 +69,16 @@ export const OrderDetailUi = ({ orderId }: { orderId: string }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [paying, setPaying] = useState(false);
-    const [payError, setPayError] = useState('');
 
     const handlePay = async () => {
         if (!order) return;
         setPaying(true);
-        setPayError('');
         try {
             const updated = await ordersApi.pay(order.id);
             setOrder(updated);
+            toast.success('Оплата прошла успешно!');
         } catch {
-            setPayError('Не удалось провести оплату. Попробуйте ещё раз.');
+            toast.error('Не удалось провести оплату. Попробуйте ещё раз.');
         } finally {
             setPaying(false);
         }
@@ -168,7 +168,6 @@ export const OrderDetailUi = ({ orderId }: { orderId: string }) => {
                             {paying ? <Loader2 size={13} className="animate-spin" /> : <CreditCard size={13} />}
                             {paying ? 'Обработка…' : `Оплатить ${order.total.toLocaleString('ru-RU')} ₽`}
                         </button>
-                        {payError && <p className="text-[10px] text-red-500 font-bold">{payError}</p>}
                     </div>
                 </div>
             )}

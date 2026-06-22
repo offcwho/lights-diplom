@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Check, Loader2, MapPin, Pencil, Plus, Star, Trash2, X } from 'lucide-react';
 import { addressesApi } from '@/lib/api';
 import type { Address } from '@/lib/types';
+import { toast } from 'sonner';
 
 /* ── Form state ─────────────────────────────────────────────────── */
 type FormData = {
@@ -251,14 +252,18 @@ export const ProfileAddressesTab = () => {
                     const list = prev.map(a => a.id === updated.id ? updated : a);
                     return data.isDefault ? list.map(a => ({ ...a, isDefault: a.id === updated.id })) : list;
                 });
+                toast.success('Адрес обновлён');
             } else {
                 const created = await addressesApi.create(dto);
                 setAddresses(prev => {
                     const list = data.isDefault ? prev.map(a => ({ ...a, isDefault: false })) : prev;
                     return [...list, created];
                 });
+                toast.success('Адрес добавлен');
             }
             closeModal();
+        } catch {
+            toast.error('Не удалось сохранить адрес');
         } finally {
             setSaving(false);
         }
@@ -269,6 +274,9 @@ export const ProfileAddressesTab = () => {
         try {
             await addressesApi.remove(id);
             setAddresses(prev => prev.filter(a => a.id !== id));
+            toast.success('Адрес удалён');
+        } catch {
+            toast.error('Не удалось удалить адрес');
         } finally {
             setDeletingId(null);
         }
@@ -278,7 +286,10 @@ export const ProfileAddressesTab = () => {
         try {
             const updated = await addressesApi.update(id, { isDefault: true });
             setAddresses(prev => prev.map(a => ({ ...a, isDefault: a.id === updated.id })));
-        } catch { /* ignore */ }
+            toast.success('Основной адрес изменён');
+        } catch {
+            toast.error('Не удалось изменить основной адрес');
+        }
     };
 
     if (loading) {

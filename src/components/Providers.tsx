@@ -4,6 +4,7 @@ import { FavouritesProvider } from "@/entities/favorites";
 import { AuthProvider } from "@/hooks/AuthContext";
 import { HeaderHeightProvider } from "@/hooks/useHeaderHeight";
 import { StuckProvider } from "@/hooks/useStack";
+import { Toaster } from "sonner";
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
     return (
@@ -15,6 +16,7 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
                             <FavouritesProvider>
                                 <CartProvider>
                                     {children}
+                                    <Toaster richColors position="bottom-right" />
                                 </CartProvider>
                             </FavouritesProvider>
                         </CatalogProvider>

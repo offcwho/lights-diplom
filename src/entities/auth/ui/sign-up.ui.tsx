@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { AuthShell, Eyebrow, Field, PrimaryButton, SwitchLink } from ".."
 import { useAuth } from "@/hooks/AuthContext"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 export const SignUpPage = () => {
     const { register, user } = useAuth();
@@ -14,12 +15,15 @@ export const SignUpPage = () => {
         if (user) route.push('/');
     }, [user])
 
-    console.log(user)
-
-    const onSubmit = (e: React.FormEvent) => {
+    const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        register(form.name, form.email, form.password);
-        console.log("signup", form) // TODO
+        try {
+            await register(form.name, form.email, form.password);
+            toast.success('Аккаунт создан! Добро пожаловать 🎉');
+        } catch (err: unknown) {
+            const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+            toast.error(msg || 'Ошибка регистрации. Попробуйте ещё раз.');
+        }
     }
 
     return (

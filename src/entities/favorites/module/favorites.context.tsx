@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { Product } from "@/lib/types";
 import { favouritesApi } from "@/lib/api"; // Путь к твоему файлу API
+import { toast } from "sonner";
 
 type FavouritesContextValue = {
     favouriteItems: Product[];
@@ -41,11 +42,11 @@ export const FavouritesProvider = ({ children }: { children: React.ReactNode }) 
     // 2. ИНТЕГРАЦИЯ МЕТОДОВ С API
     const addItemFavourite = async (id: string) => {
         try {
-            // Отправляем на бэк, он возвращает обновленный массив избранного
             const updatedItems = await favouritesApi.add(id);
             setFavouriteItems(updatedItems);
-        } catch (err) {
-            console.error("Не удалось добавить в избранное:", err);
+            toast.success('Добавлено в избранное');
+        } catch {
+            toast.error('Не удалось добавить в избранное');
         }
     };
 
@@ -53,10 +54,10 @@ export const FavouritesProvider = ({ children }: { children: React.ReactNode }) 
         try {
             const updatedItems = await favouritesApi.remove(id);
             setFavouriteItems(updatedItems);
-            // Убираем из выбранных чекбоксов, если товар там был
             setSelectedIds(prev => prev.filter(selectedId => selectedId !== id));
-        } catch (err) {
-            console.error("Не удалось удалить из избранного:", err);
+            toast.success('Удалено из избранного');
+        } catch {
+            toast.error('Не удалось удалить из избранного');
         }
     };
 

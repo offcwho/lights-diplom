@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/AuthContext';
 import { useCart } from '@/entities/cart/module/cart.context';
 import { addressesApi, ordersApi } from '@/lib/api';
 import type { Address } from '@/lib/types';
+import { toast } from 'sonner';
 
 function Field({
     label, icon, error, ...props
@@ -90,9 +91,11 @@ export const CheckoutUi = () => {
         try {
             const order = await ordersApi.checkout({ shippingAddress: resolvedAddress, phone: phone.trim() });
             await clear();
+            toast.success('Заказ успешно оформлен!');
             setDone(true);
             setTimeout(() => router.push(`/order/detail/${order.id}`), 1200);
         } catch {
+            toast.error('Не удалось оформить заказ. Попробуйте ещё раз.');
             setErrors({ submit: 'Не удалось оформить заказ. Попробуйте ещё раз.' });
         } finally {
             setSubmitting(false);

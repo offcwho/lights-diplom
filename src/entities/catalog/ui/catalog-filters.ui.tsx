@@ -89,7 +89,7 @@ export const CatalogFiltersUi = ({ className, style }: { className?: string; sty
     return (
         <motion.div
             ref={rootRef}
-            className={`${className} xs:fixed z-10000 xs:bottom-0 xs:rounded-b-none md:rounded-3xl xs:w-full xs:left-0 w-auto filters-sheet backdrop-blur-xl bg-white/30 rounded-3xl border border-black/5 lg:sticky lg:top-6 shadow-[0_8px_30px_rgba(0,0,0,0.02)] overflow-hidden pb-(--sheet-pb) [--sheet-pb:0px]`}
+            className={`${className} xs:fixed z-9998 xs:bottom-0 xs:rounded-b-none md:rounded-3xl xs:w-full xs:left-0 w-auto filters-sheet backdrop-blur-xl bg-white/30 rounded-3xl border border-black/5 lg:sticky lg:top-6 shadow-[0_8px_30px_rgba(0,0,0,0.02)] overflow-hidden pb-(--sheet-pb) [--sheet-pb:0px]`}
             style={{
                 ...style,
                 ['--sheet-offset' as string]: `${headerHeight + dockHeight + 36}px`,

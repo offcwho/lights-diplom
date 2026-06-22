@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { cartApi, authApi } from "@/lib/api";
 import type { Cart as ApiCart } from "@/lib/types";
 import { useAuth } from "@/hooks/AuthContext";
+import { toast } from "sonner";
 
 export type CartItem = {
     id: string;          // id товара (совпадает с product.id из каталога)
@@ -64,11 +65,15 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Добавить товар (бэк сам делает +1, если уже есть)
     const addItem = async (id: string | number) => {
-        if (!authApi.isAuthenticated()) return;
+        if (!authApi.isAuthenticated()) {
+            toast.error('Войдите, чтобы добавлять товары в корзину');
+            return;
+        }
         try {
             const cart = await cartApi.add(String(id), 1);
             setItems(toCartItems(cart));
-        } catch { /* ignore */ }
+            toast.success('Товар добавлен в корзину');
+        } catch { toast.error('Не удалось добавить товар'); }
     };
 
     // delta (+1 / -1) переводим в абсолютное количество для бэка
@@ -89,6 +94,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const cart = await cartApi.removeItem(current.cartItemId);
             setItems(toCartItems(cart));
+            toast.success('Товар удалён из корзины');
         } catch { /* ignore */ }
     };
 

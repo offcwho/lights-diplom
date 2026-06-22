@@ -5,6 +5,7 @@ import { AuthShell, Eyebrow, Field, PrimaryButton, SwitchLink } from ".."
 import Link from "next/link"
 import { useAuth } from "@/hooks/AuthContext"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 export const SignInPage = () => {
     const { login, user } = useAuth();
@@ -15,10 +16,15 @@ export const SignInPage = () => {
         if (user) route.push('/');
     }, [user])
 
-    const onSubmit = (e: React.FormEvent) => {
+    const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        login(form.email, form.password)
-        console.log("login", form) // TODO
+        try {
+            await login(form.email, form.password);
+            toast.success('Вы успешно вошли!');
+        } catch (err: unknown) {
+            const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+            toast.error(msg || 'Неверный email или пароль.');
+        }
     }
 
     return (

@@ -51,9 +51,16 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                 <div className="pt-4 pb-1 border-t border-black/5 mt-4 flex items-center justify-between gap-2">
                     <div className="min-w-0">
                         <h3 className="text-xs font-black tracking-tight uppercase truncate">{product.name}</h3>
-                        <p className={`text-[10px] font-bold uppercase mt-0.5 ${cartItem ? 'text-green-600' : 'text-zinc-400'}`}>
-                            {cartItem ? `В корзине · ${cartItem.quantity}` : `From $${product.price}`}
-                        </p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-sm font-black tracking-tight">
+                                {Number(product.price).toLocaleString('ru-RU')} ₽
+                            </span>
+                            {cartItem && (
+                                <span className="text-[9px] font-black uppercase tracking-wider text-green-600">
+                                    · {cartItem.quantity} в корзине
+                                </span>
+                            )}
+                        </div>
                     </div>
 
                     <motion.button
@@ -106,7 +113,7 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                             className="space-y-3 py-4 grow flex flex-col justify-center">
                             <div className="flex justify-between items-baseline gap-2">
                                 <h2 className="text-sm font-black uppercase tracking-tight truncate">{product.name}</h2>
-                                <span className="text-sm font-mono font-bold shrink-0">${product.price}.00</span>
+                                <span className="text-sm font-mono font-bold shrink-0">{Number(product.price).toLocaleString('ru-RU')} ₽</span>
                             </div>
                             <p className="text-[11px] text-zinc-500 leading-relaxed font-medium line-clamp-3">
                                 {product.desc}

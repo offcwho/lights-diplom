@@ -41,38 +41,57 @@ export const HeaderUi = () => {
                 <div className="hidden md:flex justify-between items-center">
                     <Link
                         href={'/'}
-                        className={`text-2xl font-black tracking-tighter cursor-pointer select-none ${!user && 'mx-auto'}`}
+                        className={`text-2xl font-black tracking-tighter cursor-pointer select-none`}
                     >
                         <Image src={AppIcon} width={160} alt="Логотип компании" />
                     </Link>
 
                     {/*<Navigation /> */}
 
-                    <div className="items-center space-x-2 hidden sm:flex">
-                        <Link
-                            href={'/favourites'}
-                            className={`p-2 rounded-full transition-colors relative ${isActive('/favourites') ? 'bg-black text-white' : 'hover:bg-black/5'}`}
-                        >
-                            <Heart size={20} fill={favorites.length > 0 ? "currentColor" : "none"} />
-                            {favorites.length > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-amber-700 rounded-full" />}
-                        </Link>
-                        <Link
-                            href={'/cart'}
-                            className={`p-2 rounded-full transition-colors relative ${isActive('/cart') ? 'bg-black text-white' : 'hover:bg-black/5'}`}
-                        >
-                            <ShoppingBag size={20} />
-                            {items.length > 0 && (
-                                <span className="absolute -top-0.5 -right-0.5 bg-black text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                                    {cartCount}
-                                </span>
-                            )}
-                        </Link>
-                        <Link
-                            href={user ? '/profile' : '/sign-in'}
-                            className={`p-2 rounded-full transition-colors ${isActive('/profile') ? 'bg-black text-white' : 'hover:bg-black/5'}`}
-                        >
-                            <User size={20} />
-                        </Link>
+                    <div className="items-center gap-2 hidden sm:flex">
+                        {user ? (
+                            <>
+                                <Link
+                                    href={'/favourites'}
+                                    className={`p-2 rounded-full transition-colors relative ${isActive('/favourites') ? 'bg-black text-white' : 'hover:bg-black/5'}`}
+                                >
+                                    <Heart size={20} fill={favorites.length > 0 ? "currentColor" : "none"} />
+                                    {favorites.length > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-amber-700 rounded-full" />}
+                                </Link>
+                                <Link
+                                    href={'/cart'}
+                                    className={`p-2 rounded-full transition-colors relative ${isActive('/cart') ? 'bg-black text-white' : 'hover:bg-black/5'}`}
+                                >
+                                    <ShoppingBag size={20} />
+                                    {items.length > 0 && (
+                                        <span className="absolute -top-0.5 -right-0.5 bg-black text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                                            {cartCount}
+                                        </span>
+                                    )}
+                                </Link>
+                                <Link
+                                    href={'/profile'}
+                                    className={`p-2 rounded-full transition-colors ${isActive('/profile') ? 'bg-black text-white' : 'hover:bg-black/5'}`}
+                                >
+                                    <User size={20} />
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                <Link
+                                    href={'/sign-in'}
+                                    className="text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-xl hover:bg-black/5 transition-colors"
+                                >
+                                    Войти
+                                </Link>
+                                <Link
+                                    href={'/sign-up'}
+                                    className="text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-xl bg-[#111111] text-white hover:bg-zinc-800 transition-colors"
+                                >
+                                    Регистрация
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -112,11 +131,11 @@ export const HeaderUi = () => {
                                 </>
                             ) : (
                                 <Link href="/" className="inline-block select-none w-full">
-                                    <Image src={AppIcon} width={120} alt="Логотип компании" className="mx-auto" />
+                                    <Image src={AppIcon} width={120} alt="Логотип компании"/>
                                 </Link>
                             )}
                         </div>
-                        {user &&
+                        {user ? (
                             <div className="flex items-center gap-2 shrink-0">
                                 <Link
                                     href={'/favourites'}
@@ -126,7 +145,22 @@ export const HeaderUi = () => {
                                     {favorites.length > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-600 rounded-full" />}
                                 </Link>
                             </div>
-                        }
+                        ) : (
+                            <div className="flex items-center gap-2 shrink-0">
+                                <Link
+                                    href={'/sign-in'}
+                                    className="text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-xl hover:bg-black/5 transition-colors"
+                                >
+                                    Войти
+                                </Link>
+                                <Link
+                                    href={'/sign-up'}
+                                    className="text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-xl bg-[#111111] text-white hover:bg-zinc-800 transition-colors"
+                                >
+                                    Регистрация
+                                </Link>
+                            </div>
+                        )}
                     </motion.div>
 
                     {/* Row 2 — поиск + избранное + фильтр (появляется при скролле) */}

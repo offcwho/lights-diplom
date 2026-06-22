@@ -7,12 +7,23 @@ import { useHeaderHeight } from "@/hooks/useHeaderHeight";
 import { useState } from "react";
 import { useSheetDrag } from "@/hooks/useSheetDrag"; // Путь к вашему хуку
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export const CartTotalsUi = ({ className, style }: { className?: string; style?: React.CSSProperties }) => {
     const { items, coupon, setCoupon, subtotal, total } = useCart();
     const [isOpen, setIsOpen] = useState(false);
     const { headerHeight, dockHeight } = useHeaderHeight();
     const route = useRouter();
+
+    const handleApplyCoupon = () => {
+        const code = coupon.trim().toUpperCase();
+        if (!code) { toast.error('Введите промокод'); return; }
+        if (code === 'LIGHTS10' || code === 'WELCOME') {
+            toast.success(`Промокод ${code} применён — скидка 10%!`);
+        } else {
+            toast.error('Промокод не найден или уже использован');
+        }
+    };
 
     const { rootRef, transformY, paddingBottom } = useSheetDrag({
         isOpen,
@@ -66,7 +77,10 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
                     onChange={(e) => setCoupon(e.target.value)}
                     className="bg-transparent border border-black/10 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider outline-none focus:border-black/30 transition-colors placeholder:text-zinc-400 flex-1"
                 />
-                <button className="bg-white hover:bg-zinc-900 hover:text-white text-black border border-black/10 rounded-xl px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-widest transition-all">
+                <button
+                    onClick={handleApplyCoupon}
+                    className="bg-white hover:bg-zinc-900 hover:text-white text-black border border-black/10 rounded-xl px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-widest transition-all"
+                >
                     Применить
                 </button>
             </div>
