@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import type {
-    Address, AuthResponse, Banner, Cart, Category, Order, Paginated, Product, ProductQuery, Review, User,
+    Address, AuthResponse, Banner, Cart, Category, Characteristic, Order, Paginated, Product, ProductFilters, ProductQuery, Review, User,
 } from './types';
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:9000/api';
@@ -76,6 +76,10 @@ export const productsApi = {
     },
     async getBySlug(slug: string) {
         const { data } = await api.get<Product>(`/products/${slug}`);
+        return data;
+    },
+    async getFilters() {
+        const { data } = await api.get<ProductFilters>('/products/filters');
         return data;
     },
 };
@@ -170,6 +174,14 @@ export const addressesApi = {
     },
     async remove(id: string) {
         await api.delete(`/addresses/${id}`);
+    },
+};
+
+/* ----------------------- Characteristics ------------------------ */
+export const characteristicsApi = {
+    async list() {
+        const { data } = await api.get<Characteristic[]>('/characteristics');
+        return data;
     },
 };
 

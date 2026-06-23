@@ -49,7 +49,7 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
             <div className="space-y-4 border-b border-black/5 pb-6 text-xs font-medium">
                 <div className="flex justify-between">
                     <span className="text-zinc-500 uppercase tracking-wider">Итого</span>
-                    <span className="font-mono font-bold">${subtotal.toFixed(2)}</span>
+                    <span className="font-mono font-bold">{subtotal.toFixed(2)} ₽</span>
                 </div>
                 <div className="flex justify-between items-baseline">
                     <span className="text-zinc-500 uppercase tracking-wider">Доставка</span>
@@ -65,7 +65,7 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
                     animate={{ scale: 1, opacity: 1 }}
                     className="text-xl font-mono font-black tracking-tight"
                 >
-                    ${total.toFixed(2)}
+                    {total.toFixed(2)} ₽
                 </motion.span>
             </div>
 

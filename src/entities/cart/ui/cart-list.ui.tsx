@@ -118,13 +118,13 @@ export const CartListUi = () => {
                                     </div>
                                     <div className="space-y-1">
                                         <span className="text-[9px] font-mono font-bold text-zinc-400 uppercase tracking-wider block">
-                                            {item.cartItemId}
+                                            {item.category}
                                         </span>
                                         <h3 className="text-sm font-black uppercase tracking-tight text-zinc-900">
                                             {item.name}
                                         </h3>
                                         <p className="text-xs text-zinc-500 font-medium">
-                                            {item.price}
+                                            {item.price} ₽
                                         </p>
                                     </div>
                                 </div>
@@ -153,7 +153,7 @@ export const CartListUi = () => {
                                     {/* Цена */}
                                     <div className="text-right min-w-17.5">
                                         <span className="text-xs font-mono font-black text-zinc-900">
-                                            ${(item.price * item.quantity).toFixed(2)}
+                                            {(item.price * item.quantity).toFixed(2)} ₽
                                         </span>
                                     </div>
 

@@ -3,6 +3,7 @@ export { CatalogCategoriesComponent as CatalogCategories } from "./components/ca
 export { CatalogColorsComponent as CatalogColors } from "./components/catalog-colors.component";
 export { CatalogRangeComponent as CatalogRange } from "./components/catalog-range.component";
 export { CatalogSelectComponent as CatalogSelect } from "./components/catalog-select.component";
+export { CatalogSpecFiltersComponent as CatalogSpecFilters } from "./components/catalog-spec-filters.component";
 
 
 //Ui 

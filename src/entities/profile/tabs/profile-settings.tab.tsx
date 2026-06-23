@@ -6,6 +6,25 @@ import { Toggle } from '@/components/Toggle';
 import { upload } from '@vercel/blob/client';
 import { useAuth } from '@/hooks/AuthContext';
 
+function applyPhoneMask(raw: string): string {
+    let digits = raw.replace(/\D/g, '');
+    if (!digits) return '';
+    if (digits.startsWith('8')) digits = '7' + digits.slice(1);
+    if (!digits.startsWith('7')) digits = '7' + digits;
+    digits = digits.slice(0, 11);
+    const local = digits.slice(1);
+    let result = '+7';
+    if (local.length === 0) return result;
+    result += ' (' + local.slice(0, 3);
+    if (local.length <= 3) return result;
+    result += ') ' + local.slice(3, 6);
+    if (local.length <= 6) return result;
+    result += '-' + local.slice(6, 8);
+    if (local.length <= 8) return result;
+    result += '-' + local.slice(8, 10);
+    return result;
+}
+
 export const ProfileSettingsTab = () => {
     const { user, refreshUser } = useAuth(); // Предполагается, что refreshUser обновляет глобальное состояние юзера
 
@@ -179,19 +198,9 @@ export const ProfileSettingsTab = () => {
                         <input
                             type="tel"
                             value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
+                            onChange={(e) => setPhone(applyPhoneMask(e.target.value))}
                             placeholder="+7 (999) 000-00-00"
-                            className="w-full bg-white border border-black/10 rounded-xl px-4 py-2.5 text-xs font-medium outline-none focus:border-black/30 transition-colors"
-                        />
-                    </label>
-
-                    <label className="block">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block">Адрес доставки</span>
-                        <input
-                            type="text"
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                            placeholder="г. Москва, ул. Световая, д. 10"
+                            inputMode="tel"
                             className="w-full bg-white border border-black/10 rounded-xl px-4 py-2.5 text-xs font-medium outline-none focus:border-black/30 transition-colors"
                         />
                     </label>

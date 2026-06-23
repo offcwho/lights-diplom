@@ -30,6 +30,25 @@ function formatAddress(a: Address) {
     return [a.city, a.street, `д. ${a.house}`, a.apartment ? `кв. ${a.apartment}` : '', a.zipCode].filter(Boolean).join(', ');
 }
 
+function applyPhoneMask(raw: string): string {
+    let digits = raw.replace(/\D/g, '');
+    if (!digits) return '';
+    if (digits.startsWith('8')) digits = '7' + digits.slice(1);
+    if (!digits.startsWith('7')) digits = '7' + digits;
+    digits = digits.slice(0, 11);
+    const local = digits.slice(1);
+    let result = '+7';
+    if (local.length === 0) return result;
+    result += ' (' + local.slice(0, 3);
+    if (local.length <= 3) return result;
+    result += ') ' + local.slice(3, 6);
+    if (local.length <= 6) return result;
+    result += '-' + local.slice(6, 8);
+    if (local.length <= 8) return result;
+    result += '-' + local.slice(8, 10);
+    return result;
+}
+
 export const CheckoutUi = () => {
     const { user } = useAuth();
     const { items, total, subtotal, clear } = useCart();
@@ -48,6 +67,7 @@ export const CheckoutUi = () => {
     const [useManual, setUseManual] = useState(false);
     const [manualFields, setManualFields] = useState({ city: '', street: '', house: '', apartment: '', zipCode: '' });
     const setMF = (k: keyof typeof manualFields, v: string) => setManualFields(p => ({ ...p, [k]: v }));
+    const [saveAddress, setSaveAddress] = useState(false);
 
     useEffect(() => {
         addressesApi.list()
@@ -90,6 +110,17 @@ export const CheckoutUi = () => {
         setSubmitting(true);
         try {
             const order = await ordersApi.checkout({ shippingAddress: resolvedAddress, phone: phone.trim() });
+            if (useManual && saveAddress && manualFields.city && manualFields.street && manualFields.house) {
+                try {
+                    await addressesApi.create({
+                        city: manualFields.city,
+                        street: manualFields.street,
+                        house: manualFields.house,
+                        apartment: manualFields.apartment || undefined,
+                        zipCode: manualFields.zipCode || undefined,
+                    });
+                } catch { /* don't block order success */ }
+            }
             await clear();
             toast.success('Заказ успешно оформлен!');
             setDone(true);
@@ -155,7 +186,7 @@ export const CheckoutUi = () => {
                         <Field label="ФИО получателя" icon={<User size={15} />} placeholder="Иванов Иван Иванович"
                             value={name} onChange={e => setName(e.target.value)} error={errors.name} autoComplete="name" />
                         <Field label="Телефон" icon={<Phone size={15} />} placeholder="+7 (999) 000-00-00" type="tel"
-                            value={phone} onChange={e => setPhone(e.target.value)} error={errors.phone} autoComplete="tel" />
+                            value={phone} onChange={e => setPhone(applyPhoneMask(e.target.value))} error={errors.phone} autoComplete="tel" inputMode="tel" />
                     </section>
 
                     {/* 02 — Address */}
@@ -264,9 +295,10 @@ export const CheckoutUi = () => {
                                                     <div className="space-y-1.5">
                                                         <label className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400">Дом <span className="text-red-400">*</span></label>
                                                         <input
-                                                            placeholder="12"
+                                                            placeholder="12А"
                                                             value={manualFields.house}
-                                                            onChange={e => setMF('house', e.target.value)}
+                                                            onChange={e => setMF('house', e.target.value.replace(/[^0-9а-яёА-ЯЁa-zA-Z/\-]/g, '').slice(0, 10))}
+                                                            maxLength={10}
                                                             className="w-full bg-zinc-50 border border-black/8 rounded-xl px-3.5 py-2.5 text-sm font-medium outline-none focus:border-black/30 transition-colors placeholder:text-zinc-300"
                                                         />
                                                     </div>
@@ -275,7 +307,9 @@ export const CheckoutUi = () => {
                                                         <input
                                                             placeholder="45"
                                                             value={manualFields.apartment}
-                                                            onChange={e => setMF('apartment', e.target.value)}
+                                                            onChange={e => setMF('apartment', e.target.value.replace(/\D/g, '').slice(0, 5))}
+                                                            inputMode="numeric"
+                                                            maxLength={5}
                                                             className="w-full bg-zinc-50 border border-black/8 rounded-xl px-3.5 py-2.5 text-sm font-medium outline-none focus:border-black/30 transition-colors placeholder:text-zinc-300"
                                                         />
                                                     </div>
@@ -284,11 +318,23 @@ export const CheckoutUi = () => {
                                                         <input
                                                             placeholder="101000"
                                                             value={manualFields.zipCode}
-                                                            onChange={e => setMF('zipCode', e.target.value)}
+                                                            onChange={e => setMF('zipCode', e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                                            inputMode="numeric"
+                                                            maxLength={6}
                                                             className="w-full bg-zinc-50 border border-black/8 rounded-xl px-3.5 py-2.5 text-sm font-medium outline-none focus:border-black/30 transition-colors placeholder:text-zinc-300"
                                                         />
                                                     </div>
                                                 </div>
+
+                                                <label className="flex items-center gap-2.5 cursor-pointer group pt-1">
+                                                    <div
+                                                        onClick={() => setSaveAddress(v => !v)}
+                                                        className={`w-4 h-4 rounded-md border-[1.5px] flex items-center justify-center shrink-0 transition-all ${saveAddress ? 'bg-[#111111] border-transparent' : 'border-zinc-300 group-hover:border-zinc-500'}`}
+                                                    >
+                                                        {saveAddress && <Check size={9} strokeWidth={3} className="text-white" />}
+                                                    </div>
+                                                    <span className="text-xs text-zinc-500 group-hover:text-zinc-800 transition-colors">Сохранить этот адрес</span>
+                                                </label>
                                             </div>
                                         </motion.div>
                                     )}

@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import { productsApi, reviewsApi } from '@/lib/api';
+import { characteristicsApi, productsApi, reviewsApi } from '@/lib/api';
 import Link from 'next/link';
 import { Package, Tag, Layers, ArrowLeft, Star } from 'lucide-react';
 import { ProductGalleryUi } from './product-gallery.ui';
 import { ProductActionsUi } from './product-actions.ui';
 import { ProductTabsUi } from './product-tabs.ui';
 import { ProductRelatedUi } from './product-related.ui';
-import type { Product, Review } from '@/lib/types';
+import type { Characteristic, Product, Review } from '@/lib/types';
 
 const colorLabels: Record<string, string> = {
     white_ivory: 'Белый / Слоновая кость',
@@ -46,6 +46,7 @@ export const ProductUi = ({ slug }: Props) => {
     const [related, setRelated] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+    const [characteristics, setCharacteristics] = useState<Characteristic[]>([]);
 
     useEffect(() => {
         let cancelled = false;
@@ -58,10 +59,12 @@ export const ProductUi = ({ slug }: Props) => {
                 if (cancelled) return;
                 setProduct(p);
 
-                const [reviewsData, relatedPage] = await Promise.all([
+                const [reviewsData, relatedPage, chars] = await Promise.all([
                     reviewsApi.list(p.id).catch(() => [] as Review[]),
                     productsApi.list({ limit: 5 }).catch(() => ({ items: [] as Product[] })),
+                    characteristicsApi.list().catch(() => [] as Characteristic[]),
                 ]);
+                if (!cancelled) setCharacteristics(chars);
                 if (cancelled) return;
                 setReviews(reviewsData);
                 setRelated(relatedPage.items.filter(r => r.id !== p.id).slice(0, 4));
@@ -123,6 +126,30 @@ export const ProductUi = ({ slug }: Props) => {
         ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
         : 0;
 
+    const charById = new Map(characteristics.map(c => [c.id, c.name]));
+    const n = (id: string) => charById.get(id) ?? id;
+    const join = (ids: string[]) => ids.map(n).join(', ');
+
+    const s = product.spec;
+    const specRows: { label: string; value: string }[] = s ? [
+        s.styles.length        && { label: 'Стиль',                 value: join(s.styles) },
+        s.rooms.length         && { label: 'Тип комнаты',           value: join(s.rooms) },
+        s.shapes.length        && { label: 'Форма',                 value: join(s.shapes) },
+        s.mountingType         && { label: 'Тип крепления',         value: n(s.mountingType) },
+        s.lampType             && { label: 'Тип лампы',             value: n(s.lampType) },
+        s.lampCount != null    && { label: 'Количество ламп',       value: String(s.lampCount) },
+        s.powerW    != null    && { label: 'Мощность',              value: `${s.powerW} Вт` },
+        s.lumens    != null    && { label: 'Световой поток',        value: `${s.lumens} лм` },
+        s.colorTemps.length    && { label: 'Цветовая температура',  value: join(s.colorTemps) },
+        s.frameMaterial        && { label: 'Материал корпуса',      value: n(s.frameMaterial) },
+        s.frameColor           && { label: 'Цвет корпуса',          value: n(s.frameColor) },
+        s.shadeMaterials.length && { label: 'Материал плафона',     value: join(s.shadeMaterials) },
+        s.shadeColors.length   && { label: 'Цвет плафона',          value: join(s.shadeColors) },
+        s.maxAreaM2 != null    && { label: 'Площадь освещения',     value: `до ${s.maxAreaM2} м²` },
+        s.weightKg  != null    && { label: 'Вес',                   value: `${s.weightKg} кг` },
+        s.model                && { label: 'Модель',                value: s.model },
+    ].filter(Boolean) as { label: string; value: string }[] : [];
+
     const attributeSpecs = product.attributes
         ? product.attributes.map(a => ({ label: a.name, value: a.value }))
         : [];
@@ -132,6 +159,7 @@ export const ProductUi = ({ slug }: Props) => {
         product.material && { label: 'Материал', value: product.material },
         product.color && { label: 'Цвет', value: colorLabels[product.color] ?? product.color },
         ...attributeSpecs,
+        ...specRows,
         {
             label: 'Наличие',
             value: product.stock > 0 ? `${product.stock} шт. в наличии` : 'Нет в наличии',

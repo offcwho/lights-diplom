@@ -173,7 +173,7 @@ function AddressModal({ initial, onSave, onClose, saving }: {
                         <div className={errors.city ? 'ring-1 ring-red-400 rounded-xl' : ''}>
                             <Field label="Город" placeholder="Москва" required value={form.city} onChange={e => set('city', e.target.value)} />
                         </div>
-                        <Field label="Индекс" placeholder="101000" value={form.zipCode} onChange={e => set('zipCode', e.target.value)} />
+                        <Field label="Индекс" placeholder="101000" value={form.zipCode} onChange={e => set('zipCode', e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" maxLength={6} />
                     </div>
 
                     <div className={errors.street ? 'ring-1 ring-red-400 rounded-xl' : ''}>
@@ -182,9 +182,9 @@ function AddressModal({ initial, onSave, onClose, saving }: {
 
                     <div className="grid grid-cols-2 gap-3">
                         <div className={errors.house ? 'ring-1 ring-red-400 rounded-xl' : ''}>
-                            <Field label="Дом" placeholder="12" required value={form.house} onChange={e => set('house', e.target.value)} />
+                            <Field label="Дом" placeholder="12А" required value={form.house} onChange={e => set('house', e.target.value.replace(/[^0-9а-яёА-ЯЁa-zA-Z/\-]/g, '').slice(0, 10))} maxLength={10} />
                         </div>
-                        <Field label="Квартира" placeholder="45" value={form.apartment} onChange={e => set('apartment', e.target.value)} />
+                        <Field label="Квартира" placeholder="45" value={form.apartment} onChange={e => set('apartment', e.target.value.replace(/\D/g, '').slice(0, 5))} inputMode="numeric" maxLength={5} />
                     </div>
 
                     <label className="flex items-center gap-3 cursor-pointer group pt-1">

@@ -1,8 +1,8 @@
 'use client'
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { categoriesApi, productsApi } from "@/lib/api";
-import type { Product as ApiProduct, Category } from "@/lib/types";
+import { categoriesApi, characteristicsApi, productsApi } from "@/lib/api";
+import type { Characteristic, Product as ApiProduct, Category } from "@/lib/types";
 
 export type Product = {
     id: string | number;
@@ -17,6 +17,7 @@ export type Product = {
     material: string;
     stock: number;
     attributes: { name: string; value: string }[];
+    spec: ApiProduct['spec'];
 };
 
 function toProduct(product: ApiProduct): Product {
@@ -33,8 +34,25 @@ function toProduct(product: ApiProduct): Product {
         material: product.material ?? "",
         stock: product.stock,
         attributes: Array.isArray(product.attributes) ? product.attributes as { name: string; value: string }[] : [],
+        spec: product.spec ?? null,
     };
 }
+
+export type SpecFilters = {
+    shapes: string[];
+    styles: string[];
+    rooms: string[];
+    lampTypes: string[];
+    mountingTypes: string[];
+    frameMaterials: string[];
+    frameColors: string[];
+    colorTemps: string[];
+};
+
+const EMPTY_SPEC: SpecFilters = {
+    shapes: [], styles: [], rooms: [], lampTypes: [],
+    mountingTypes: [], frameMaterials: [], frameColors: [], colorTemps: [],
+};
 
 type CatalogContextValue = {
     searchQuery: string;
@@ -71,6 +89,10 @@ type CatalogContextValue = {
 
     products: Product[] | undefined;
     categories: Category[] | undefined;
+
+    derivedFilters: SpecFilters;
+    specFilters: SpecFilters;
+    toggleSpecFilter: (key: keyof SpecFilters, value: string) => void;
 };
 
 const CatalogContext = createContext<CatalogContextValue | null>(null);
@@ -92,6 +114,12 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
     const [cart, setCart] = useState<Product[]>([]);
     const [isOpenFilters, setIsOpenFilters] = useState(false);
     const [categories, setCategories] = useState<Category[]>();
+    const [specFilters, setSpecFilters] = useState<SpecFilters>(EMPTY_SPEC);
+    const [characteristics, setCharacteristics] = useState<Characteristic[]>([]);
+
+    useEffect(() => {
+        characteristicsApi.list().then(setCharacteristics).catch(() => []);
+    }, []);
 
     useEffect(() => {
         setLoading(true);
@@ -122,6 +150,7 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     useEffect(() => {
+        setLoading(true);
         productsApi
             .list({ limit: 100 })
             .then((data) => setProducts(data.items.map(toProduct)))
@@ -143,11 +172,21 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
         setCart((prev) => [...prev, item]);
     };
 
+    const toggleSpecFilter = (key: keyof SpecFilters, value: string) => {
+        setSpecFilters(prev => ({
+            ...prev,
+            [key]: prev[key].includes(value)
+                ? prev[key].filter(v => v !== value)
+                : [...prev[key], value],
+        }));
+    };
+
     const resetFilters = () => {
         setSearchQuery("");
         setSelectedCategory("all");
         setSelectedColors([]);
         setInStockOnly(false);
+        setSpecFilters(EMPTY_SPEC);
     };
 
     const countByCategory = (categoryId: string) =>
@@ -160,6 +199,26 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
             prev.includes(colorId) ? prev.filter((c) => c !== colorId) : [...prev, colorId]
         );
     };
+
+    const uniq = (arr: string[]) => [...new Set(arr)].filter(Boolean).sort();
+
+    const charById = useMemo(
+        () => new Map(characteristics.map(c => [c.id, c.name])),
+        [characteristics]
+    );
+
+    const toName = (id: string) => charById.get(id) ?? id;
+
+    const derivedFilters = useMemo<SpecFilters>(() => ({
+        shapes:         uniq(products.flatMap(p => p.spec?.shapes ?? []).map(toName)),
+        styles:         uniq(products.flatMap(p => p.spec?.styles ?? []).map(toName)),
+        rooms:          uniq(products.flatMap(p => p.spec?.rooms ?? []).map(toName)),
+        lampTypes:      uniq(products.map(p => p.spec?.lampType ?? '').filter(Boolean).map(toName)),
+        mountingTypes:  uniq(products.map(p => p.spec?.mountingType ?? '').filter(Boolean).map(toName)),
+        frameMaterials: uniq(products.map(p => p.spec?.frameMaterial ?? '').filter(Boolean).map(toName)),
+        frameColors:    uniq(products.map(p => p.spec?.frameColor ?? '').filter(Boolean).map(toName)),
+        colorTemps:     uniq(products.flatMap(p => p.spec?.colorTemps ?? []).map(toName)),
+    }), [products, charById]);
 
     const filteredProducts = useMemo(() => {
         let result = [...products];
@@ -183,11 +242,22 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
         result = result.filter((product) => Number(product.price) <= maxPrice);
         if (inStockOnly) result = result.filter((product) => product.stock > 0);
 
+        const sf = specFilters;
+        const n = (id: string) => charById.get(id) ?? id;
+        if (sf.shapes.length)         result = result.filter(p => p.spec?.shapes.some(v => sf.shapes.includes(n(v))));
+        if (sf.styles.length)         result = result.filter(p => p.spec?.styles.some(v => sf.styles.includes(n(v))));
+        if (sf.rooms.length)          result = result.filter(p => p.spec?.rooms.some(v => sf.rooms.includes(n(v))));
+        if (sf.lampTypes.length)      result = result.filter(p => !!p.spec?.lampType && sf.lampTypes.includes(n(p.spec.lampType)));
+        if (sf.mountingTypes.length)  result = result.filter(p => !!p.spec?.mountingType && sf.mountingTypes.includes(n(p.spec.mountingType)));
+        if (sf.frameMaterials.length) result = result.filter(p => !!p.spec?.frameMaterial && sf.frameMaterials.includes(n(p.spec.frameMaterial)));
+        if (sf.frameColors.length)    result = result.filter(p => !!p.spec?.frameColor && sf.frameColors.includes(n(p.spec.frameColor)));
+        if (sf.colorTemps.length)     result = result.filter(p => p.spec?.colorTemps.some(v => sf.colorTemps.includes(n(v))));
+
         if (sortBy === "price-asc") result.sort((a, b) => Number(a.price) - Number(b.price));
         if (sortBy === "price-desc") result.sort((a, b) => Number(b.price) - Number(a.price));
 
         return result;
-    }, [products, searchQuery, selectedCategory, selectedColors, maxPrice, sortBy, inStockOnly]);
+    }, [products, searchQuery, selectedCategory, selectedColors, maxPrice, sortBy, inStockOnly, specFilters, charById]);
 
     const value: CatalogContextValue = {
         products,
@@ -210,6 +280,9 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
         setIsOpenFilters,
         openFilters,
         categories,
+        derivedFilters,
+        specFilters,
+        toggleSpecFilter,
     };
 
     return <CatalogContext.Provider value={value}>{children}</CatalogContext.Provider>;

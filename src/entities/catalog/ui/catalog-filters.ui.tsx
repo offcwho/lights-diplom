@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Sliders } from "lucide-react"
 import { useCatalog } from "../module/catalog.context";
-import { CatalogCategories, CatalogRange, CatalogSelect } from "..";
+import { CatalogCategories, CatalogRange, CatalogSelect, CatalogSpecFilters } from "..";
 import { PremiumSpring } from "../module/catalog.animations";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
 import { useSheetDrag } from "@/hooks/useSheetDrag";
@@ -17,10 +17,12 @@ export const CatalogFiltersUi = ({ className, style }: { className?: string; sty
         setInStockOnly,
         resetFilters,
         setIsOpenFilters,
-        isOpenFilters
+        isOpenFilters,
+        specFilters,
     } = useCatalog();
 
-    const isFiltered = selectedCategory !== "all" || selectedColors.length > 0 || maxPrice < 1500 || inStockOnly;
+    const hasSpecFilters = Object.values(specFilters).some(arr => arr.length > 0);
+    const isFiltered = selectedCategory !== "all" || selectedColors.length > 0 || maxPrice < 1500 || inStockOnly || hasSpecFilters;
     const { headerHeight, dockHeight } = useHeaderHeight();
 
     // Подключаем наш обновленный хук умного трекинга скролла
@@ -66,6 +68,9 @@ export const CatalogFiltersUi = ({ className, style }: { className?: string; sty
             </div>
             <div>
                 <CatalogRange />
+            </div>
+            <div>
+                <CatalogSpecFilters />
             </div>
             <div>
                 <p className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-400 mb-3">Наличие</p>

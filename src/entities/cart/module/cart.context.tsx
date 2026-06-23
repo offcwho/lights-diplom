@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { cartApi, authApi } from "@/lib/api";
-import type { Cart as ApiCart } from "@/lib/types";
+import type { Cart as ApiCart, Product } from "@/lib/types";
 import { useAuth } from "@/hooks/AuthContext";
 import { toast } from "sonner";
 
@@ -11,6 +11,7 @@ export type CartItem = {
     cartItemId: string;  // id строки корзины на бэке — нужен для update/remove
     name: string;
     price: number;
+    category: string;
     images: string;
     color: string;
     quantity: number;
@@ -22,6 +23,7 @@ function toCartItems(cart: ApiCart): CartItem[] {
         id: i.productId,
         cartItemId: i.id,
         name: i.product.name,
+        category: i.product.category.name,
         price: i.product.price,
         images: i.product.images?.[0],
         color: i.product.color ?? "",

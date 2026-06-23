@@ -35,6 +35,7 @@ export interface Product {
     popularity: number;
     stock: number;
     attributes?: { name: string; value: string }[] | null;
+    spec?: ProductSpec | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -63,6 +64,16 @@ export interface ProductQuery {
     sort?: ProductSort;
     page?: number;
     limit?: number;
+    // Spec filters (comma-separated values)
+    styles?: string;
+    rooms?: string;
+    shapes?: string;
+    lampTypes?: string;
+    mountingTypes?: string;
+    frameMaterials?: string;
+    frameColors?: string;
+    colorTemps?: string;
+    minPowerW?: number;
 }
 
 export interface CartItem {
@@ -139,6 +150,44 @@ export interface Banner {
     buttonLabel?: string | null;
     isActive: boolean;
     order: number;
+}
+
+export interface ProductSpec {
+    id: string;
+    productId: string;
+    model?: string | null;
+    weightKg?: number | null;
+    shapes: string[];
+    styles: string[];
+    rooms: string[];
+    lampType?: string | null;
+    maxAreaM2?: number | null;
+    mountingType?: string | null;
+    frameMaterial?: string | null;
+    frameColor?: string | null;
+    shadeMaterials: string[];
+    shadeColors: string[];
+    colorTemps: string[];
+    powerW?: number | null;
+    lumens?: number | null;
+    lampCount?: number | null;
+}
+
+export interface Characteristic {
+    id: string;
+    name: string;
+    type: string;
+}
+
+export interface ProductFilters {
+    shapes: string[];
+    styles: string[];
+    rooms: string[];
+    lampTypes: string[];
+    mountingTypes: string[];
+    frameMaterials: string[];
+    frameColors: string[];
+    colorTemps: string[];
 }
 
 export interface Review {

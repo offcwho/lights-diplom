@@ -34,7 +34,7 @@ export const CatalogRangeComponent = () => {
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                     className="text-xs font-black font-mono bg-zinc-100 px-2 py-0.5 rounded-md text-zinc-900 select-none"
                 >
-                    ${currentPrice}
+                    {currentPrice} ₽
                 </motion.span>
             </div>
 
@@ -91,8 +91,8 @@ export const CatalogRangeComponent = () => {
             </div>
 
             <div className="flex justify-between text-[9px] text-zinc-400 font-mono font-bold tracking-wider select-none">
-                <span>MIN / ${min}</span>
-                <span>MAX / ${max}</span>
+                <span>Мин / {min} ₽</span>
+                <span>Макс / {max} ₽</span>
             </div>
         </div>
     )
