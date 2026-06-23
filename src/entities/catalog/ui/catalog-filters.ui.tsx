@@ -98,14 +98,13 @@ export const CatalogFiltersUi = ({ className, style }: { className?: string; sty
             style={{
                 ...style,
                 ['--sheet-offset' as string]: `${headerHeight + dockHeight + 36}px`,
-                overscrollBehavior: 'contain',
                 y: transformY,
                 paddingBottom,
             }}
         >
             {/* Десктопная версия */}
             <div className="hidden lg:flex lg:flex-col" style={{ maxHeight: 'calc(100vh - 3rem)' }}>
-                <div className="overflow-y-auto overflow-x-hidden flex-1 overscroll-contain">
+                <div className="overflow-y-auto overflow-x-hidden flex-1">
                     {filtersContent}
                 </div>
             </div>

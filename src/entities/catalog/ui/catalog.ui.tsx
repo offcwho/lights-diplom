@@ -8,8 +8,6 @@ import { motion } from "framer-motion"
 import { PageItem, PageStagger } from "@/components/Animations"
 import { CatalogToolbarUi } from "./catalog-toolbar.ui"
 import { StuckSentinel } from "@/hooks/useStack"
-import Link from "next/link"
-import { LayoutGrid } from "lucide-react"
 import { Suspense, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 
@@ -50,13 +48,6 @@ export const CatalogUi = () => {
                                 Коллекции
                             </h2>
                         </div>
-                        <Link
-                            href="/categories"
-                            className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-black transition-colors group"
-                        >
-                            <LayoutGrid size={12} />
-                            Все
-                        </Link>
                     </div>
                     <CategoryRow />
                 </PageItem>
