@@ -65,9 +65,9 @@ export const ProductRelatedUi = ({ products }: { products: Product[] }) => {
                                     )}
                                     <h3 className="text-xs font-black uppercase tracking-tight truncate mt-0.5">{p.name}</h3>
                                     <div className="flex items-baseline gap-2 mt-1">
-                                        <span className="text-sm font-black">${price.toFixed(0)}.00</span>
+                                        <span className="text-sm font-black">{price.toLocaleString('ru-RU')} ₽</span>
                                         {hasDiscount && (
-                                            <span className="text-xs text-zinc-400 line-through">${p.price.toFixed(0)}.00</span>
+                                            <span className="text-xs text-zinc-400 line-through">{p.price.toLocaleString('ru-RU')} ₽</span>
                                         )}
                                     </div>
                                 </Link>

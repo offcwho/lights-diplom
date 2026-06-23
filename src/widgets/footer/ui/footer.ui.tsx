@@ -211,10 +211,10 @@ export const FooterUi = () => {
                         {/* Bottom bar */}
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-[10px] text-zinc-600">
                             <p>© 2026 Свет.Ру. Все права защищены.</p>
-                            <div className="flex gap-5">
+                            {/* <div className="flex gap-5">
                                 <a href="#" className="hover:text-zinc-400 transition-colors">Политика конфиденциальности</a>
                                 <a href="#" className="hover:text-zinc-400 transition-colors">Пользовательское соглашение</a>
-                            </div>
+                            </div> */}
                         </div>
 
                     </div>

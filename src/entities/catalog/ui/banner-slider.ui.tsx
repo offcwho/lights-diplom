@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import Link from 'next/link';
-import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { bannersApi } from '@/lib/api';
 import type { Banner } from '@/lib/types';
 
@@ -131,16 +130,6 @@ export const BannerSliderUi = () => {
                             </p>
                         )}
 
-                        {banner.action && (
-                            <Link
-                                href={banner.action}
-                                className="inline-flex items-center gap-2.5 bg-white text-[#111111] text-[10px] lg:text-xs font-black
-                                           px-5 py-2.5 lg:px-7 lg:py-3.5 rounded-xl hover:bg-zinc-100 transition-colors uppercase tracking-widest"
-                            >
-                                {banner.buttonLabel ?? 'Смотреть'}
-                                <ArrowRight size={12} />
-                            </Link>
-                        )}
                     </motion.div>
                 </AnimatePresence>
 

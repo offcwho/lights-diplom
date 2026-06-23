@@ -2,7 +2,7 @@
 
 import { Container } from "@/components/Container"
 import { useCatalog } from "../module/catalog.context"
-import { BannerSlider, CatalogFilters, CatalogList, CatalogTopbar, CategoryRow, FlashSale, ProductCard, SortChips } from ".."
+import { BannerSlider, CatalogFilters, CategoryRow, ProductCard, SortChips } from ".."
 import { useHeaderHeight } from "@/hooks/useHeaderHeight"
 import { motion } from "framer-motion"
 import { PageItem, PageStagger } from "@/components/Animations"
@@ -73,7 +73,7 @@ export const CatalogUi = () => {
                         />
 
                         <div className="lg:col-span-10">
-                            <FlashSale />
+                            {/* <FlashSale /> */}
                             <SortChips />
 
                             {filteredProducts.length === 0 ? (

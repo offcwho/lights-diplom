@@ -25,6 +25,12 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                             flex flex-col justify-between aspect-3/4">
                 <div className="w-full aspect-square rounded-[20px] overflow-hidden bg-[#F4F3F0] relative
                                 flex items-center justify-center p-6">
+                    {/* Мобильная ссылка на товар — под кнопками */}
+                    <Link
+                        href={`/product/${product.slug || product.id}`}
+                        className="lg:hidden absolute inset-0 z-1"
+                        aria-label={product.name}
+                    />
                     <img
                         src={product.lifestyleImg}
                         alt={product.name}
@@ -48,7 +54,7 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                         whileTap={{ scale: 0.85 }}
                         onClick={() => toggleItem(String(product.id))}
                         aria-label="В избранное"
-                        className="lg:hidden absolute top-3 right-3 w-8 h-8 rounded-full bg-white
+                        className="lg:hidden absolute top-3 right-3 z-2 w-8 h-8 rounded-full bg-white
                                    flex items-center justify-center shadow-sm"
                     >
                         <Heart size={13} className={isFav ? 'text-red-500' : 'text-zinc-400'}
