@@ -200,7 +200,8 @@ export const CatalogProvider = ({ children }: { children: ReactNode }) => {
         );
     };
 
-    const uniq = (arr: string[]) => [...new Set(arr)].filter(Boolean).sort();
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const uniq = (arr: string[]) => [...new Set(arr)].filter(v => Boolean(v) && !UUID_RE.test(v)).sort();
 
     const charById = useMemo(
         () => new Map(characteristics.map(c => [c.id, c.name])),
