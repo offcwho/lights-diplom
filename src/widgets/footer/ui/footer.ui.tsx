@@ -1,20 +1,40 @@
 'use client'
 
 import Link from 'next/link';
-import { Mail, Phone, MapPin, X, MessageCircle, ArrowRight } from 'lucide-react';
+import { Mail, Phone, MapPin, MessageCircle, ArrowRight, X, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import Image from 'next/image';
 import AppIcon from '@/../public/icons/logo-full.svg';
 import { Container } from '@/components/Container';
+import { supportApi } from '@/lib/api';
+import { useAuth } from '@/hooks/AuthContext';
+import { toast } from 'sonner';
 
 function SupportModal({ onClose }: { onClose: () => void }) {
-    const [name, setName] = useState('');
+    const { user } = useAuth();
+    const [name, setName] = useState(user?.name ?? '');
+    const [email, setEmail] = useState(user?.email ?? '');
+    const [subject, setSubject] = useState('');
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
     const [sent, setSent] = useState(false);
 
-    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+    const submit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (name.trim() && message.trim()) setSent(true);
+        setLoading(true);
+        try {
+            await supportApi.create({
+                name: name.trim(),
+                email: email.trim(),
+                subject: subject.trim() || undefined,
+                message: message.trim(),
+            });
+            setSent(true);
+        } catch {
+            toast.error('Не удалось отправить обращение. Попробуйте позже.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -56,17 +76,34 @@ function SupportModal({ onClose }: { onClose: () => void }) {
                     {sent ? (
                         <div className="flex items-center gap-2 text-sm font-bold text-green-600 py-4">
                             <span className="w-2 h-2 rounded-full bg-green-500" />
-                            Сообщение отправлено — ответим в течение часа
+                            Обращение отправлено — ответим в течение часа
                         </div>
                     ) : (
                         <form onSubmit={submit} className="space-y-3">
+                            <div className="grid grid-cols-2 gap-3">
+                                <input
+                                    type="text"
+                                    value={name}
+                                    onChange={e => setName(e.target.value)}
+                                    placeholder="Ваше имя"
+                                    required
+                                    className="border border-black/10 rounded-xl px-3.5 py-2.5 text-xs font-medium outline-none focus:border-black/30 transition-colors"
+                                />
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    placeholder="E-mail"
+                                    required
+                                    className="border border-black/10 rounded-xl px-3.5 py-2.5 text-xs font-medium outline-none focus:border-black/30 transition-colors"
+                                />
+                            </div>
                             <input
                                 type="text"
-                                value={name}
-                                onChange={e => setName(e.target.value)}
-                                placeholder="Ваше имя"
-                                required
-                                className="w-full border border-black/10 rounded-xl px-4 py-2.5 text-xs font-medium outline-none focus:border-black/30 transition-colors"
+                                value={subject}
+                                onChange={e => setSubject(e.target.value)}
+                                placeholder="Тема (необязательно)"
+                                className="w-full border border-black/10 rounded-xl px-3.5 py-2.5 text-xs font-medium outline-none focus:border-black/30 transition-colors"
                             />
                             <textarea
                                 value={message}
@@ -74,12 +111,14 @@ function SupportModal({ onClose }: { onClose: () => void }) {
                                 placeholder="Опишите вопрос..."
                                 rows={3}
                                 required
-                                className="w-full border border-black/10 rounded-xl px-4 py-2.5 text-xs font-medium outline-none focus:border-black/30 resize-none transition-colors"
+                                className="w-full border border-black/10 rounded-xl px-3.5 py-2.5 text-xs font-medium outline-none focus:border-black/30 resize-none transition-colors"
                             />
                             <button
                                 type="submit"
-                                className="w-full bg-[#111111] text-white py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-zinc-800 transition-colors"
+                                disabled={loading}
+                                className="w-full flex items-center justify-center gap-2 bg-[#111111] text-white py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-zinc-800 transition-colors disabled:opacity-60"
                             >
+                                {loading && <Loader2 size={13} className="animate-spin" />}
                                 Отправить
                             </button>
                         </form>
@@ -91,14 +130,7 @@ function SupportModal({ onClose }: { onClose: () => void }) {
 }
 
 export const FooterUi = () => {
-    const [email, setEmail] = useState('');
-    const [sent, setSent] = useState(false);
     const [supportOpen, setSupportOpen] = useState(false);
-
-    const handleSubscribe = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if (email.trim()) { setSent(true); setEmail(''); }
-    };
 
     return (
         <>
@@ -108,13 +140,13 @@ export const FooterUi = () => {
                 <Container className='pb-0!'>
                     <div className="bg-[#111111] text-[#e3e3e3] rounded-t-[40px] px-6 md:px-10 lg:px-16 pt-14 pb-8 max-w-full">
 
-                        {/* Top row */}
-                        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-10 pb-12 border-b border-white/8 mb-12">
+                        {/* Main row: Brand | Nav | Support */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 pb-12 border-b border-white/8 mb-8">
 
                             {/* Brand */}
-                            <div className="space-y-4 max-w-xs">
+                            <div className="lg:col-span-4 space-y-4">
                                 <Image src={AppIcon} width={140} alt="Свет.Ру" className="brightness-0 invert" />
-                                <p className="text-xs text-zinc-500 leading-relaxed">
+                                <p className="text-xs text-zinc-500 leading-relaxed max-w-xs">
                                     Дизайнерские светильники для жилых и коммерческих пространств. Доставка по всей России.
                                 </p>
                                 <div className="space-y-2 text-xs text-zinc-500">
@@ -133,73 +165,46 @@ export const FooterUi = () => {
                                 </div>
                             </div>
 
-                            {/* Newsletter */}
-                            <div className="max-w-sm w-full space-y-4">
-                                <div>
-                                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-2">Рассылка</p>
-                                    <h3 className="text-xl font-black tracking-tight leading-tight">Будьте в&nbsp;курсе новинок</h3>
+                            {/* Nav */}
+                            <div className="lg:col-span-4 grid grid-cols-2 gap-8">
+                                <div className="space-y-4">
+                                    <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500">Каталог</h4>
+                                    <ul className="space-y-2.5">
+                                        <li><Link href="/" className="text-xs text-zinc-400 hover:text-white transition-colors">Все товары</Link></li>
+                                        <li><Link href="/cart" className="text-xs text-zinc-400 hover:text-white transition-colors">Корзина</Link></li>
+                                        <li><Link href="/favourites" className="text-xs text-zinc-400 hover:text-white transition-colors">Избранное</Link></li>
+                                    </ul>
                                 </div>
-                                <p className="text-xs text-zinc-500 leading-relaxed">
-                                    Новые коллекции, скидки и вдохновляющие интерьеры — раз в две недели, без спама.
-                                </p>
-                                {sent ? (
-                                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
-                                        <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                                        Вы подписаны — спасибо!
+                                <div className="space-y-4">
+                                    <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500">Аккаунт</h4>
+                                    <ul className="space-y-2.5">
+                                        <li><Link href="/profile" className="text-xs text-zinc-400 hover:text-white transition-colors">Профиль</Link></li>
+                                        <li><Link href="/profile" className="text-xs text-zinc-400 hover:text-white transition-colors">Мои заказы</Link></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            {/* Support block */}
+                            <div className="lg:col-span-4">
+                                <div className="bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4 h-full flex flex-col justify-between">
+                                    <div className="space-y-2">
+                                        <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
+                                            <MessageCircle size={18} className="text-white" />
+                                        </div>
+                                        <p className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500">Помощь</p>
+                                        <h3 className="text-lg font-black tracking-tight leading-tight">Нужна&nbsp;помощь?</h3>
+                                        <p className="text-xs text-zinc-500 leading-relaxed">
+                                            Ответим на любые вопросы о товарах, доставке и оплате.
+                                        </p>
                                     </div>
-                                ) : (
-                                    <form onSubmit={handleSubscribe} className="flex items-center gap-0 bg-white/6 border border-white/10 rounded-2xl overflow-hidden pr-1.5 focus-within:border-white/25 transition-colors">
-                                        <input
-                                            type="email"
-                                            value={email}
-                                            onChange={e => setEmail(e.target.value)}
-                                            placeholder="Ваш e-mail"
-                                            required
-                                            className="flex-1 bg-transparent text-sm text-white placeholder:text-zinc-600 px-4 py-3.5 outline-none"
-                                        />
-                                        <button
-                                            type="submit"
-                                            className="shrink-0 w-9 h-9 bg-white rounded-xl flex items-center justify-center text-black hover:bg-zinc-100 transition-colors active:scale-95"
-                                            aria-label="Подписаться"
-                                        >
-                                            <ArrowRight size={15} />
-                                        </button>
-                                    </form>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Nav */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 pb-12 border-b border-white/8 mb-8">
-                            <div className="space-y-4">
-                                <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500">Каталог</h4>
-                                <ul className="space-y-2.5">
-                                    <li><Link href="/" className="text-xs text-zinc-400 hover:text-white transition-colors">Все товары</Link></li>
-                                </ul>
-                            </div>
-
-                            <div className="space-y-4">
-                                <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500">Аккаунт</h4>
-                                <ul className="space-y-2.5">
-                                    <li><Link href="/profile" className="text-xs text-zinc-400 hover:text-white transition-colors">Профиль</Link></li>
-                                    <li><Link href="/profile/orders" className="text-xs text-zinc-400 hover:text-white transition-colors">Мои заказы</Link></li>
-                                    <li><Link href="/favourites" className="text-xs text-zinc-400 hover:text-white transition-colors">Избранное</Link></li>
-                                </ul>
-                            </div>
-
-                            <div className="space-y-4">
-                                <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500">Помощь</h4>
-                                <ul className="space-y-2.5">
-                                    <li>
-                                        <button
-                                            onClick={() => setSupportOpen(true)}
-                                            className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
-                                        >
-                                            <MessageCircle size={12} />
-                                            Поддержка
-                                        </button>
-                                    </li>
-                                </ul>
+                                    <button
+                                        onClick={() => setSupportOpen(true)}
+                                        className="group flex items-center justify-between w-full bg-white text-black px-5 py-3.5 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-zinc-100 transition-colors"
+                                    >
+                                        <span>Написать нам</span>
+                                        <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
 

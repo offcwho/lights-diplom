@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import type {
-    Address, AuthResponse, Banner, Cart, Category, Characteristic, Order, Paginated, Product, ProductFilters, ProductQuery, PromoCode, Review, ReviewQuestion, User,
+    Address, AuthResponse, Banner, Cart, Category, Characteristic, Order, Paginated, Product, ProductFilters, ProductQuery, PromoCode, Review, ReviewQuestion, SupportTicket, User,
 } from './types';
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:9000/api';
@@ -238,6 +238,14 @@ export const reviewsApi = {
 export const promoCodesApi = {
     async apply(code: string, orderAmount: number) {
         const { data } = await api.post<PromoCode>('/promo-codes/apply', { code, orderAmount });
+        return data;
+    },
+};
+
+/* --------------------------- Support ---------------------------- */
+export const supportApi = {
+    async create(dto: { name: string; email: string; subject?: string; message: string }) {
+        const { data } = await api.post<SupportTicket>('/support', dto);
         return data;
     },
 };

@@ -202,6 +202,20 @@ export interface ProductFilters {
     colorTemps: string[];
 }
 
+export type SupportStatus = 'new' | 'in_progress' | 'closed';
+
+export interface SupportTicket {
+    id: string;
+    name: string;
+    email: string;
+    subject?: string | null;
+    message: string;
+    status: SupportStatus;
+    userId?: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export interface ReviewQuestion {
     id: string;
     reviewId: string;
