@@ -10,6 +10,20 @@ import { CatalogToolbarUi } from "./catalog-toolbar.ui"
 import { StuckSentinel } from "@/hooks/useStack"
 import Link from "next/link"
 import { LayoutGrid } from "lucide-react"
+import { Suspense, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
+
+function CategoryParamSync() {
+    const params = useSearchParams();
+    const { setSelectedCategory } = useCatalog();
+
+    useEffect(() => {
+        const cat = params.get('category');
+        if (cat) setSelectedCategory(cat);
+    }, [params, setSelectedCategory]);
+
+    return null;
+}
 
 export const CatalogUi = () => {
     const { headerHeight } = useHeaderHeight();
@@ -17,6 +31,7 @@ export const CatalogUi = () => {
 
     return (
         <Container className="px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
+            <Suspense><CategoryParamSync /></Suspense>
             <PageStagger className="space-y-10 lg:space-y-6">
 
                 {/* Баннер-слайдер */}

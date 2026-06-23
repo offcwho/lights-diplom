@@ -169,6 +169,10 @@ export const ordersApi = {
         const { data } = await api.post<Order>(`/orders/${id}/pay`);
         return data;
     },
+    async cancel(id: string) {
+        const { data } = await api.patch<Order>(`/orders/${id}/cancel`);
+        return data;
+    },
 };
 
 /* --------------------------- Addresses -------------------------- */

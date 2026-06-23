@@ -109,7 +109,7 @@ export const CategoriesPageUi = ({ categories, totalProducts }: Props) => {
                                 className={isHero ? 'col-span-2 lg:col-span-1' : ''}
                             >
                                 <Link
-                                    href="/catalog"
+                                    href={`/catalog?category=${cat.id}`}
                                     className="group relative flex flex-col overflow-hidden rounded-3xl bg-zinc-900 cursor-pointer select-none"
                                     style={{ aspectRatio: isHero ? '16/9' : '4/5' }}
                                 >

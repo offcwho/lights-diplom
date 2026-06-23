@@ -185,6 +185,8 @@ export const OrderDetailUi = ({ orderId }: { orderId: string }) => {
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+    const [cancelling, setCancelling] = useState(false);
+    const [confirmCancel, setConfirmCancel] = useState(false);
     // productId → user's existing review (or null if not reviewed)
     const [reviewMap, setReviewMap] = useState<Record<string, Review | null>>({});
     const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -242,6 +244,22 @@ export const OrderDetailUi = ({ orderId }: { orderId: string }) => {
 
     const { label, color, icon } = STATUS_MAP[order.status] ?? { label: order.status, color: 'text-zinc-600 bg-zinc-100 border-zinc-200', icon: <Package size={15} /> };
     const canReview = order.status === 'completed';
+    const canCancel = order.status === 'new' || order.status === 'paid';
+
+    const handleCancel = async () => {
+        if (!confirmCancel) { setConfirmCancel(true); return; }
+        setCancelling(true);
+        try {
+            const updated = await ordersApi.cancel(order.id);
+            setOrder(updated);
+            setConfirmCancel(false);
+            toast.success('Заказ отменён');
+        } catch {
+            toast.error('Не удалось отменить заказ');
+        } finally {
+            setCancelling(false);
+        }
+    };
 
     return (
         <div className="max-w-2xl mx-auto px-6 py-10 space-y-6">
@@ -313,6 +331,37 @@ export const OrderDetailUi = ({ orderId }: { orderId: string }) => {
                     <span className="text-lg font-black">{order.total.toLocaleString('ru-RU')} ₽</span>
                 </div>
             </div>
+
+            {canCancel && (
+                <div className="flex justify-end">
+                    {confirmCancel ? (
+                        <div className="flex items-center gap-3">
+                            <span className="text-xs text-zinc-500 font-medium">Отменить заказ?</span>
+                            <button
+                                onClick={() => setConfirmCancel(false)}
+                                className="text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl border border-black/10 hover:border-black/30 transition-colors"
+                            >
+                                Нет
+                            </button>
+                            <button
+                                onClick={handleCancel}
+                                disabled={cancelling}
+                                className="inline-flex items-center gap-2 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50"
+                            >
+                                {cancelling && <Loader2 size={12} className="animate-spin" />}
+                                Да, отменить
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={handleCancel}
+                            className="text-[10px] font-black uppercase tracking-widest text-red-500 border border-red-200 px-4 py-2.5 rounded-xl hover:bg-red-50 transition-colors"
+                        >
+                            Отменить заказ
+                        </button>
+                    )}
+                </div>
+            )}
 
             {(order.shippingAddress || order.phone) && (
                 <div className="bg-white rounded-3xl border border-black/5 overflow-hidden">
