@@ -120,7 +120,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             const promo = await promoCodesApi.apply(trimmed, currentSubtotal);
             setAppliedPromo(promo);
             setCoupon('');
-            const label = promo.discountType === 'PERCENTAGE'
+            const label = promo.discountType === 'percentage'
                 ? `−${promo.discountValue}%`
                 : `−${promo.discountValue} ₽`;
             toast.success(`Промокод ${promo.code} применён: ${label}`);
