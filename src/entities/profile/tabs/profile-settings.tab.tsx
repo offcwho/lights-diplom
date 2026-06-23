@@ -1,10 +1,14 @@
 'use client';
 
+'use client';
+
 import { useState, useEffect, useRef } from 'react';
-import { usersApi } from '@/lib/api'; // Укажи правильный путь к твоему API// Твой хук авторизации
-import { Toggle } from '@/components/Toggle';
+import { usersApi } from '@/lib/api';
 import { upload } from '@vercel/blob/client';
 import { useAuth } from '@/hooks/AuthContext';
+import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 function applyPhoneMask(raw: string): string {
     let digits = raw.replace(/\D/g, '');
@@ -28,10 +32,6 @@ function applyPhoneMask(raw: string): string {
 export const ProfileSettingsTab = () => {
     const { user, refreshUser } = useAuth(); // Предполагается, что refreshUser обновляет глобальное состояние юзера
 
-    // Состояния уведомлений
-    const [notifyOrders, setNotifyOrders] = useState(true);
-    const [notifyPromo, setNotifyPromo] = useState(false);
-
     // Состояния полей профиля
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
@@ -40,6 +40,16 @@ export const ProfileSettingsTab = () => {
     // Состояния для лоадеров
     const [isSaving, setIsSaving] = useState(false);
     const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+
+    // Смена пароля
+    const [showPasswordForm, setShowPasswordForm] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const [showCurrent, setShowCurrent] = useState(false);
+    const [showNew, setShowNew] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
 
     // Ссылка на скрытый инпут выбора файла
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -53,18 +63,37 @@ export const ProfileSettingsTab = () => {
         }
     }, [user]);
 
-    // Хэндлер сохранения текстовых данных
     const handleSaveProfile = async () => {
         try {
             setIsSaving(true);
             await usersApi.updateProfile({ name, phone, address });
-            if (refreshUser) await refreshUser(); // Обновляем стейт в контексте
-            alert('Профиль успешно обновлен');
-        } catch (error) {
-            console.error('Ошибка при сохранении профиля:', error);
-            alert('Не удалось сохранить изменения');
+            if (refreshUser) await refreshUser();
+            toast.success('Профиль успешно обновлён');
+        } catch {
+            toast.error('Не удалось сохранить изменения');
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleChangePassword = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!currentPassword) { toast.error('Введите текущий пароль'); return; }
+        if (newPassword.length < 6) { toast.error('Новый пароль — минимум 6 символов'); return; }
+        if (newPassword !== confirmPassword) { toast.error('Пароли не совпадают'); return; }
+        setIsChangingPassword(true);
+        try {
+            await usersApi.changePassword({ currentPassword, newPassword });
+            toast.success('Пароль успешно изменён');
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+            setShowPasswordForm(false);
+        } catch (err: unknown) {
+            const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+            toast.error(msg || 'Неверный текущий пароль');
+        } finally {
+            setIsChangingPassword(false);
         }
     };
 
@@ -92,10 +121,9 @@ export const ProfileSettingsTab = () => {
             });
 
             if (refreshUser) await refreshUser();
-            alert('Аватар успешно изменен!');
-        } catch (error) {
-            console.error('Ошибка при работе с Vercel Blob:', error);
-            alert('Не удалось сохранить изображение');
+            toast.success('Аватар успешно изменён');
+        } catch {
+            toast.error('Не удалось сохранить изображение');
         } finally {
             setIsAvatarUploading(false);
         }
@@ -216,35 +244,63 @@ export const ProfileSettingsTab = () => {
                 </button>
             </div>
 
-            {/* Уведомления */}
-            <div className="bg-[#F5F4F1] rounded-3xl p-4 sm:p-6 border border-black/5 space-y-1">
-                <h3 className="text-[11px] font-mono font-bold uppercase tracking-[0.2em] text-zinc-400 mb-3">
-                    Уведомления
-                </h3>
-                {/* Компонент Toggle оставлен без изменений, стейты привязаны сверху */}
-                <Toggle
-                    label="Статус заказов"
-                    description="Email о смене статуса доставки"
-                    checked={notifyOrders}
-                    onChange={setNotifyOrders}
-                />
-                <Toggle
-                    label="Акции и новинки"
-                    description="Редкие письма о новых коллекциях"
-                    checked={notifyPromo}
-                    onChange={setNotifyPromo}
-                />
-            </div>
-
             {/* Безопасность */}
-            <div className="bg-[#F5F4F1] rounded-3xl p-4 sm:p-6 border border-black/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                    <h3 className="text-xs font-bold">Пароль</h3>
-                    <p className="text-[10px] text-zinc-500 mt-0.5">Последнее изменение: 3 месяца назад</p>
+            <div className="bg-[#F5F4F1] rounded-3xl p-4 sm:p-6 border border-black/5 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h3 className="text-xs font-bold">Пароль</h3>
+                        <p className="text-[10px] text-zinc-500 mt-0.5">Измените пароль от аккаунта</p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => { setShowPasswordForm(v => !v); setCurrentPassword(''); setNewPassword(''); setConfirmPassword(''); }}
+                        className="shrink-0 bg-white border border-black/10 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-zinc-900 hover:text-white transition-all"
+                    >
+                        {showPasswordForm ? 'Отмена' : 'Изменить'}
+                    </button>
                 </div>
-                <button className="shrink-0 bg-white border border-black/10 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-zinc-900 hover:text-white transition-all">
-                    Изменить
-                </button>
+
+                <AnimatePresence>
+                {showPasswordForm && (
+                    <motion.form
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.25, ease: 'easeInOut' }}
+                        style={{ overflow: 'hidden' }}
+                        onSubmit={handleChangePassword} className="space-y-3 border-t border-black/5 pt-4">
+                        {[
+                            { label: 'Текущий пароль', value: currentPassword, set: setCurrentPassword, show: showCurrent, toggle: () => setShowCurrent(v => !v) },
+                            { label: 'Новый пароль', value: newPassword, set: setNewPassword, show: showNew, toggle: () => setShowNew(v => !v) },
+                            { label: 'Повторите новый пароль', value: confirmPassword, set: setConfirmPassword, show: showConfirm, toggle: () => setShowConfirm(v => !v) },
+                        ].map(({ label, value, set, show, toggle }) => (
+                            <label key={label} className="block">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5 block">{label}</span>
+                                <div className="flex items-center bg-white border border-black/10 rounded-xl px-4 focus-within:border-black/30 transition-colors">
+                                    <input
+                                        type={show ? 'text' : 'password'}
+                                        value={value}
+                                        onChange={e => set(e.target.value)}
+                                        placeholder="••••••••"
+                                        className="flex-1 py-2.5 text-xs font-medium outline-none bg-transparent"
+                                    />
+                                    <button type="button" onClick={toggle} className="text-zinc-400 hover:text-zinc-700 transition-colors pl-2">
+                                        {show ? <EyeOff size={14} /> : <Eye size={14} />}
+                                    </button>
+                                </div>
+                            </label>
+                        ))}
+                        <button
+                            type="submit"
+                            disabled={isChangingPassword}
+                            className="bg-black text-white px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-zinc-800 disabled:opacity-50 transition-all flex items-center gap-2"
+                        >
+                            {isChangingPassword && <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                            {isChangingPassword ? 'Сохранение...' : 'Сохранить пароль'}
+                        </button>
+                    </motion.form>
+                )}
+                </AnimatePresence>
             </div>
         </div>
     );

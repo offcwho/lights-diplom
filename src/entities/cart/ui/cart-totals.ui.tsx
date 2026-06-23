@@ -1,28 +1,24 @@
 'use client'
 
 import { AnimatePresence, motion } from "framer-motion"
-import { ArrowRight, X } from "lucide-react"
+import { ArrowRight, Tag, X } from "lucide-react"
 import { useCart } from "../module/cart.context";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
 import { useState } from "react";
-import { useSheetDrag } from "@/hooks/useSheetDrag"; // Путь к вашему хуку
+import { useSheetDrag } from "@/hooks/useSheetDrag";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 export const CartTotalsUi = ({ className, style }: { className?: string; style?: React.CSSProperties }) => {
-    const { items, coupon, setCoupon, subtotal, total } = useCart();
+    const { items, coupon, setCoupon, appliedPromo, discountAmount, applyPromo, removePromo, subtotal, total } = useCart();
     const [isOpen, setIsOpen] = useState(false);
+    const [applying, setApplying] = useState(false);
     const { headerHeight, dockHeight } = useHeaderHeight();
     const route = useRouter();
 
-    const handleApplyCoupon = () => {
-        const code = coupon.trim().toUpperCase();
-        if (!code) { toast.error('Введите промокод'); return; }
-        if (code === 'LIGHTS10' || code === 'WELCOME') {
-            toast.success(`Промокод ${code} применён — скидка 10%!`);
-        } else {
-            toast.error('Промокод не найден или уже использован');
-        }
+    const handleApplyCoupon = async () => {
+        setApplying(true);
+        try { await applyPromo(coupon); }
+        finally { setApplying(false); }
     };
 
     const { rootRef, transformY, paddingBottom } = useSheetDrag({
@@ -51,6 +47,19 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
                     <span className="text-zinc-500 uppercase tracking-wider">Итого</span>
                     <span className="font-mono font-bold">{subtotal.toFixed(2)} ₽</span>
                 </div>
+                {discountAmount > 0 && (
+                    <div className="flex justify-between items-center text-green-600">
+                        <span className="uppercase tracking-wider flex items-center gap-1">
+                            <Tag size={11} /> {appliedPromo?.code}
+                        </span>
+                        <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold">−{discountAmount.toFixed(2)} ₽</span>
+                            <button onClick={removePromo} className="text-zinc-400 hover:text-red-500 transition-colors">
+                                <X size={13} />
+                            </button>
+                        </div>
+                    </div>
+                )}
                 <div className="flex justify-between items-baseline">
                     <span className="text-zinc-500 uppercase tracking-wider">Доставка</span>
                     <span className="font-mono text-[10px] text-zinc-400 font-bold uppercase tracking-widest bg-zinc-100 px-2 py-0.5 rounded-md">Free</span>
@@ -70,19 +79,30 @@ export const CartTotalsUi = ({ className, style }: { className?: string; style?:
             </div>
 
             <div className="pt-6 flex flex-col sm:flex-row items-stretch gap-2 max-w-sm">
-                <input
-                    type="text"
-                    placeholder="Введите промокод"
-                    value={coupon}
-                    onChange={(e) => setCoupon(e.target.value)}
-                    className="bg-transparent border border-black/10 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider outline-none focus:border-black/30 transition-colors placeholder:text-zinc-400 flex-1"
-                />
-                <button
-                    onClick={handleApplyCoupon}
-                    className="bg-white hover:bg-zinc-900 hover:text-white text-black border border-black/10 rounded-xl px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-widest transition-all"
-                >
-                    Применить
-                </button>
+                {appliedPromo ? (
+                    <div className="flex items-center gap-2 px-4 py-2.5 bg-green-50 border border-green-200 rounded-xl flex-1">
+                        <Tag size={12} className="text-green-600 shrink-0" />
+                        <span className="text-xs font-bold text-green-700 uppercase tracking-wider">{appliedPromo.code} применён</span>
+                    </div>
+                ) : (
+                    <>
+                        <input
+                            type="text"
+                            placeholder="Введите промокод"
+                            value={coupon}
+                            onChange={(e) => setCoupon(e.target.value.toUpperCase())}
+                            onKeyDown={e => e.key === 'Enter' && handleApplyCoupon()}
+                            className="bg-transparent border border-black/10 rounded-xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider outline-none focus:border-black/30 transition-colors placeholder:text-zinc-400 flex-1"
+                        />
+                        <button
+                            onClick={handleApplyCoupon}
+                            disabled={applying}
+                            className="bg-white hover:bg-zinc-900 hover:text-white text-black border border-black/10 rounded-xl px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-widest transition-all disabled:opacity-50"
+                        >
+                            {applying ? '...' : 'Применить'}
+                        </button>
+                    </>
+                )}
             </div>
 
             <div className="pt-2">

@@ -1,8 +1,8 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { cartApi, authApi } from "@/lib/api";
-import type { Cart as ApiCart, Product } from "@/lib/types";
+import { cartApi, authApi, promoCodesApi } from "@/lib/api";
+import type { Cart as ApiCart, Product, PromoCode } from "@/lib/types";
 import { useAuth } from "@/hooks/AuthContext";
 import { toast } from "sonner";
 
@@ -35,6 +35,10 @@ type CartContextValue = {
     items: CartItem[];
     coupon: string;
     setCoupon: (v: string) => void;
+    appliedPromo: PromoCode | null;
+    discountAmount: number;
+    applyPromo: (code: string) => Promise<void>;
+    removePromo: () => void;
     addItem: (id: string | number) => Promise<void>;
     updateQuantity: (id: string, delta: number) => Promise<void>;
     removeItem: (id: string) => Promise<void>;
@@ -50,6 +54,7 @@ const CartContext = createContext<CartContextValue | undefined>(undefined);
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     const [items, setItems] = useState<CartItem[]>([]);
     const [coupon, setCoupon] = useState('');
+    const [appliedPromo, setAppliedPromo] = useState<PromoCode | null>(null);
     const [loading, setLoading] = useState(true);
     const { user } = useAuth();
 
@@ -107,14 +112,42 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         } catch { /* ignore */ }
     };
 
+    const applyPromo = async (code: string) => {
+        const trimmed = code.trim().toUpperCase();
+        if (!trimmed) { toast.error('Введите промокод'); return; }
+        const currentSubtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+        try {
+            const promo = await promoCodesApi.apply(trimmed, currentSubtotal);
+            setAppliedPromo(promo);
+            setCoupon('');
+            const label = promo.discountType === 'PERCENTAGE'
+                ? `−${promo.discountValue}%`
+                : `−${promo.discountValue} ₽`;
+            toast.success(`Промокод ${promo.code} применён: ${label}`);
+        } catch (err: unknown) {
+            const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+            toast.error(msg || 'Промокод не найден или недействителен');
+        }
+    };
+
+    const removePromo = () => setAppliedPromo(null);
+
     const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const shipping = 0;
-    const total = subtotal + shipping;
+    const discountAmount = appliedPromo
+        ? appliedPromo.discountType === 'percentage'
+            ? Math.round(subtotal * appliedPromo.discountValue / 100 * 100) / 100
+            : Math.min(appliedPromo.discountValue, subtotal)
+        : 0;
+    const total = Math.max(0, subtotal - discountAmount);
 
     const value: CartContextValue = {
         items,
         coupon,
         setCoupon,
+        appliedPromo,
+        discountAmount,
+        applyPromo,
+        removePromo,
         addItem,
         updateQuantity,
         removeItem,

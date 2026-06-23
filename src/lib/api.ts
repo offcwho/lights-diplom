@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import type {
-    Address, AuthResponse, Banner, Cart, Category, Characteristic, Order, Paginated, Product, ProductFilters, ProductQuery, Review, User,
+    Address, AuthResponse, Banner, Cart, Category, Characteristic, Order, Paginated, Product, ProductFilters, ProductQuery, PromoCode, Review, ReviewQuestion, User,
 } from './types';
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:9000/api';
@@ -44,6 +44,14 @@ api.interceptors.response.use(
 
 /* ----------------------------- Auth ----------------------------- */
 export const authApi = {
+    async sendRegisterCode(dto: { name: string; email: string; password: string }) {
+        await api.post('/auth/send-verification', dto);
+    },
+    async verifyRegisterCode(dto: { email: string; code: string }) {
+        const { data } = await api.post<AuthResponse>('/auth/verify-email', dto);
+        tokenStore.set(data.accessToken);
+        return data;
+    },
     async register(dto: { email: string; password: string; name?: string }) {
         const { data } = await api.post<AuthResponse>('/auth/register', dto);
         tokenStore.set(data.accessToken);
@@ -51,16 +59,20 @@ export const authApi = {
     },
     async login(dto: { email: string; password: string }) {
         const { data } = await api.post<AuthResponse>('/auth/login', dto);
-        console.log(data)
         tokenStore.set(data.accessToken);
         return data;
+    },
+    async forgotPassword(email: string) {
+        await api.post('/auth/forgot-password', { email });
+    },
+    async resetPassword(dto: { email: string; code: string; newPassword: string }) {
+        await api.post('/auth/reset-password', dto);
     },
     logout() {
         tokenStore.clear();
     },
     async me() {
         const { data } = await api.get<User>('/auth/me');
-        console.log(data)
         return data;
     },
     isAuthenticated() {
@@ -81,6 +93,9 @@ export const productsApi = {
     async getFilters() {
         const { data } = await api.get<ProductFilters>('/products/filters');
         return data;
+    },
+    async incrementPopularity(id: string) {
+        await api.post(`/products/${id}/view`);
     },
 };
 
@@ -138,7 +153,7 @@ export const favouritesApi = {
 
 /* ---------------------------- Orders ---------------------------- */
 export const ordersApi = {
-    async checkout(dto?: { shippingAddress?: string; phone?: string }) {
+    async checkout(dto?: { shippingAddress?: string; phone?: string; promoCode?: string; discountAmount?: number }) {
         const { data } = await api.post<Order>('/orders', dto ?? {});
         return data;
     },
@@ -196,11 +211,29 @@ export const bannersApi = {
 /* ---------------------------- Reviews --------------------------- */
 export const reviewsApi = {
     async list(productId: string) {
-        const { data } = await api.get<Review[]>(`/products/${productId}/reviews`);
+        const { data } = await api.get<Review[]>('/reviews', { params: { productId } });
         return data;
     },
-    async create(productId: string, dto: { rating: number; comment: string }) {
-        const { data } = await api.post<Review>(`/products/${productId}/reviews`, dto);
+    async create(dto: { productId: string; rating: number; body: string; title?: string }) {
+        const { data } = await api.post<Review>('/reviews', dto);
+        return data;
+    },
+    async remove(id: string) {
+        await api.delete(`/reviews/${id}`);
+    },
+    async addQuestion(reviewId: string, text: string) {
+        const { data } = await api.post<ReviewQuestion>(`/reviews/${reviewId}/questions`, { text });
+        return data;
+    },
+    async removeQuestion(id: string) {
+        await api.delete(`/reviews/questions/${id}`);
+    },
+};
+
+/* -------------------------- Promo codes ------------------------- */
+export const promoCodesApi = {
+    async apply(code: string, orderAmount: number) {
+        const { data } = await api.post<PromoCode>('/promo-codes/apply', { code, orderAmount });
         return data;
     },
 };
@@ -211,8 +244,11 @@ export const usersApi = {
         const { data } = await api.get<User>('/users/me');
         return data;
     },
-    async updateProfile(dto: { name?: string; phone?: string; address?: string, avatarUrl?: string }) {
+    async updateProfile(dto: { name?: string; phone?: string; address?: string; avatarUrl?: string }) {
         const { data } = await api.patch<User>('/users/me', dto);
         return data;
+    },
+    async changePassword(dto: { currentPassword: string; newPassword: string }) {
+        await api.patch('/users/me/password', dto);
     },
 };

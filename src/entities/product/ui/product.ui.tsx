@@ -58,6 +58,7 @@ export const ProductUi = ({ slug }: Props) => {
                 const p = await productsApi.getBySlug(slug);
                 if (cancelled) return;
                 setProduct(p);
+                productsApi.incrementPopularity(p.id).catch(() => {});
 
                 const [reviewsData, relatedPage, chars] = await Promise.all([
                     reviewsApi.list(p.id).catch(() => [] as Review[]),

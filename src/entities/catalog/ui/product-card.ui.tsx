@@ -35,6 +35,14 @@ export const ProductCardUi = ({ product }: { product: Product }) => {
                         {product.category.name}
                     </span>
 
+                    {product.stock > 0 && product.stock < 4 && (
+                        <span className="absolute bottom-3 left-3 text-[9px] font-black tracking-widest
+                                         bg-amber-50 border border-amber-200 text-amber-700
+                                         px-2.5 py-0.5 rounded-full uppercase">
+                            Осталось {product.stock} шт.
+                        </span>
+                    )}
+
                     {/* Избранное — на базовой карточке, для мобилки */}
                     <motion.button
                         whileTap={{ scale: 0.85 }}

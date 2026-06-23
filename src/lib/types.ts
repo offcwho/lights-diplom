@@ -173,6 +173,18 @@ export interface ProductSpec {
     lampCount?: number | null;
 }
 
+export interface PromoCode {
+    id: string;
+    code: string;
+    discountType: 'percentage' | 'fixed';
+    discountValue: number;
+    minOrderAmount?: number | null;
+    maxUses?: number | null;
+    usedCount: number;
+    isActive: boolean;
+    expiresAt?: string | null;
+}
+
 export interface Characteristic {
     id: string;
     name: string;
@@ -190,12 +202,23 @@ export interface ProductFilters {
     colorTemps: string[];
 }
 
+export interface ReviewQuestion {
+    id: string;
+    reviewId: string;
+    userId: string;
+    user: Pick<User, 'id' | 'name' | 'avatarUrl'>;
+    text: string;
+    createdAt: string;
+}
+
 export interface Review {
     id: string;
     productId: string;
     userId: string;
     user: Pick<User, 'id' | 'name' | 'avatarUrl'>;
     rating: number;
-    comment: string;
+    title?: string | null;
+    body: string;
     createdAt: string;
+    questions: ReviewQuestion[];
 }

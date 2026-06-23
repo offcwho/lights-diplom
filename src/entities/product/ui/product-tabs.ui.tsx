@@ -145,7 +145,7 @@ export const ProductTabsUi: React.FC<Props> = ({ description, reviews }) => {
                                                 </span>
                                             </div>
                                             <Stars rating={review.rating} size={12} />
-                                            <p className="text-sm text-zinc-600 leading-relaxed mt-2">{review.comment}</p>
+                                            <p className="text-sm text-zinc-600 leading-relaxed mt-2">{review.body}</p>
                                         </div>
                                     </div>
                                 </div>

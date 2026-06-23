@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 
 function Field({
     label, icon, error, ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & { label: string; icon: React.ReactNode; error?: string }) {
+}: React.InputHTMLAttributes<HTMLInputElement> & { label: string; icon: React.ReactNode; error?: string | '' }) {
     return (
         <div className="space-y-1.5">
             <label className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400">{label}</label>
@@ -51,7 +51,7 @@ function applyPhoneMask(raw: string): string {
 
 export const CheckoutUi = () => {
     const { user } = useAuth();
-    const { items, total, subtotal, clear } = useCart();
+    const { items, total, subtotal, discountAmount, appliedPromo, clear, removePromo } = useCart();
     const router = useRouter();
 
     const [name, setName]   = useState(user?.name  ?? '');
@@ -95,11 +95,22 @@ export const CheckoutUi = () => {
             ? formatAddress(addresses.find(a => a.id === selectedId)!)
             : '';
 
+    const validateName = (v: string): string => {
+        const trimmed = v.trim();
+        if (!trimmed) return 'Введите ФИО получателя';
+        if (!/^[а-яёА-ЯЁa-zA-Z\s\-]+$/.test(trimmed)) return 'ФИО должно содержать только буквы';
+        const parts = trimmed.split(/\s+/).filter(Boolean);
+        if (parts.length < 2) return 'Введите фамилию и имя';
+        if (parts.some(p => p.length < 2)) return 'Каждая часть ФИО — минимум 2 символа';
+        return '';
+    };
+
     const validate = () => {
         const e: Record<string, string> = {};
-        if (!name.trim())            e.name    = 'Введите ФИО';
-        if (!phone.trim())           e.phone   = 'Введите телефон';
-        if (!resolvedAddress)        e.address = 'Выберите или введите адрес';
+        const nameErr = validateName(name);
+        if (nameErr)          e.name    = nameErr;
+        if (!phone.trim())    e.phone   = 'Введите телефон';
+        if (!resolvedAddress) e.address = 'Выберите или введите адрес';
         setErrors(e);
         return Object.keys(e).length === 0;
     };
@@ -109,7 +120,12 @@ export const CheckoutUi = () => {
         if (!validate()) return;
         setSubmitting(true);
         try {
-            const order = await ordersApi.checkout({ shippingAddress: resolvedAddress, phone: phone.trim() });
+            const order = await ordersApi.checkout({
+                shippingAddress: resolvedAddress,
+                phone: phone.trim(),
+                promoCode: appliedPromo?.code,
+                discountAmount: discountAmount > 0 ? discountAmount : undefined,
+            });
             if (useManual && saveAddress && manualFields.city && manualFields.street && manualFields.house) {
                 try {
                     await addressesApi.create({
@@ -122,6 +138,7 @@ export const CheckoutUi = () => {
                 } catch { /* don't block order success */ }
             }
             await clear();
+            removePromo();
             toast.success('Заказ успешно оформлен!');
             setDone(true);
             setTimeout(() => router.push(`/order/detail/${order.id}`), 1200);
@@ -184,7 +201,15 @@ export const CheckoutUi = () => {
                     <section className="space-y-4">
                         <p className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 pb-3 border-b border-black/5">01 / Контакты</p>
                         <Field label="ФИО получателя" icon={<User size={15} />} placeholder="Иванов Иван Иванович"
-                            value={name} onChange={e => setName(e.target.value)} error={errors.name} autoComplete="name" />
+                            value={name}
+                            onChange={e => {
+                                const v = e.target.value.replace(/[^а-яёА-ЯЁa-zA-Z\s\-]/g, '');
+                                setName(v);
+                                if (errors.name) setErrors(prev => ({ ...prev, name: validateName(v) || '' }));
+                            }}
+                            onBlur={() => setErrors(prev => ({ ...prev, name: validateName(name) }))}
+                            error={errors.name}
+                            autoComplete="name" />
                         <Field label="Телефон" icon={<Phone size={15} />} placeholder="+7 (999) 000-00-00" type="tel"
                             value={phone} onChange={e => setPhone(applyPhoneMask(e.target.value))} error={errors.phone} autoComplete="tel" inputMode="tel" />
                     </section>
@@ -409,6 +434,12 @@ export const CheckoutUi = () => {
                                 <span className="text-zinc-400 font-medium">Товары ({items.length})</span>
                                 <span className="font-bold">{subtotal.toLocaleString('ru-RU')} ₽</span>
                             </div>
+                            {discountAmount > 0 && (
+                                <div className="flex justify-between text-xs text-green-600">
+                                    <span className="font-medium">Промокод {appliedPromo?.code}</span>
+                                    <span className="font-black">−{discountAmount.toLocaleString('ru-RU')} ₽</span>
+                                </div>
+                            )}
                             <div className="flex justify-between text-xs">
                                 <span className="text-zinc-400 font-medium">Доставка</span>
                                 <span className="font-black text-green-600 uppercase tracking-widest text-[10px]">Бесплатно</span>
