@@ -104,8 +104,10 @@ export const CatalogFiltersUi = ({ className, style }: { className?: string; sty
             }}
         >
             {/* Десктопная версия */}
-            <div className="hidden lg:block space-y-8">
-                {filtersContent}
+            <div className="hidden lg:flex lg:flex-col" style={{ maxHeight: 'calc(100vh - 3rem)' }}>
+                <div className="overflow-y-auto overflow-x-hidden flex-1 overscroll-contain">
+                    {filtersContent}
+                </div>
             </div>
 
             {/* Мобильная версия шторки */}
