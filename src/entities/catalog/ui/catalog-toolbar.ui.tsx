@@ -75,9 +75,6 @@ export const CatalogToolbarUi = ({ onOpen, className }: { onOpen?: () => void; c
                         {filteredProducts.length} поз.
                     </motion.span>
                 </div>
-
-                {/* Сортировка */}
-                <SortDropdown value={sortBy} onChange={setSortBy} />
             </div>
 
             {/* Кнопка фильтров — мобилка, та же высота h-12 */}
@@ -104,72 +101,6 @@ export const CatalogToolbarUi = ({ onOpen, className }: { onOpen?: () => void; c
                     )}
                 </AnimatePresence>
             </motion.button>
-        </div>
-    );
-};
-
-/* ------- Кастомный дропдаун сортировки ------- */
-const SortDropdown = ({ value, onChange }: {
-    value: string;
-    onChange: (v: string) => void;
-}) => {
-    const [open, setOpen] = useState(false);
-    const ref = useRef<HTMLDivElement>(null);
-
-    // закрытие по клику вне
-    useEffect(() => {
-        if (!open) return;
-        const onClick = (e: MouseEvent) => {
-            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-        };
-        document.addEventListener('mousedown', onClick);
-        return () => document.removeEventListener('mousedown', onClick);
-    }, [open]);
-
-    const current = SORT_OPTIONS.find(o => o.value === value) ?? SORT_OPTIONS[0];
-
-    return (
-        <div ref={ref} className="hidden lg:flex relative shrink-0 border-l border-black/5">
-            <button
-                onClick={() => setOpen(prev => !prev)}
-                className="h-full flex items-center gap-2 px-5 text-[11px] font-semibold
-                   text-zinc-700 hover:text-black hover:bg-black/3 transition-colors whitespace-nowrap"
-            >
-                {current.label}
-                <motion.span animate={{ rotate: open ? 180 : 0 }} transition={springSmooth}>
-                    <ChevronDown size={12} />
-                </motion.span>
-            </button>
-
-            <AnimatePresence>
-                {open && (
-                    <motion.ul
-                        initial={{ opacity: 0, y: -6, scale: 0.98 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -6, scale: 0.98 }}
-                        transition={springSmooth}
-                        className="absolute right-0 top-full mt-2 w-52 bg-white border border-black/5 rounded-2xl
-                                   shadow-[0_12px_40px_rgba(0,0,0,0.08)] p-1.5 z-50 origin-top"
-                    >
-                        {SORT_OPTIONS.map(opt => {
-                            const isActive = opt.value === value;
-                            return (
-                                <li key={opt.value}>
-                                    <button
-                                        onClick={() => { onChange(opt.value); setOpen(false); }}
-                                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl
-                                                    text-[10px] font-bold uppercase tracking-wider text-left transition-colors
-                                                    ${isActive ? 'bg-black text-white' : 'text-zinc-600 hover:bg-black/5'}`}
-                                    >
-                                        {opt.label}
-                                        {isActive && <Check size={12} />}
-                                    </button>
-                                </li>
-                            );
-                        })}
-                    </motion.ul>
-                )}
-            </AnimatePresence>
         </div>
     );
 };
